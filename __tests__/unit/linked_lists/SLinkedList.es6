@@ -1,5 +1,6 @@
 jest.autoMockOff();
-var IM = require('immutable'), SLinkedList = require('../../../src/linked_lists/SLinkedList');
+var IM = require('immutable'),
+    SLinkedList = require('../../../src/linked_lists/SLinkedList');
 
 describe('SLinkedList', () => {
 
