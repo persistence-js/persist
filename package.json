@@ -1,20 +1,21 @@
 {
-  "name": "immutable",
-  "version": "3.7.2",
-  "description": "WIP",
+  "name": "immutable-harmony",
+  "version": "0.0.1",
+  "description": "specialized immutable collections in javascript -- immutable-js addons",
   "homepage": "https://github.com/immutable-harmony/ih",
   "author": {
     "name": "Immutable-Harmony"
   },
-  "contributors":[{
+  "contributors": [
+    {
       "name": "Clark Feusier",
-      "email": "clark.feusier@hackreactor.com"
+      "email": "cfeusier@gmail.com"
     },
     {
       "name": "Sze-Hung Daniel Tsui",
       "email": "daniel.tsui@hackreactor.com"
     }
-    ],
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/immutable-harmony/ih.git"
@@ -22,34 +23,22 @@
   "bugs": {
     "url": "https://github.com/immutable-harmony/ih/issues"
   },
-  // "main": "dist/immutable.js",
-  // "scripts": {
-  //   "test": "./resources/node_test.sh",
-  //   "perf": "node ./resources/bench.js"
-  // },
-  // "jest": {
-  //   "scriptPreprocessor": "resources/jestPreprocessor.js",
-  //   "testFileExtensions": [
-  //     "js",
-  //     "ts"
-  //   ],
-  //   "persistModuleRegistryBetweenSpecs": true
-  // },
+  "main": "",
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "core-js": "^0.6.0",
+    "immutable": "3.7.2"
+  },
   "devDependencies": {
-    // "es6-transpiler": "^0.7.18",
-    // "6to5": "3.6.5",
-    "traceur": "0.0.88"
+    "babel": "^4.6.0",
+    "babel-jest": "*",
+    "jest-cli": "^0.4.0"
   },
   "engines": {
     "node": ">=0.8.0"
   },
-  // "files": [
-  //   "dist",
-  //   "contrib",
-  //   "README.md",
-  //   "LICENSE",
-  //   "PATENTS"
-  // ],
   "keywords": [
     "immutable",
     "persistent",
@@ -62,5 +51,17 @@
     "sequence",
     "iteration"
   ],
-  "license": "Apache 2.0"
+  "license": "Apache 2.0",
+  "jest": {
+    "scriptPreprocessor": "node_modules/babel-jest",
+    "testFileExtensions": [
+      "es6",
+      "js"
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "es6"
+    ]
+  }
 }
