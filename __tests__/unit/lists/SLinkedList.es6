@@ -112,15 +112,15 @@ describe('SLinkedList', () => {
       expect(matchTest6).toEqual(false);
     });
 
-    it('each-nodes', () => {
+    it('traverses', () => {
       let sLL = new SLinkedList([1, 2, 3]),
           result = [],
           cbAdd = (v) => result.push(v),
-          cbDel = (v) => result.pop();
+          cbDel = () => result.pop();
       expect(result.length).toEqual(0);
-      sLL.eachNode(cbAdd);
+      sLL.traverse(cbAdd);
       expect(result.length).toEqual(3);
-      sLL.eachNode(cbDel);
+      sLL.traverse(cbDel);
       expect(result.length).toEqual(0);
     });
 
