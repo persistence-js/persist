@@ -3,18 +3,27 @@ let IM = require('immutable');
 let Heap = require('../../../src/heaps/Heap');
 
 describe("Heap Operations", ()=>{
-  describe("Basic Instantiation: ", ()=>{
+  describe("Instantiation: ", ()=>{
     let newHeap;
     newHeap = new Heap();
     it("instantiates a min-heap", ()=>{
       expect(newHeap.isMaxHeap).toBe(false);
     })
-    it("instantiates empty", ()=>{
+    it("can create a max-heap", ()=>{
+      let maxHeap = new Heap(undefined,true);
+      expect(maxHeap.isMaxHeap).toBe(true);
+    })
+    it("instantiates empty, checks size", ()=>{
       expect(newHeap.size).toBe(0);
+    })
+    it("instantiates with a comparator", ()=>{
+      let compare = ()=>0;
+      let compareHeap = new Heap(undefined, undefined, compare);
+      expect(compareHeap.comparator).toEqual(compare);
     })
   })
 
-  describe("Basic: ", ()=>{
+  describe("Basic Instance Methods: ", ()=>{
     let newHeap = new Heap();
     newHeap = newHeap.push(1).push(0).push(3);
     let newHeap2 = new Heap();
@@ -34,36 +43,62 @@ describe("Heap Operations", ()=>{
     it("Replaces", ()=>{
       expect(newHeap.replace(0).size).toBe(3);
       expect(newHeap.replace(0).peek()).toBe(0);
-
     })
   })
 
-  xdescribe("Creation: ", ()=>{
-    describe("Constructor", ()=>{
-      it("can create a max-heap", ()=>{})
-      it("accepts an array", ()=>{})
-      it("accepts a heap", ()=>{})
-      it("", ()=>{})
+  describe("Creation & Operations: ", ()=>{
+    let numbers25 = [];
+    let numbers50 = [];
+    for (var i = 25; i >0; i--){
+      numbers25.push(i);
+    }
+    for (var i = 50; i >25; i--){
+      numbers50.push(i);
+    }
+    describe("BuildHeap", ()=>{
+      it("builds max heaps from an array", ()=>{
+        let heap = new Heap(numbers25, true);
+        expect(heap.size).toBe(25);
+        expect(heap.peek()).toBe(25);
+        expect(heap.pop().pop().peek()).toBe(23);
+      })
+      it("builds min heaps from an array", ()=>{
+        let heap = new Heap(numbers25);
+        expect(heap.size).toBe(25);
+        expect(heap.peek()).toBe(1);
+        expect(heap.pop().pop().peek()).toBe(3);
+      })
+      it("accepts heaps", ()=>{
+        let heap1 = new Heap(numbers25);
+        let heap2 = new Heap(heap1);
+        expect(heap.size).toBe(25);
+        expect(heap.peek()).toBe(25);
+        expect(heap.pop().pop().peek()).toBe(23);
+
+      })
     })
-    describe("heapifies", ()=>{})
-    describe("Merges", ()=>{})
-    describe("Melds", ()=>{})
-
-  })
-
-  xdescribe("Inspection: ", ()=>{
-    it("Checks Size", ()=>{})
-    it("Checks isEmpty", ()=>{})
-    
-  })
-  
-  xdescribe("Internal: ", ()=>{
-    it("Deletes Node", ()=>{})
-    it("inc/dec key", ()=>{})
-    it("performs an integrity check", ()=>{})
-    it("can push into a large 1000+ heap without errors", ()=>{})
-    it("sift up", ()=>{})
-    it("sift down", ()=>{})
+    describe("Merge", ()=>{
+      it("merges with other heaps", ()=>{
+        let heap1 = new Heap(numbers25);
+        let heap2 = new Heap(numbers50);
+        let heap3 = heap2.merge(heap1);
+        expect(heap3.peek()).toBe(1);
+        expect(heap3.size).toBe(50);
+      })
+    })
+    describe("HeapSort", ()=>{
+        it('sorts an array of numbers', ()=>{
+          let tenNumbers = [1,2,3,4,5,6,7,8,9,10].sort(()=>{
+            return .5 - Math.random();
+          });
+          let newHeap = new Heap(tenNumbers);
+          //heapsort should return the array
+          let sortedArray = newHeap.heapsort();
+          for (var i = 0; i<10; i++){
+            expect(sortedArray[i]).toBe(i+1);
+          }          
+        })
+    })
   })
 
 })
