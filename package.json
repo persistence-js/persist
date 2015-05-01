@@ -25,7 +25,8 @@
   },
   "main": "",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "test-debug": "node-debug --nodejs --harmony ./node_modules/jest-cli/bin/jest.js --runInBand"
   },
   "dependencies": {
     "core-js": "^0.6.0",
