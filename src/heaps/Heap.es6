@@ -55,7 +55,7 @@ export default class Heap {
     if (this.storage.size <= 0){ return this; }
     let siftingList;
     if (value === undefined){
-      siftingList = this.storage.withMutations(list => {
+      siftingList = this.storage.withMutations((list) => {
         return list.set(0, this.storage.last()).pop();
       })
     } else {
@@ -82,7 +82,7 @@ export default class Heap {
       //Using size of Heap, find the number of .siftDown calls...
       let roundedPowerOfTwo = Math.floor(Math.log(list.size)/Math.log(2));
       let numberOfSifts = Math.pow(2,roundedPowerOfTwo)-1;
-      let heapifiedList = list.withMutations(list => {
+      let heapifiedList = list.withMutations((list) => {
         let siftedList = list.reduceRight((previous, current, index, array) => {
           let inRange = (index+1 <=numberOfSifts);
           return inRange ? this.siftDown(previous, index) : previous;
@@ -101,7 +101,7 @@ export default class Heap {
   //Returns a sorted Immuatble List of the Heap's elements.
   heapSort(){
     let sortedList = new IM.List([]);
-    sortedList = sortedList.withMutations(list => {
+    sortedList = sortedList.withMutations((list) => {
       let heap = this;
       for (var i = 0; i < heap.size; i++){
         list.push(heap.peek());
@@ -113,7 +113,7 @@ export default class Heap {
   }
   //Takes a list, and sifts down depending on the index.
   siftDown(list, indexToSift){
-    return list.withMutations(list => {
+    return list.withMutations((list) => {
       let finalList = list;
       let switchDown = (p, c, list) => {
         finalList = this.switchNodes(p, c, list);
@@ -144,7 +144,7 @@ export default class Heap {
   }
   //Child checks parent, switches if they violate the Heap property.
   siftUp(parentIndex, childIndex, list){
-    return list.withMutations(siftingList => {
+    return list.withMutations((siftingList) => {
       while (!this.integrityCheck(parentIndex, childIndex, siftingList)){
         siftingList = this.switchNodes(parentIndex, childIndex, siftingList);
         //Update child and parent to continue checking:
@@ -184,7 +184,7 @@ export default class Heap {
     }
   }
   switchNodes(parentIndex, childIndex, list){
-    return list.withMutations(list => {
+    return list.withMutations((list) => {
       let temp = list.get(parentIndex);
       return list.set(parentIndex, list.get(childIndex)).set(childIndex, temp)
     });
