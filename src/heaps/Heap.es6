@@ -117,7 +117,7 @@ export default class Heap {
     return list.withMutations((list) => {
       let finalList = list;
       let switchDown = (p, c, list) => {
-        finalList = this.switchNodes(p, c, list);
+        finalList = Heap.switchNodes(p, c, list);
         parentIndex = c;
         children = Heap.findChildrenWithParent(parentIndex, list);
       }.bind(this);
@@ -148,7 +148,7 @@ export default class Heap {
   siftUp(parentIndex, childIndex, list) {
     return list.withMutations((siftingList) => {
       while (!this.integrityCheck(parentIndex, childIndex, siftingList)) {
-        siftingList = this.switchNodes(parentIndex, childIndex, siftingList);
+        siftingList = Heap.switchNodes(parentIndex, childIndex, siftingList);
         //Update child and parent to continue checking:
         childIndex = parentIndex;
         parentIndex = Heap.findParentWithChild(childIndex);
@@ -186,12 +186,6 @@ export default class Heap {
       return 0;
     }
   }
-  switchNodes(parentIndex, childIndex, list) {
-    return list.withMutations((list) => {
-      let temp = list.get(parentIndex);
-      return list.set(parentIndex, list.get(childIndex)).set(childIndex, temp)
-    });
-  }
   integrityCheck(parentIndex, childIndex, list) {
     if (parentIndex === null || childIndex === null) {return true;}
     let parentNode = list.get(parentIndex); 
@@ -204,6 +198,12 @@ export default class Heap {
       //minHeap
       return (comparison === -1 || comparison === 0) ? true: false;
     }
+  }
+  static switchNodes(parentIndex, childIndex, list) {
+    return list.withMutations((list) => {
+      let temp = list.get(parentIndex);
+      return list.set(parentIndex, list.get(childIndex)).set(childIndex, temp)
+    });
   }
   //assigns child indexes for a given parent index
   static findChildrenWithParent(parentIndex, list) {
