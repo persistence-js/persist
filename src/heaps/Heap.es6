@@ -9,21 +9,12 @@ export default class Heap {
    * @param  {[function]}  comparator [Must return {0, 1, -1} to sort nodes]
    * @return {[type]}             [Heap]
    */
-  constructor(value, isMax, comparator) {
+  constructor(value = null , isMax = false, comparator = Heap.defaultComparator()) {
     //Construct from existing heap:
     if (!!value && this.isHeap(value)) {
       this._heapStorage = value._heapStorage;
-      this.maxHeap = (isMax === undefined) ? value.isMaxHeap : isMax;
-      if (comparator === undefined) {
-        this.comparatorFunction = value.comparator;
-      } else {
-        if (typeof comparator === 'function') {
-          this.comparatorFunction = comparator;
-        } else {
-          Heap.defaultComparator();
-        }
-      }
-
+      this.maxHeap = isMax;
+      this.comparatorFunction = value.comparator;
       return this;
     }
     //Construct from primitive, array, or IM.List
@@ -159,7 +150,7 @@ export default class Heap {
         childIndex = parentIndex;
         parentIndex = Heap.findParentWithChild(childIndex);
       }
-      
+
       return siftingList;
     }.bind(this))
   }
