@@ -23,6 +23,7 @@ export default class Heap {
           Heap.defaultComparator();
         }
       }
+
       return this;
     }
     //Construct from primitive, array, or IM.List
@@ -42,6 +43,7 @@ export default class Heap {
     let parentIndex = Heap.findParentWithChild(childIndex);
     let newStorage = this.storage.push(value);
     let finalStorageList = this.siftUp(parentIndex, childIndex, newStorage);
+
     return new Heap(finalStorageList, this.isMaxHeap, this.comparator);    
   }
   /**
@@ -53,6 +55,7 @@ export default class Heap {
    */
   pop(value) {
     if (this.storage.size <= 0) { return this; }
+
     let siftingList;
     if (value === undefined) {
       siftingList = this.storage.withMutations((list) => {
@@ -62,6 +65,7 @@ export default class Heap {
       siftingList = this.storage.set(0, value);
     }
     let finalStorageList = this.siftDown(siftingList, 0);
+
     return new Heap(finalStorageList, this.isMaxHeap, this.comparator);
   }
   //Alias method for pop, but with a value.
@@ -89,6 +93,7 @@ export default class Heap {
         }.bind(this), list);
         return siftedList;
       });
+
       return heapifiedList;
     }
   }
@@ -107,8 +112,10 @@ export default class Heap {
         list.push(heap.peek());
         heap = heap.pop();
       }
+
       return list;
     }.bind(this));
+
     return sortedList;
   }
   //Takes a list, and sifts down depending on the index.
@@ -139,6 +146,7 @@ export default class Heap {
           switchDown(parentIndex, children.right, finalList);
         }
       }
+
       return finalList;
     }.bind(this));
   }
@@ -151,6 +159,7 @@ export default class Heap {
         childIndex = parentIndex;
         parentIndex = Heap.findParentWithChild(childIndex);
       }
+      
       return siftingList;
     }.bind(this))
   }
