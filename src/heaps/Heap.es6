@@ -88,8 +88,11 @@ export default class Heap {
       return heapifiedList;
     }
   }
-  //Accepts a Heap.
-  //Merges current heap with the input heap, returning a new Heap.
+  /**
+   * Merges heaps, returning a new Heap.
+   * @param  {[Heap]} hp [description]
+   * @return {[type]}    [description]
+   */
   merge(hp) {
     let newStorage = this.buildHeap(hp._heapStorage.concat(this._heapStorage));
     return new Heap(newStorage, hp.isMaxHeap, hp.comparator);
