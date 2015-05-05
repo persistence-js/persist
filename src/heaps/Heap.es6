@@ -208,7 +208,7 @@ export default class Heap {
     let rightIdx = (parentIndex + 1) * 2;
     return {
       left: (leftIdx >= list.size) ? null : leftIdx,
-      right: (rightIdx >= list.size) ? null : rightIdx
+      right: (rightIdx >= list.size) ? null : rightIdx,
     }
   }
   static findParentWithChild(childIndex){
