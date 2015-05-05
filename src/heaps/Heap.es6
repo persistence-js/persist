@@ -10,12 +10,22 @@ export default class Heap {
    * @return {[type]}             [Heap]
    */
   constructor(value, isMax, comparator) {
+    //Construct from existing heap:
     if (!!value && this.isHeap(value)){
       this._heapStorage = value._heapStorage;
       this.maxHeap = (isMax === undefined) ? value.isMaxHeap : isMax;
-      this.comparatorFunction = (comparator === undefined) ? value.comparator : comparator;
+      if (comparator === undefined) {
+        this.comparatorFunction = value.comparator;
+      } else {
+        if (typeof comparator === 'function'){
+          this.comparatorFunction = comparator;
+        } else {
+          Heap.defaultComparator();
+        }
+      }
       return this;
-    } 
+    }
+    //Construct from primitive, array, or IM.List
     this._heapStorage = IM.List.isList(value) ? value : new IM.List(value);
     this.maxHeap = (isMax && typeof isMax === 'boolean') ? true : false;
     if (!!comparator && typeof comparator === 'function'){
@@ -23,22 +33,21 @@ export default class Heap {
     } else {
       this.comparatorFunction = Heap.defaultComparator();
     }
-    //**Optimization issue: need to only build heap when instantiating new, not internal.
     this._heapStorage = this.buildHeap(this._heapStorage);
     Object.freeze(this);
   }
   //Returns a new Heap, with the new value inserted.
   push(value){
     let childIndex = this.storage.size; //index of the new value, before the new value is added
-    let parentIndex = childIndex === 0 ? null : (childIndex % 2 === 0 ? childIndex / 2 - 1 : Math.floor(childIndex / 2));
-    let newStorageList = this.storage.push(value);
-    let finalStorageList = this.siftUp(parentIndex, childIndex, newStorageList);
+    let parentIndex = Heap.findParentWithChild(childIndex);
+    let newStorage = this.storage.push(value);
+    let finalStorageList = this.siftUp(parentIndex, childIndex, newStorage);
     return new Heap(finalStorageList, this.isMaxHeap, this.comparator);    
   }
   /**
    * Returns a new Heap with the extracted value (max or min)
    * Use Peek() for the top of the Heap.
-   * Pass a value into '.pop' and it will behave as if replace() was called on a regular Heap.
+   * With inputs, will behave as if replace() was called on a regular Heap.
    * @param  {[type]} value [Repesents a new node]
    * @return {[type]}       [A new Heap]
    */
@@ -55,11 +64,13 @@ export default class Heap {
     let finalStorageList = this.siftDown(siftingList, 0);
     return new Heap(finalStorageList, this.isMaxHeap, this.comparator);
   }
+  //Alias method for pop, but with a value.
   replace(value){
     return this.pop(value);
   }
   /**
-   * Builds the array repesenting Heap Storage, from array sent to constructor.
+   * Builds the array repesenting Heap Storage.
+   * Should only be called from constructor.
    * Does so by calling siftDown on all non-leaf nodes.
    * @param  {[type]} array [Heap Storage, must be an Immutable List]
    * @return {[type]}       [New Heap Storage]
@@ -73,17 +84,19 @@ export default class Heap {
       let numberOfSifts = Math.pow(2,roundedPowerOfTwo)-1;
       let heapifiedList = list.withMutations((list)=>{
         let siftedList = list.reduceRight((previous, current, index, array)=>{
-          return (index+1 <=numberOfSifts) ? this.siftDown(previous, index) : previous;
+          let inRange = (index+1 <=numberOfSifts);
+          return inRange ? this.siftDown(previous, index) : previous;
         }.bind(this), list);
         return siftedList;
       });
       return heapifiedList;
     }
   }
-  //Accepts a Heap, merges current heap with the input heap, returning a new Heap.
-  merge(heap){
-    let newStorage = this.buildHeap(heap._heapStorage.concat(this._heapStorage));
-    return new Heap(newStorage, heap.isMaxHeap, heap.comparator);
+  //Accepts a Heap.
+  //Merges current heap with the input heap, returning a new Heap.
+  merge(hp){
+    let newStorage = this.buildHeap(hp._heapStorage.concat(this._heapStorage));
+    return new Heap(newStorage, hp.isMaxHeap, hp.comparator);
   }
   //Returns a sorted Immuatble List of the Heap's elements.
   heapSort(){
@@ -98,8 +111,7 @@ export default class Heap {
     }.bind(this));
     return sortedList;
   }
-  //Takes a list, and sifts down depending on the index, accounting for heap type.
-  //Note: Could chained use of list.withMutations be optimised?
+  //Takes a list, and sifts down depending on the index.
   siftDown(list, indexToSift){
     return list.withMutations(list => {
       let finalList = list;
@@ -110,7 +122,8 @@ export default class Heap {
       }.bind(this);
       let parentIndex = indexToSift;
       let children = Heap.findChildrenWithParent(parentIndex, list);
-      while (!this.integrityCheck(parentIndex,children.left,finalList) || !this.integrityCheck(parentIndex,children.right,finalList)){
+      while (!this.integrityCheck(parentIndex,children.left,finalList) 
+        || !this.integrityCheck(parentIndex,children.right,finalList)){
         if        (children.left && children.right){
           //must select correct child to switch:
           if(this.integrityCheck(children.left, children.right ,finalList)){
@@ -136,7 +149,7 @@ export default class Heap {
         siftingList = this.switchNodes(parentIndex, childIndex, siftingList);
         //Update child and parent to continue checking:
         childIndex = parentIndex;
-        parentIndex = parentIndex === 0 ? null : (parentIndex % 2 === 0 ? parentIndex / 2 - 1 : Math.floor(parentIndex / 2));
+        parentIndex = Heap.findParentWithChild(childIndex);
       }
       return siftingList;
     }.bind(this))
@@ -173,18 +186,20 @@ export default class Heap {
   switchNodes(parentIndex, childIndex, list){
     return list.withMutations(list => {
       let temp = list.get(parentIndex);
-      return list.set(parentIndex, list.get(childIndex)).set(childIndex, temp)});
+      return list.set(parentIndex, list.get(childIndex)).set(childIndex, temp)
+    });
   }
   integrityCheck(parentIndex, childIndex, list){
     if (parentIndex === null || childIndex === null){return true;}
-    let comparison = this.comparatorFunction(list.get(parentIndex), list.get(childIndex));
-    // 1 = greater than, -1 = less than, 0 = equal;
+    let parentNode = list.get(parentIndex); 
+    let childNode = list.get(childIndex);
+    let comparison = this.comparatorFunction(parentNode, childNode);
     if (this.isMaxHeap){
-      //maxheap, parent should be larger
-      if (comparison === 1 || comparison === 0) {return true;} else {return false;}
-    } else if (!this.isMaxHeap){
-      if (comparison === -1 || comparison === 0){return true;} else {
-        return false;}
+      //maxHeap, parent should be larger
+      return (comparison === 1 || comparison === 0) ? true : false;
+    } else{
+      //minHeap
+      return (comparison === -1 || comparison === 0) ? true: false;
     }
   }
   //assigns child indexes for a given parent index
@@ -195,5 +210,9 @@ export default class Heap {
       left: (leftIdx >= list.size) ? null : leftIdx,
       right: (rightIdx >= list.size) ? null : rightIdx
     }
+  }
+  static findParentWithChild(childIndex){
+    return (childIndex === 0) ? null : 
+    (childIndex % 2 === 0 ? childIndex / 2 - 1 : Math.floor(childIndex / 2));
   }
 }
