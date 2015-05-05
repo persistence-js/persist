@@ -82,8 +82,8 @@ export default class Heap {
       //Using size of Heap, find the number of .siftDown calls...
       let roundedPowerOfTwo = Math.floor(Math.log(list.size)/Math.log(2));
       let numberOfSifts = Math.pow(2,roundedPowerOfTwo)-1;
-      let heapifiedList = list.withMutations((list)=>{
-        let siftedList = list.reduceRight((previous, current, index, array)=>{
+      let heapifiedList = list.withMutations(list => {
+        let siftedList = list.reduceRight((previous, current, index, array) => {
           let inRange = (index+1 <=numberOfSifts);
           return inRange ? this.siftDown(previous, index) : previous;
         }.bind(this), list);
@@ -101,7 +101,7 @@ export default class Heap {
   //Returns a sorted Immuatble List of the Heap's elements.
   heapSort(){
     let sortedList = new IM.List([]);
-    sortedList = sortedList.withMutations((list)=>{
+    sortedList = sortedList.withMutations(list => {
       let heap = this;
       for (var i = 0; i < heap.size; i++){
         list.push(heap.peek());
