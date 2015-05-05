@@ -1,5 +1,5 @@
 import 'core-js/shim';
-var IM = require('immutable');
+const IM = require('immutable');
 
 export default class Heap {
   /**
@@ -103,7 +103,7 @@ export default class Heap {
     let sortedList = new IM.List([]);
     sortedList = sortedList.withMutations((list) => {
       let heap = this;
-      for (var i = 0; i < heap.size; i++) {
+      for (let i = 0; i < heap.size; i++) {
         list.push(heap.peek());
         heap = heap.pop();
       }

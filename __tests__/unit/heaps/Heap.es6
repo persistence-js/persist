@@ -1,6 +1,6 @@
 jest.autoMockOff();
-let IM = require('immutable');
-let Heap = require('../../../src/heaps/Heap');
+const IM = require('immutable');
+const Heap = require('../../../src/heaps/Heap');
 
 describe("Heap Operations", () => {
   describe("Instantiation", () => {
@@ -66,10 +66,10 @@ describe("Heap Operations", () => {
   describe("Creation & Operations", () => {
     let numbers25 = [];
     let numbers50 = [];
-    for (var i = 25; i >0; i--){
+    for (let i = 25; i >0; i--){
       numbers25.push(i);
     }
-    for (var i = 50; i >25; i--){
+    for (let i = 50; i >25; i--){
       numbers50.push(i);
     }
     describe("BuildHeap", () => {
@@ -109,7 +109,7 @@ describe("Heap Operations", () => {
         });
         let newHeap = new Heap(tenNumbers);
         let sortedArray = newHeap.heapSort();
-        for (var i = 0; i < sortedArray.size; i++){
+        for (let i = 0; i < sortedArray.size; i++){
           expect(sortedArray.get(i)).toEqual(i+1);
         }
       });
