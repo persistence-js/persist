@@ -3,9 +3,8 @@ let IM = require('immutable');
 let Heap = require('../../../src/heaps/Heap');
 
 describe("Heap Operations", ()=>{
-  describe("Instantiation: ", ()=>{
-    let newHeap;
-    newHeap = new Heap();
+  describe("Instantiation", ()=>{
+    let newHeap = new Heap();
     it("instantiates a min-heap", ()=>{
       expect(newHeap.isMaxHeap).toBe(false);
     })
@@ -22,8 +21,27 @@ describe("Heap Operations", ()=>{
       expect(compareHeap.comparator).toEqual(compare);
     })
   })
-
-  describe("Basic Instance Methods: ", ()=>{
+  describe("Internal Methods", ()=>{
+    describe("Directional Sifting", ()=>{
+      let newMinHeap = new Heap();
+      newMinHeap = newMinHeap.push(99).push(8).push(9).push(4).push(5);
+      let newMaxHeap = new Heap(undefined,true);
+      newMaxHeap = newMaxHeap.push(99).push(8).push(9).push(4).push(5);
+      it("sifts down I", ()=>{
+        let siftedList = newMaxHeap.siftDown(newMaxHeap._heapStorage,0);
+        expect(siftedList.first()).toBe(99);
+        expect(siftedList.last()).toBe(5);
+        expect(siftedList.get(2)).toBe(9);
+      })
+      it("sifts down II", ()=>{
+        let siftedList = newMinHeap.siftDown(newMinHeap._heapStorage,0);
+        expect(siftedList.first()).toBe(4);
+        expect(siftedList.last()).toBe(8);
+        expect(siftedList.get(2)).toBe(9);
+      })
+    })
+  })
+  describe("Basic Instance Methods", ()=>{
     let newHeap = new Heap();
     newHeap = newHeap.push(1).push(0).push(3);
     let newHeap2 = new Heap();
@@ -45,8 +63,7 @@ describe("Heap Operations", ()=>{
       expect(newHeap.replace(0).peek()).toBe(0);
     })
   })
-
-  describe("Creation & Operations: ", ()=>{
+  describe("Creation & Operations", ()=>{
     let numbers25 = [];
     let numbers50 = [];
     for (var i = 25; i >0; i--){
@@ -71,10 +88,9 @@ describe("Heap Operations", ()=>{
       it("accepts heaps", ()=>{
         let heap1 = new Heap(numbers25);
         let heap2 = new Heap(heap1);
-        expect(heap.size).toBe(25);
-        expect(heap.peek()).toBe(25);
-        expect(heap.pop().pop().peek()).toBe(23);
-
+        expect(heap2.size).toBe(25);
+        expect(heap2.peek()).toBe(1);
+        expect(heap2.pop().pop().peek()).toBe(3);
       })
     })
     describe("Merge", ()=>{
@@ -87,18 +103,16 @@ describe("Heap Operations", ()=>{
       })
     })
     describe("HeapSort", ()=>{
-        it('sorts an array of numbers', ()=>{
-          let tenNumbers = [1,2,3,4,5,6,7,8,9,10].sort(()=>{
-            return .5 - Math.random();
-          });
-          let newHeap = new Heap(tenNumbers);
-          //heapsort should return the array
-          let sortedArray = newHeap.heapsort();
-          for (var i = 0; i<10; i++){
-            expect(sortedArray[i]).toBe(i+1);
-          }          
-        })
+      it('sorts an array of numbers', ()=>{
+        let tenNumbers = [1,2,3,4,5,6,7,8,9,10].sort(()=>{
+          return .5 - Math.random();
+        });
+        let newHeap = new Heap(tenNumbers);
+        let sortedArray = newHeap.heapSort();
+        for (var i = 0; i < sortedArray.size; i++){
+          expect(sortedArray.get(i)).toEqual(i+1);
+        }
+      })
     })
   })
-
 })
