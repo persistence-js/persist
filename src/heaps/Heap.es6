@@ -38,7 +38,7 @@ export default class Heap {
   }
   //Returns a new Heap, with the new value inserted.
   push(value){
-    let childIndex = this.storage.size; //index of the new value, before the new value is added
+    let childIndex = this.storage.size; 
     let parentIndex = Heap.findParentWithChild(childIndex);
     let newStorage = this.storage.push(value);
     let finalStorageList = this.siftUp(parentIndex, childIndex, newStorage);
