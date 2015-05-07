@@ -34,7 +34,7 @@ export default class DLinkedList extends LinkedListBase {
   _createLists(baseNodeIdx, newNode, cb) {
     return {
       leftList: this._sliceLeft(cb).concat(newNode),
-      rightList: this._lzStore.skipUntil(cb)
+      rightList: this._lzStore.skipUntil(cb),
     };
   }
 
