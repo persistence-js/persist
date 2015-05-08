@@ -6,8 +6,7 @@ const BSTNode = require('./BSTNode');
 export default class BinarySearchTree {
 
   constructor(comparator, _root, _count) {
-    let isComparator = !!comparator && typeof comparator === 'function';
-    this._comparator = isComparator ? comparator : BinarySearchTree.defaultComp;
+    this._comparator = BinarySearchTree.setComparator(comparator);
     if (BinarySearchTree.isBSTNode(_root)) {
       this._root = BinarySearchTree.cloneNode(_root);
       this._count = this._root.id;
@@ -97,11 +96,22 @@ export default class BinarySearchTree {
     BinarySearchTree.traverseInOrder(this.root, callback);
   }
 
+  // returns the given comparator or the default comparator function
+  static setComparator(comparator) {
+    let isComparator = !!comparator && typeof comparator === 'function';
+    return isComparator ? comparator : BinarySearchTree.defaultComp;
+  }
+
   // based on default comparison criteria - returns -1, 1, or 0
   static defaultComp(keyA, keyB) {
     if (keyA < keyB) return -1;
     else if (keyA > keyB) return 1;
     else return 0;
+  }
+
+  // returns true if maybe is a BSTNode
+  static isBSTNode(maybe) {
+    return !!maybe && maybe.constructor === BSTNode;
   }
 
   // returns new BSTNode clone of input node
@@ -119,11 +129,7 @@ export default class BinarySearchTree {
 
   }
 
-  // returns true if maybe is a BSTNode
-  static isBSTNode(maybe) {
-    return !!maybe && maybe.constructor === BSTNode;
-  }
-
+  // recursively traverses tree nodes in-order and applies cb to each node
   static traverseInOrder(node, cb) {
     if (!node) return;
     let left = node.left, right = node.right;
