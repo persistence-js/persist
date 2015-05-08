@@ -46,10 +46,8 @@ describe('SLinkedList', () => {
     });
 
     it('stores an array on initialization', () => {
-      debugger;
       let sLLArray = new SLinkedList(['random string', {'asdfasdf':'asdf'}, { name: 'anna' }, 26, ['tail value']]);
       expect(sLLArray.size).toBe(5);
-      debugger;
       expect(sLLArray.head.data).toEqual('random string');
       expect(sLLArray.head.next).toNotEqual(null);
       expect(sLLArray.head.next.data['asdfasdf']).toBe('asdf');
