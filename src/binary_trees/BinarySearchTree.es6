@@ -49,12 +49,12 @@ export default class BinarySearchTree {
 
   // returns node with smallest key in tree or null
   get min() {
-    return this.traverseSide('left');
+    return BinarySearchTree.traverseSide('left', this.root);
   }
 
   // returns node with largest key in tree or null
   get max() {
-    return this.traverseSide('right');
+    return BinarySearchTree.traverseSide('right', this.root);
   }
 
   // returns a new BST with the key-value pair inserted
@@ -77,19 +77,12 @@ export default class BinarySearchTree {
   // returns BSTNode or null
   // O(log n)
   find(key) {
-    let searcher = (comparator, node, targetKey) => {
-      if (!node) return null;
-      let comparisons = comparator(node.key, key);
-      if (comparisons === -1) return searcher(comparator, node.right, key);
-      else if (comparisons === 1) return searcher(comparator, node.left, key);
-      else return node;
-    };
-    return searcher(this.comparator, this.root, key);
+    return BinarySearchTree.recursiveSearch(this.comparator, this.root, key);
   }
 
   // returns value or null
   get(key) {
-    let search = this.find(key);
+    let search = BinarySearchTree.recursiveSearch(this.comparator, this.root, key);
     return !search ? null : search.value;
   }
 
@@ -101,22 +94,7 @@ export default class BinarySearchTree {
 
   // returns undefined, applies callback to nodes in-order
   forEach(callback) {
-    let traverseInOrder = (node, cb) => {
-      if (!node) return;
-      let left = node.left, right = node.right;
-      if (left) traverseInOrder(left, cb);
-      cb(node);
-      if (right) traverseInOrder(right, cb);
-    };
-    traverseInOrder(this.root, callback);
-  }
-
-  // returns the leaf BSTNode furthest down a given side, or null
-  traverseSide(side, currentRoot = this.root) {
-    if (!currentRoot) return null;
-    let nextNode = currentRoot.store.get('_' + side);
-    while (nextNode) currentRoot = nextNode.store;
-    return currentRoot;
+    BinarySearchTree.traverseInOrder(this.root, callback);
   }
 
   // based on default comparison criteria - returns -1, 1, or 0
@@ -144,6 +122,31 @@ export default class BinarySearchTree {
   // returns true if maybe is a BSTNode
   static isBSTNode(maybe) {
     return !!maybe && maybe.constructor === BSTNode;
+  }
+
+  static traverseInOrder(node, cb) {
+    if (!node) return;
+    let left = node.left, right = node.right;
+    if (left) BinarySearchTree.traverseInOrder(left, cb);
+    cb(node);
+    if (right) BinarySearchTree.traverseInOrder(right, cb);
+  }
+
+  // returns the leaf BSTNode furthest down a given side, or null
+  static traverseSide(side, currentRoot) {
+    if (!currentRoot) return null;
+    let nextNode = currentRoot.store.get('_' + side);
+    while (nextNode) currentRoot = nextNode.store;
+    return currentRoot;
+  }
+
+  // returns node with matching key or null
+  static recursiveSearch(comparator, node, key) {
+    if (!node) return null;
+    let comparisons = comparator(node.key, key);
+    if (comparisons === -1) return BinarySearchTree.recursiveSearch(comparator, node.right, key);
+    else if (comparisons === 1) return BinarySearchTree.recursiveSearch(comparator, node.left, key);
+    else return node;
   }
 
 }
