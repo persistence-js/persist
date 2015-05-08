@@ -1,46 +1,46 @@
 import 'core-js/shim';
 let IM = require('immutable');
 
-class LLNode {
-  //The alternative to this is using a record and storing pointers anyway...
-  constructor(currentIndex = null, llStore = null){
-    this._currentIndex = currentIndex;
-    this._llStore = llStore;
-    Object.freeze(this);
-  }
-  get data(){
-    //memoize this function
-    let has = this._llStore.has(this._currentIndex);
-    return (has) ? this._llStore.get(this._currentIndex) : null;
-  }
-  get next(){
-    //memoize
-    let idx = this._currentIndex+1;
-    let has = this._llStore.has(idx);
-    return (has) ? new LLNode(idx, this._llStore) : null;
-  }
-}
-
 export default class LinkedListBase {
   constructor(itemOrList = []) {
-    this._lzStore = LinkedListBase.generateLzStore(itemOrList);
+    let items = Array.isArray(itemOrList) ? IM.Seq(itemOrList) :
+      IM.Seq([].concat(itemOrList));
+    this.head = LinkedListBase.makeHead(items);
+    this.size = items.size;
   }
 
-  get store() {
-    return this._lzStore.toJS();
+  static makeMap(data, next) {
+    let node = {
+      data: data, 
+      next: next,
+    };
+    return Object.freeze(node);
   }
-
-  get head() {
-    return  this.size > 0 ? new LLNode(0, this._lzStore) : null;
+  
+  static makeHead(seq) {
+    let LLB = LinkedListBase;
+    if (seq === null || seq.size === 0) { 
+      return null; 
+    } else {
+      console.log(seq.size);
+      let rest = seq.rest();
+      rest = (rest.size === 0) ? null : rest;
+      return LLB.makeMap(seq.first(), LLB.makeHead(rest));
+    } 
   }
 
   get tail() {
-    let size = this.size;
-    return size > 0 ? new LLNode(size-1, this._lzStore) : null;
-  }
-
-  get size() {
-    return this._lzStore.size;
+    if (this.head === null) {
+      return this.head;
+    }else{
+      let current = this.head;
+      let tailNode;
+      while (current !== null){
+        if (current.next === null) { tailNode = current;}
+        current = current.next; 
+      }
+      return tailNode;
+    }
   }
 
   prepend() {
@@ -112,7 +112,7 @@ export default class LinkedListBase {
   }
 
   static generateLzStore(itemOrList) {
-    return Array.isArray(itemOrList) ? IM.Seq(itemOrList) : IM.Seq([].concat(itemOrList));
+    return 
   }
 
 }
