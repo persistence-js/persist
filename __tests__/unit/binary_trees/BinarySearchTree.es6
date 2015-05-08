@@ -8,8 +8,8 @@ describe('BinarySearchTree Operations', () => {
 
   describe('Instantiation', () => {
     let bst = new BinarySearchTree(),
-        node = new BSTNode(0, "first node value", null, null),
-        bstWithNode = new BinarySearchTree(null, IM.Seq.of(node));
+        node = new BSTNode(0, "first node value", null, null, 1),
+        bstWithNode = new BinarySearchTree(null, node);
 
     it('instantiates empty, checks size', () => {
       expect(bst.size).toBe(0);
@@ -17,6 +17,17 @@ describe('BinarySearchTree Operations', () => {
 
     it('instantiates with a root node, checks size', () => {
       expect(bstWithNode.size).toBe(1);
+    });
+
+    it('instantiates with a default comparator', () => {
+      expect(bst.comparator).toBeDefined();
+      expect(typeof bst.comparator).toBe('function');
+    });
+
+    it('instantiates with a custom comparator', () => {
+      let comp = () => 0, compBST = new BinarySearchTree(comp);
+      expect(compBST.comparator).toBe(comp);
+      expect(typeof compBST.comparator).toBe('function');
     });
 
   });
