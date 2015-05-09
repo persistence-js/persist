@@ -27,6 +27,21 @@ export default class BinarySearchTree {
     return this._comparator;
   }
 
+  // returns first node in sorted tree
+  get root() {
+    return this._root;
+  }
+
+  // returns node with smallest key in tree or null
+  get min() {
+    return BinarySearchTree.traverseSide('left', this);
+  }
+
+  // returns node with largest key in tree or null
+  get max() {
+    return BinarySearchTree.traverseSide('right', this);
+  }
+
   // returns an array of all the keys in the tree
   get keys() {
     let keys = [];
@@ -41,23 +56,10 @@ export default class BinarySearchTree {
     return values;
   }
 
-  // returns first node in sorted tree
-  get root() {
-    return this._root;
-  }
-
-  // returns node with smallest key in tree or null
-  get min() {
-    return BinarySearchTree.traverseSide('left', this.root);
-  }
-
-  // returns node with largest key in tree or null
-  get max() {
-    return BinarySearchTree.traverseSide('right', this.root);
-  }
-
   // returns a new BST with the key-value pair inserted
   insert(key, value, selfBalance = false) {
+    if (!key) return this;
+
     if (!this.size) {
       let newNode = new BSTNode(key, value, null, null, 1);
       return new BinarySearchTree(this.comparator, newNode, 1);
@@ -69,7 +71,6 @@ export default class BinarySearchTree {
 
     // reconstruct 'new' tree from leaf node
     let parentNode = ancestors.pop();
-    console.log(node, parentNode)
 
     if (selfBalance) {
       return this.balanceTree();
@@ -77,7 +78,7 @@ export default class BinarySearchTree {
   }
 
   balanceTree() {
-    console.log('balancing tree');
+
   }
 
   // returns a new BST with the list's key-value pairs inserted
@@ -158,10 +159,14 @@ export default class BinarySearchTree {
   }
 
   // returns the leaf BSTNode furthest down a given side, or null
-  static traverseSide(side, currentRoot) {
+  static traverseSide(side, tree) {
+    let currentRoot = tree.root;
     if (!currentRoot) return null;
-    let nextNode = currentRoot.store.get('_' + side);
-    while (nextNode) currentRoot = nextNode.store;
+    let nextNode = currentRoot[side];
+    while (nextNode) {
+      currentRoot = nextNode;
+      nextNode = nextNode[side];
+    }
     return currentRoot;
   }
 
