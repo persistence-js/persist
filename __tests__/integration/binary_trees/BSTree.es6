@@ -1,15 +1,15 @@
 jest.autoMockOff();
 const IM = require('immutable');
-const BinarySearchTree = require('../../../src/binary_trees/BinarySearchTree');
+const BSTree = require('../../../src/binary_trees/BSTree');
 const BSTNode = require('../../../src/binary_trees/BSTNode');
 
 
-describe('BinarySearchTree', () => {
+describe('BSTree', () => {
 
   describe('Instantiation', () => {
-    let bst = new BinarySearchTree(),
+    let bst = new BSTree(),
         node = new BSTNode(0, 'first node value', null, null, 1),
-        bstWithNode = new BinarySearchTree(null, node);
+        bstWithNode = new BSTree(null, node);
 
     it('instantiates empty, checks size', () => {
       expect(bst.size).toBe(0);
@@ -25,7 +25,7 @@ describe('BinarySearchTree', () => {
     });
 
     it('instantiates with a custom comparator', () => {
-      let comp = () => 0, compBST = new BinarySearchTree(comp);
+      let comp = () => 0, compBST = new BSTree(comp);
       expect(compBST.comparator).toBe(comp);
       expect(typeof compBST.comparator).toBe('function');
     });
@@ -37,14 +37,14 @@ describe('BinarySearchTree', () => {
     xdescribe('#insert', () => {
 
       xdescribe('empty trees', () => {
-        let bst = new BinarySearchTree();
+        let bst = new BSTree();
 
         it('returns current tree when no args', () => {
           expect(bst.insert()).toBe(bst);
         });
 
         it('returns new tree for simple insert into empty tree', () => {
-          expect(bst.insert(2, 'val')).toEqual(jasmine.any(BinarySearchTree));
+          expect(bst.insert(2, 'val')).toEqual(jasmine.any(BSTree));
         });
 
         it('returns a tree with the correct root node', () => {
@@ -57,10 +57,10 @@ describe('BinarySearchTree', () => {
 
       xdescribe('nonempty trees', () => {
         let rootNode = new BSTNode(1, 'hi', null, null, 1),
-            bst = new BinarySearchTree(null, rootNode);
+            bst = new BSTree(null, rootNode);
 
         it('returns a new tree', () => {
-          expect(bst.insert(2, 'a')).toEqual(jasmine.any(BinarySearchTree));
+          expect(bst.insert(2, 'a')).toEqual(jasmine.any(BSTree));
         });
 
         xdescribe('root node', () => {
@@ -92,7 +92,7 @@ describe('BinarySearchTree', () => {
 
       xdescribe('chained insertion', () => {
         let rootNode = new BSTNode(50, 'hi', null, null, 1),
-            bst = new BinarySearchTree(undefined, rootNode),
+            bst = new BSTree(undefined, rootNode),
             node1 = new BSTNode(25, 'a', null, null, 2),
             node2 = new BSTNode(75, 'b', null, null, 3),
             node3 = new BSTNode(95, 'c', null, null, 4),
@@ -101,7 +101,7 @@ describe('BinarySearchTree', () => {
         xdescribe('resulting tree', () => {
 
           it('returns a new tree', () => {
-            expect(chainedResult).toEqual(jasmine.any(BinarySearchTree));
+            expect(chainedResult).toEqual(jasmine.any(BSTree));
           });
 
           it('has correct max node', () => {
@@ -168,7 +168,7 @@ describe('BinarySearchTree', () => {
     xdescribe('get size', () => {
 
       it('returns current number of nodes in tree', () => {
-        let bst1 = new BinarySearchTree(),
+        let bst1 = new BSTree(),
             bst2 = bst1.insert(5, 'first value'),
             bst3 = bst2.insert(0, 'second value'),
             bst4 = bst3.insert(10, 'third value');
@@ -183,14 +183,14 @@ describe('BinarySearchTree', () => {
     describe('get comparator', () => {
 
       it('returns default comparator, duck-check', () => {
-        let bstDefault = (new BinarySearchTree()).comparator;
+        let bstDefault = (new BSTree()).comparator;
         expect(bstDefault(2, 1)).toBe(1);
         expect(bstDefault(1, 2)).toBe(-1);
         expect(bstDefault(1, 1)).toBe(0);
       });
 
       it('returns custom comparator, duck-check', () => {
-        let bstCustom = (new BinarySearchTree(() => 0)).comparator;
+        let bstCustom = (new BSTree(() => 0)).comparator;
         expect(bstCustom(2, 1)).toBe(0);
         expect(bstCustom(1, 2)).toBe(0);
         expect(bstCustom('a', 'hi')).toBe(0);
@@ -201,12 +201,12 @@ describe('BinarySearchTree', () => {
     describe('get root', () => {
 
       it('returns null for empty tree', () => {
-        expect((new BinarySearchTree()).root).toBeNull();
+        expect((new BSTree()).root).toBeNull();
       });
 
       it('returns root node for nonempty tree', () => {
         let rootNode = new BSTNode(1, 'a', null, null, 1);
-        expect((new BinarySearchTree(null, rootNode)).root).toEqual(rootNode);
+        expect((new BSTree(null, rootNode)).root).toEqual(rootNode);
       });
 
     });
@@ -214,7 +214,7 @@ describe('BinarySearchTree', () => {
     describe('get min', () => {
 
       it('returns null for empty tree', () => {
-        expect((new BinarySearchTree()).min).toBeNull();
+        expect((new BSTree()).min).toBeNull();
       });
 
       it('returns node with min key for nonempty tree', () => {
@@ -222,7 +222,7 @@ describe('BinarySearchTree', () => {
             rootRight = new BSTNode(75, 'b', null, null, 2),
             rootLeft = new BSTNode(25, 'c', minNode, null, 3),
             rootNode = new BSTNode(50, 'a', rootLeft, rootRight, 1),
-            bst = new BinarySearchTree(null, rootNode);
+            bst = new BSTree(null, rootNode);
         expect(bst.min).toEqual(minNode);
       });
 
@@ -231,7 +231,7 @@ describe('BinarySearchTree', () => {
     describe('get max', () => {
 
       it('returns null for empty tree', () => {
-        expect((new BinarySearchTree()).max).toBeNull();
+        expect((new BSTree()).max).toBeNull();
       });
 
       it('returns node with max key for nonempty tree', () => {
@@ -239,7 +239,7 @@ describe('BinarySearchTree', () => {
             rootRight = new BSTNode(75, 'b', null, maxNode, 2),
             rootLeft = new BSTNode(25, 'c', null, null, 3),
             rootNode = new BSTNode(50, 'a', rootLeft, rootRight, 1),
-            bst = new BinarySearchTree(null, rootNode);
+            bst = new BSTree(null, rootNode);
         expect(bst.max).toEqual(maxNode);
       });
 
@@ -248,7 +248,7 @@ describe('BinarySearchTree', () => {
     describe('get keys', () => {
 
       it('returns empty array for empty tree', () => {
-        expect((new BinarySearchTree()).keys).toEqual([]);
+        expect((new BSTree()).keys).toEqual([]);
       });
 
       it('returns in-order array of all node keys for nonempty tree', () => {
@@ -256,7 +256,7 @@ describe('BinarySearchTree', () => {
             rootRight = new BSTNode(75, 'b', null, maxNode, 2),
             rootLeft = new BSTNode(25, 'c', null, null, 3),
             rootNode = new BSTNode(50, 'a', rootLeft, rootRight, 1),
-            bst = new BinarySearchTree(null, rootNode);
+            bst = new BSTree(null, rootNode);
         expect(bst.keys).toEqual([25, 50, 75, 100]);
       });
 
@@ -265,7 +265,7 @@ describe('BinarySearchTree', () => {
     describe('get values', () => {
 
       it('returns empty array for empty tree', () => {
-        expect((new BinarySearchTree()).values).toEqual([]);
+        expect((new BSTree()).values).toEqual([]);
       });
 
       it('returns in-order array of all node values for nonempty tree', () => {
@@ -273,7 +273,7 @@ describe('BinarySearchTree', () => {
             rootRight = new BSTNode(75, 'b', null, maxNode, 2),
             rootLeft = new BSTNode(25, 'c', null, null, 3),
             rootNode = new BSTNode(50, 'a', rootLeft, rootRight, 1),
-            bst = new BinarySearchTree(null, rootNode);
+            bst = new BSTree(null, rootNode);
         expect(bst.values).toEqual(['c', 'a', 'b', 'max']);
       });
 

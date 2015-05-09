@@ -3,12 +3,12 @@ const IM = require('immutable');
 const BSTNode = require('./BSTNode');
 
 
-export default class BinarySearchTree {
+export default class BSTree {
 
   constructor(comparator, _root, _count) {
-    this._comparator = BinarySearchTree.setComparator(comparator);
-    if (BinarySearchTree.isBSTNode(_root)) {
-      this._root = BinarySearchTree.cloneNode(_root);
+    this._comparator = BSTree.setComparator(comparator);
+    if (BSTree.isBSTNode(_root)) {
+      this._root = BSTree.cloneNode(_root);
       this._count = this._root.id;
     } else {
       this._root = null;
@@ -34,12 +34,12 @@ export default class BinarySearchTree {
 
   // returns node with smallest key in tree or null
   get min() {
-    return BinarySearchTree.traverseSide('left', this);
+    return BSTree.traverseSide('left', this);
   }
 
   // returns node with largest key in tree or null
   get max() {
-    return BinarySearchTree.traverseSide('right', this);
+    return BSTree.traverseSide('right', this);
   }
 
   // returns an array of all the keys in the tree
@@ -62,11 +62,11 @@ export default class BinarySearchTree {
 
     if (!this.size) {
       let newNode = new BSTNode(key, value, null, null, 1);
-      return new BinarySearchTree(this.comparator, newNode, 1);
+      return new BSTree(this.comparator, newNode, 1);
     }
     let finalTree,
         searchArgs = [],
-        BSTSearch = BinarySearchTree.recursiveSearch,
+        BSTSearch = BSTree.recursiveSearch,
         [node, ancestors] = BSTSearch(this.comparator, this.root, key);
 
     // reconstruct 'new' tree from leaf node
@@ -85,12 +85,12 @@ export default class BinarySearchTree {
   // returns BSTNode or null
   // O(log n)
   find(key) {
-    return BinarySearchTree.recursiveSearch(this.comparator, this.root, key)[0];
+    return BSTree.recursiveSearch(this.comparator, this.root, key)[0];
   }
 
   // returns value or null
   get(key) {
-    let [search,] = BinarySearchTree.recursiveSearch(this.comparator, this.root, key);
+    let [search,] = BSTree.recursiveSearch(this.comparator, this.root, key);
     return !search ? null : search.value;
   }
 
@@ -102,7 +102,7 @@ export default class BinarySearchTree {
 
   // returns undefined, applies callback to nodes in-order
   forEach(callback) {
-    BinarySearchTree.traverseInOrder(this.root, callback);
+    BSTree.traverseInOrder(this.root, callback);
   }
 
   // returns a new BST with the list's key-value pairs inserted
@@ -120,7 +120,7 @@ export default class BinarySearchTree {
   // returns the given comparator or the default comparator function
   static setComparator(comparator) {
     let isComparator = !!comparator && typeof comparator === 'function';
-    return isComparator ? comparator : BinarySearchTree.defaultComp;
+    return isComparator ? comparator : BSTree.defaultComp;
   }
 
   // based on default comparison criteria - returns -1, 1, or 0
@@ -154,9 +154,9 @@ export default class BinarySearchTree {
   static traverseInOrder(node, cb) {
     if (!node) return;
     let left = node.left, right = node.right;
-    if (left) BinarySearchTree.traverseInOrder(left, cb);
+    if (left) BSTree.traverseInOrder(left, cb);
     cb(node);
-    if (right) BinarySearchTree.traverseInOrder(right, cb);
+    if (right) BSTree.traverseInOrder(right, cb);
   }
 
   // returns the leaf BSTNode furthest down a given side, or null
@@ -177,10 +177,10 @@ export default class BinarySearchTree {
     let comparisons = comparator(node.key, key);
     if (comparisons === -1) {
       ancestorStack.push(['R', node])
-      return BinarySearchTree.recursiveSearch(comparator, node.right, key, ancestorStack);
+      return BSTree.recursiveSearch(comparator, node.right, key, ancestorStack);
     } else if (comparisons === 1) {
       ancestorStack.push(['L', node])
-      return BinarySearchTree.recursiveSearch(comparator, node.left, key, ancestorStack);
+      return BSTree.recursiveSearch(comparator, node.left, key, ancestorStack);
     } else {
       return [node, ancestorStack];
     }
