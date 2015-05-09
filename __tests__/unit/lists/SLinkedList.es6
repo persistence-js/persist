@@ -74,8 +74,8 @@ describe('SLinkedList', () => {
     describe('prepends', () => {
 
       it('returns a new list when prepending undefined', () => {
-        let nList = sLLArray.prepend();
-        expect(nList).toNotBe(sLLArray);
+        let nList = sLLNumber.prepend();
+        expect(nList).toNotBe(sLLNumber);
         expect(nList.head.data).toBe(1);
       });
 
@@ -151,7 +151,7 @@ describe('SLinkedList', () => {
       it('appends nodes, copying only a node\'s data', () => {
         let nList = sLLArray.prepend(sLLArray.head);
         expect(nList.head.data).toEqual('random string');
-        exoect(nList.head).toNotBe(sLLArray.head)l
+        exoect(nList.head).toNotBe(sLLArray.head);
         expect(nList.size).toBe(sLLArray.size+1);
 
       });
