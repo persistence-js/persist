@@ -72,12 +72,23 @@ describe('SLinkedList', () => {
 
 
     describe('prepends', () => {
+
+      it('returns a new list when prepending undefined', () => {
+        let nList = sLLArray.prepend();
+        expect(nList).toNotBe(sLLArray);
+        expect(nList.head.data).toBe(1);
+      });
+
       it('prepends single elements', () => {
-        expect(sLLArray.prepend(0).head.data).toEqual(0);
+        let nList = sLLArray.prepend(0);
+        expect(nList.head.data).toEqual(0);
+        expect(nList.size).toBe(sLLArray.size+1);
       });
 
       it('prepends an array', () => {
-        expect(sLLArray.prepend([1,2,3]).head.next.data).toEqual(2);
+        let nList = sLLArray.prepend([1,2,3]);
+        expect(nList.head.next.data).toEqual(2);
+        expect(nList.size).toEqual(sLLArray.size+3);
       });
 
       it('prepends nested arrays', () => {
