@@ -51,11 +51,19 @@ describe('LList', () => {
     });
 
     it('stores an array on initialization', () => {
+<<<<<<< HEAD:__tests__/unit/lists/LList.es6
       let sLLArray = new LList([
           'random string', 
           {'asdfasdf':'asdf'}, 
           { name: 'anna' }, 
           26, 
+=======
+      let sLLArray = new SLinkedList([
+          'random string',
+          {'asdfasdf':'asdf'},
+          { name: 'anna' },
+          26,
+>>>>>>> Fix rebase conflict of __tests__ dir structure:__tests__/integration/lists/LList.es6
           ['tail value'],
         ]);
       expect(sLLArray.size).toBe(5);
@@ -73,15 +81,22 @@ describe('LList', () => {
         sLLNumber.head.data = 2;
       }
       expect(changeSomething).toThrow();
-      expect(sLLNumber.head.data).toEqual(1); 
+      expect(sLLNumber.head.data).toEqual(1);
     });
   });
 
   describe('public interface instance methods', () => {
+<<<<<<< HEAD:__tests__/unit/lists/LList.es6
     let sLLNumber = new LList(1);
     let sLLArray = new LList([
         'random string', 
         {'asdfasdf':'asdf'}, 
+=======
+    let sLLNumber = new SLinkedList(1);
+    let sLLArray = new SLinkedList([
+        'random string',
+        {'asdfasdf':'asdf'},
+>>>>>>> Fix rebase conflict of __tests__ dir structure:__tests__/integration/lists/LList.es6
         { name: 'anna' },
       ]);
 
@@ -129,7 +144,7 @@ describe('LList', () => {
         let currentNode = nList.head;
         //increment the size of the previous array, check if tail is old head
         for (let i = 0; i < sLLArray.size; i++){
-          if (i === sLLArray.size-1){ 
+          if (i === sLLArray.size-1){
             expect(currentNode.next).toBe(sLLArray.head);
           }
           currentNode = currentNode.next;
@@ -150,7 +165,7 @@ describe('LList', () => {
       it('appends single numbers', () => {
         let sLLNumber2 = sLLNumber.append(2);
         // shouldn't mutate original list
-        expect(sLLNumber.tail.data).toEqual(1); 
+        expect(sLLNumber.tail.data).toEqual(1);
         expect(sLLNumber2.head.data).toEqual(1);
         expect(sLLNumber2.tail.data).toEqual(2);
       });
@@ -187,8 +202,8 @@ describe('LList', () => {
         let sLLNumber2 = sLLNumber.append(2);
         let sLLNumber3 = sLLNumber.removeHead();
         let sLLNumber4 = sLLNumber2.removeHead();
-        expect(sLLNumber.head.data).toEqual(1); 
-        expect(sLLNumber2.head.data).toEqual(1); 
+        expect(sLLNumber.head.data).toEqual(1);
+        expect(sLLNumber2.head.data).toEqual(1);
         expect(sLLNumber3.head).toBeNull();
         expect(sLLNumber4.head.data).toEqual(2);
         expect(sLLNumber4.tail.data).toEqual(2);
@@ -198,7 +213,7 @@ describe('LList', () => {
         let sLLNumber2  = sLLNumber.append(2);
         let sLLNumber3  = sLLNumber2.removeTail();
         let sLLEmpty    = sLLNumber.removeTail();
-        expect(sLLNumber.head.data).toEqual(1); 
+        expect(sLLNumber.head.data).toEqual(1);
         expect(sLLNumber2.head.data).toEqual(1);
         expect(sLLNumber3.head.data).toEqual(1);
         expect(sLLEmpty.tail).toBeNull();
@@ -211,7 +226,7 @@ describe('LList', () => {
           it('reverses', () =>{
             expect(sLLArray.reverse().head.data['name']).toEqual('anna');
           });
-        });  
+        });
     });
   });
 });
