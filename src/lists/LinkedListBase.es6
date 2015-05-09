@@ -1,11 +1,10 @@
 import 'core-js/shim';
 let IM = require('immutable');
 
-export default class LinkedListBase {
+export default class LList {
   constructor(itemOrList = [], options = { circular: false }) {
-    let items = Array.isArray(itemOrList) ? IM.Seq(itemOrList) :
-      IM.Seq([].concat(itemOrList));
-    this.head = LinkedListBase.makeHead(items);
+    let items = LList.convertToSeq(itemOrList);
+    this.head = LList.makeHead(items);
     this.size = items.size;
 
     //take an input, point tail.next at the input before freezing
@@ -28,18 +27,17 @@ export default class LinkedListBase {
       data: data, 
       next: next,
     };
-    node[LinkedListBase._LLNODE_SENTINEL_()] = true;
+    node[LList._LLNODE_SENTINEL_()] = true;
     return node;
   }
 
   static makeHead(seq) {
-    let LLB = LinkedListBase;
     if (seq === null || seq.size === 0) { 
       return null; 
     } else {
       let rest = seq.rest();
       rest = (rest.size === 0) ? null : rest;
-      return LLB.makeMap(seq.first(), LLB.makeHead(rest));
+      return LList.makeMap(seq.first(), LList.makeHead(rest));
     } 
   }
 
@@ -59,64 +57,76 @@ export default class LinkedListBase {
 
   /**
    * Returns a new list, with the current list as the tail of the input.
-   * @param  {Item, Array, List, Node, or LinkedList}  toPrepend []
+   * Utilizes tail-sharing.
+   * @param  {Item, Array, List, Node, or LList}  toPrepend []
    * @return {[type]}           [description]
    */
-  prepend(toPrepend = []) {
-    let options = { 
+  prepend(toPre = []) {
+    let opts = { 
       circular  : false,
       prependTo : this.head, 
       oldSize   : this.size,
     };
-    //check if Node: copy/attach
-    //  toPrepend = toPrepend.data
-    //check if LL: copy/attach
-    //  toPrepend = toPrepend.map((LL.getData))
-    //pass to item
-    //
-    if (LinkedListBase === undefined){debugger;}
+
     return (
-      LinkedListBase.isNode(toPrepend) ? new LinkedListBase(LinkedListBase.getData(toPrepend), options) : 
-      LinkedListBase.isLinkedList(toPrepend) ? new LinkedListBase(toPrepend.map(LinkedListBase.getData), options) : 
-      new LinkedListBase(toPrepend, options)
+      LList.isNode(toPre) ? new LList(LList.getData(toPre), opts) : 
+      LList.isLList(toPre) ? new LList(toPre.map(LList.getData), opts) : 
+      new LList(toPre, opts)
     );
-    
-    //create a new list with these inputs,
-    //  when the tail is created, point it at this...
-    //
-    //make Head
-  }
-
-  append() {
 
   }
 
+  /**
+   * Returns a new list in O(n) by recollecting elements of both
+   * into a Seq, and passing that Seq to the LList constructor.
+   * @param  {[Item, Array, List, Node, or LList]} toAppend [description]
+   * @return {[type]}       [description]
+   */
+  append(toApp) {
+    return (
+      new LList(
+        this.map(LList.getData).concat(
+          LList.isNode(toApp) ? LList.getData(toApp) : 
+          LList.isLList(toApp) ? toApp.map(LList.getData) : 
+          LList.convertToSeq(toApp).toArray()
+        )
+      )
+    );
+  }
+
+  /**
+   * Returns a new list, with copies of the old list's elements, pointed
+   * in reverse order
+   * @return {[type]} [description]
+   */
   reverse(){
-    //returns a list
-    // head -> Tail
-    // Tail -> Head, but modified to point to null
-    // save Lz_store as reversed
+    let reversed = [];
+    let unShiftToList = (element) => { reversed.unshift(element)}
+    this.map(LList.getData).forEach(unShiftToList);
+    return new LList(reversed);
   }
 
-  addToTail(valueOrNode) {
-    //refactor out into:
-    //  isNode
-    //  getNodeData
-    let tailP = valueOrNode.__proto__;
-    let maybeNode = (tailP && tailP === LinkedListBase.nodeConstructor);
-    valueOrNode = (maybeNode) ? valueOrNode.data : valueOrNode; 
-    let newList;
-    if (this.tail) {
-      newList = new LinkedListBase(this._lzStore.concat(valueOrNode).toJS());
-    } else {
-      newList = new LinkedListBase(valueOrNode);
-    }
-
-    return newList;
-  }
-
+  /**
+   * Returns a new list, sans the current list's head.
+   * Uses tail-sharing.
+   * @return {[type]} [description]
+   */
   removeHead() {
-    return new LinkedListBase(this._lzStore.rest().toJS());
+    let notFirst = (node) => {
+      return (node !==  this.head);
+    }
+    return new LList(this.filter(notFirst).map(LList.getData));
+  }
+
+  /**
+   * Returns a new list in O(n), sans the current list's tail.
+   * @return {[type]} [description]
+   */
+  removeTail() {
+    let notLast = (node) => {
+      return (node !== this.tail)
+    }
+    return new LList(this.filter(notLast).map(LList.getData));
   }
 
   forEach(cb) {
@@ -129,46 +139,29 @@ export default class LinkedListBase {
 
   map(cb){
     let mapped = [];
-    let current = this.head;
-    while (current !== null){
-      mapped.push(cb(current));
-      current = current.next;
-    }
+    let pushResult = (node) => { mapped.push(cb(node));}
+    this.forEach(pushResult);
     return mapped;
   }
 
   filter(predicate) {
     let filtered = [];
-    let current = this.head;
-    while (current !== null){
-      if (predicate){
-        filtered.push(current);
+    this.forEach((node) => {
+      if(!!predicate(node)){
+        filtered.push(node);
       }
-      current = current.next;        
-    }
+    });
 
     return filtered;
   }
 
-  insertBefore() {
-
-  }
-
-  insertAfter() {
-
-  }
-
-  removeBefore(){
-
-  }
-
-  removeAfter(){
-
+  reduce(){
+    //sig: prev, current, index, list
   }
 
   static getData(node) {
     return (
-      (LinkedListBase.isNode(node)) ? node.data : 
+      (LList.isNode(node)) ? node.data : 
       new Error('getData only accepts nodes.')
     );
   }
@@ -177,12 +170,17 @@ export default class LinkedListBase {
     return LLNode;
   }
 
-  static isLinkedList(maybeLinkedList){
-    return !!(maybeLinkedList && maybeLinkedList[LinkedListBase._LL_SENTINEL_()]);
+  static isLList(maybeLList){
+    return !!(maybeLList && maybeLList[LList._LL_SENTINEL_()]);
   }
 
   static isNode(maybeNode){
-    return !!(maybeNode && maybeNode[LinkedListBase._LLNODE_SENTINEL_()]);
+    return !!(maybeNode && maybeNode[LList._LLNODE_SENTINEL_()]);
+  }
+
+  static convertToSeq(itemOrList){
+    return Array.isArray(itemOrList) ? IM.Seq(itemOrList) :
+      IM.Seq([].concat(itemOrList));
   }
 
   static _LL_SENTINEL_(){
@@ -195,5 +193,5 @@ export default class LinkedListBase {
 
 }
 
-LinkedListBase.prototype[LinkedListBase._LL_SENTINEL_()] = true;
+LList.prototype[LList._LL_SENTINEL_()] = true;
 

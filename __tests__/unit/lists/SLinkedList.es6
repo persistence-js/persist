@@ -191,21 +191,6 @@ describe('SLinkedList', () => {
     });
 
     describe('functional methods', () => {
-        xdescribe('filter', ()=>{
-
-        });
-
-        xdescribe('reduce', ()=>{
-          
-        });
-
-        xdescribe('map', ()=>{
-          
-        });
-
-        xdescribe('forEach', ()=>{
-          
-        });
 
         describe('reverse', () => {
           it('reverses', () =>{
