@@ -57,8 +57,27 @@ export default class BinarySearchTree {
   }
 
   // returns a new BST with the key-value pair inserted
-  insert(key, value) {
+  insert(key, value, selfBalance = false) {
+    if (!this.size) {
+      let newNode = new BSTNode(key, value, null, null, 1);
+      return new BinarySearchTree(this.comparator, newNode, 1);
+    }
+    let finalTree,
+        searchArgs = [],
+        BSTSearch = BinarySearchTree.recursiveSearch,
+        [node, ancestors] = BSTSearch(this.comparator, this.root, key);
 
+    // reconstruct 'new' tree from leaf node
+    let parentNode = ancestors.pop();
+    console.log(node, parentNode)
+
+    if (selfBalance) {
+      return this.balanceTree();
+    }
+  }
+
+  balanceTree() {
+    console.log('balancing tree');
   }
 
   // returns a new BST with the list's key-value pairs inserted
@@ -76,12 +95,12 @@ export default class BinarySearchTree {
   // returns BSTNode or null
   // O(log n)
   find(key) {
-    return BinarySearchTree.recursiveSearch(this.comparator, this.root, key);
+    return BinarySearchTree.recursiveSearch(this.comparator, this.root, key)[0];
   }
 
   // returns value or null
   get(key) {
-    let search = BinarySearchTree.recursiveSearch(this.comparator, this.root, key);
+    let [search,] = BinarySearchTree.recursiveSearch(this.comparator, this.root, key);
     return !search ? null : search.value;
   }
 
@@ -147,12 +166,18 @@ export default class BinarySearchTree {
   }
 
   // returns node with matching key or null
-  static recursiveSearch(comparator, node, key) {
-    if (!node) return null;
+  static recursiveSearch(comparator, node, key, ancestorStack = []) {
+    if (!node) return [null, ancestorStack];
     let comparisons = comparator(node.key, key);
-    if (comparisons === -1) return BinarySearchTree.recursiveSearch(comparator, node.right, key);
-    else if (comparisons === 1) return BinarySearchTree.recursiveSearch(comparator, node.left, key);
-    else return node;
+    if (comparisons === -1) {
+      ancestorStack.push(['R', node])
+      return BinarySearchTree.recursiveSearch(comparator, node.right, key, ancestorStack);
+    } else if (comparisons === 1) {
+      ancestorStack.push(['L', node])
+      return BinarySearchTree.recursiveSearch(comparator, node.left, key, ancestorStack);
+    } else {
+      return [node, ancestorStack];
+    }
   }
 
 }
