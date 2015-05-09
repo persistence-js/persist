@@ -77,17 +77,6 @@ export default class BinarySearchTree {
     }
   }
 
-  balanceTree() {
-
-  }
-
-  // returns a new BST with the list's key-value pairs inserted
-  insertAll(listToInsert, selfBalance = false) {
-    // iterate list and insert each item into BST (mutative)
-      // if selfBalance, balance tree after each insertion
-    // return the new BST
-  }
-
   // returns a new BST post removal of node with matching key
   remove(key) {
 
@@ -114,6 +103,18 @@ export default class BinarySearchTree {
   // returns undefined, applies callback to nodes in-order
   forEach(callback) {
     BinarySearchTree.traverseInOrder(this.root, callback);
+  }
+
+  // returns a new BST with the list's key-value pairs inserted
+  insertAll(listToInsert, selfBalance = false) {
+    // iterate list and insert each item into BST (mutative)
+      // if selfBalance, balance tree after each insertion
+    // return the new BST
+  }
+
+  // returns a balanced BST
+  balanceTree() {
+
   }
 
   // returns the given comparator or the default comparator function
