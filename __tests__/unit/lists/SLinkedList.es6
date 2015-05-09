@@ -55,17 +55,21 @@ describe('SLinkedList', () => {
       expect(sLLArray.tail.next).toBeNull();
       expect(sLLArray.tail.data).toEqual(['tail value']);
     });
+
+    it('contains immutable nodes', () => {
+      let sLLNumber = new SLinkedList(1);
+      let changeSomething = () =>{
+        sLLNumber.head.data = 2;
+      }
+      expect(changeSomething).toThrow();
+      expect(sLLNumber.head.data).toEqual(1); 
+    });
   });
 
   describe('public interface instance methods', () => {
     let sLLNumber = new SLinkedList(1);
     let sLLArray = new SLinkedList(['random string', {'asdfasdf':'asdf'}, { name: 'anna' }]);
 
-    describe('reverse', () => {
-      it('reverses', () =>{
-        expect(sLLArray.reverse().head.data['name'].toEqual('anna'));
-      });
-    });
 
     describe('prepends', () => {
       it('prepends single elements', () => {
@@ -91,7 +95,7 @@ describe('SLinkedList', () => {
         expect(sLLNumber.tail.data).toEqual(1); // shouldn't mutate original list
         expect(sLLNumber2.head.data).toEqual(1);
         expect(sLLNumber2.tail.data).toEqual(2);
-      });
+      });F
     });
 
     it('removes-head', () => {
@@ -113,5 +117,12 @@ describe('SLinkedList', () => {
       expect(sLLNumber3.head.data).toEqual(1);
       expect(sLLNumber3.tail.data).toBeNull();
     });
+
+    describe('reverse', () => {
+      it('reverses', () =>{
+        expect(sLLArray.reverse().head.data['name'].toEqual('anna'));
+      });
+    });
+
   });
 });
