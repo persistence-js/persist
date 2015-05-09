@@ -100,45 +100,110 @@ describe('SLinkedList', () => {
       });
 
       it('prepends other LLs', () => {
-        expect(sLLArray.prepend(sLLArray).size).toEqual(sLLArray.size*2);
-        expect(sLLArray.tail.data).toEqual(sLLArray.tail.data);
+        let nList = sLLArray.prepend(sLLArray);
+        expect(nList.size).toEqual(sLLArray.size*2);
+        expect(nList.tail.data).toEqual(sLLArray.tail.data);
+      });
+
+      it('prepends via tail-sharing', () => {
+        let nList = sLLArray.prepend(sLLArray);
+        expect(nList.head).toNotBe(sLLArray.head);
+        expect(nList.tail.next).toBeNull();
+        let currentNode = nList.head;
+        //increment the size of the previous array, check if tail is old head
+        for (let i = 0; i < sLLArray.size; i++){
+          if (i === sLLArray.size-1){ 
+            expect(currentNode.next).toBe(sLLArray.head);
+          }
+          currentNode = currentNode.next;
+        }
       });
 
     });
 
     describe('appends', () => {
+
+      it('returns a new list when appends undefined', () => {
+        let nList = sLLArray.append();
+        expect(nList).toNotBe(sLLArray);
+        expect(nList.head.data).toBe(1);
+      });
+
       it('appends single numbers', () => {
         let sLLNumber2 = sLLNumber.append(2);
         expect(sLLNumber.tail.data).toEqual(1); // shouldn't mutate original list
         expect(sLLNumber2.head.data).toEqual(1);
         expect(sLLNumber2.tail.data).toEqual(2);
-      });F
-    });
-
-    it('removes-head', () => {
-      let sLLNumber2 = sLLNumber.append(2);
-      let sLLNumber3 = sLLNumber.removeHead();
-      let sLLNumber4 = sLLNumber2.removeHead();
-      expect(sLLNumber.head.data).toEqual(1); // shouldn't mutate original list
-      expect(sLLNumber2.head.data).toEqual(1); // shouldn't mutate any copied lists
-      expect(sLLNumber3.head.data).toBeNull();
-      expect(sLLNumber4.head.data).toEqual(2);
-      expect(sLLNumber4.tail.data).toEqual(2);
-    });
-
-    it('removes-tail', () => {
-      let sLLNumber2 = sLLNumber.append(2);
-      let sLLNumber3 = sLLNumber2.removeTail();
-      expect(sLLNumber.head.data).toEqual(1); // shouldn't mutate original list
-      expect(sLLNumber2.head.data).toEqual(1); // shouldn't mutate any copied lists
-      expect(sLLNumber3.head.data).toEqual(1);
-      expect(sLLNumber3.tail.data).toBeNull();
-    });
-
-    describe('reverse', () => {
-      it('reverses', () =>{
-        expect(sLLArray.reverse().head.data['name'].toEqual('anna'));
       });
+
+      it('appends an array', () => {
+        let nList = sLLArray.append([1,2,3]);
+        expect(nList.tail.data).toEqual(3);
+        expect(nList.size).toEqual(sLLArray.size+3);
+      });
+
+      it('appends nested arrays', () => {
+        expect(sLLArray.append([[1,2,3],[1,2]]).tail.data).toEqual([1,2]);
+      });
+
+      it('appends nodes', () => {
+        expect(sLLArray.append(sLLArray.head).tail.data).toEqual('random string');
+      });
+
+      it('appends other LLs', () => {
+        let nList = sLLArray.append(sLLArray);
+        expect(nList.size).toEqual(sLLArray.size*2);
+        expect(nList.tail.data).toEqual(sLLArray.tail.data);
+      });
+
+    });
+
+    describe('removal methods', () => {
+
+      it('removes-head', () => {
+        let sLLNumber2 = sLLNumber.append(2);
+        let sLLNumber3 = sLLNumber.removeHead();
+        let sLLNumber4 = sLLNumber2.removeHead();
+        expect(sLLNumber.head.data).toEqual(1); // shouldn't mutate original list
+        expect(sLLNumber2.head.data).toEqual(1); // shouldn't mutate any copied lists
+        expect(sLLNumber3.head).toBeNull();
+        expect(sLLNumber4.head.data).toEqual(2);
+        expect(sLLNumber4.tail.data).toEqual(2);
+      });
+
+      it('removes-tail', () => {
+        let sLLNumber2 = sLLNumber.append(2);
+        let sLLNumber3 = sLLNumber2.removeTail();
+        expect(sLLNumber.head.data).toEqual(1); // shouldn't mutate original list
+        expect(sLLNumber2.head.data).toEqual(1); // shouldn't mutate any copied lists
+        expect(sLLNumber3.head.data).toEqual(1);
+        expect(sLLNumber3.tail).toBeNull();
+      });
+
+    });
+
+    describe('functional methods', () => {
+        xdescribe('filter', ()=>{
+
+        });
+
+        xdescribe('reduce', ()=>{
+          
+        });
+
+        xdescribe('map', ()=>{
+          
+        });
+        
+        xdescribe('forEach', ()=>{
+          
+        });
+
+        describe('reverse', () => {
+          it('reverses', () =>{
+            expect(sLLArray.reverse().head.data['name'].toEqual('anna'));
+          });
+        });  
     });
 
   });
