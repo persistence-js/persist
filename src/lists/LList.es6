@@ -2,13 +2,20 @@ import 'core-js/shim';
 let IM = require('immutable');
 
 export default class LList {
+  /**
+   * Accepts items and list-like objects.
+   * Converts them into Immutable Seq's of length >1 before
+   * creating nodes.
+   * @param  {Array}  itemOrList [description]
+   * @param  {Object} options [circular (bool), prependTo(node), oldSize(num)]
+   * @return {[type]}            [description]
+   */
   constructor(itemOrList = [], options = { circular: false }) {
     let items = LList.convertToSeq(itemOrList);
     this.head = LList.makeHead(items);
     this.size = items.size;
-
-    //take an input, point tail.next at the input before freezing
-    if (options.prependTo){
+    let prepend = options.prependTo && LList.isNode(options.prependTo);
+    if (prepend){
       if (this.size === 0){
         this.head = options.prependTo;
       } else {
@@ -17,42 +24,17 @@ export default class LList {
       this.size = this.size + options.oldSize;
     }
 
-    //Recursive freeze;
     this.forEach(Object.freeze);
     Object.freeze(this);
   }
 
-  static makeMap(data, next) {
-    let node = {
-      data: data, 
-      next: next,
-    };
-    node[LList._LLNODE_SENTINEL_()] = true;
-    return node;
-  }
-
-  static makeHead(seq) {
-    if (seq === null || seq.size === 0) { 
-      return null; 
-    } else {
-      let rest = seq.rest();
-      rest = (rest.size === 0) ? null : rest;
-      return LList.makeMap(seq.first(), LList.makeHead(rest));
-    } 
-  }
-
+  /**
+   * Find the final node in the Linked List in O(n).
+   * @return {[Node]} [last node in the linked list, null if list is empty]
+   */
   get tail() {
-    if (this.head === null) {
-      return this.head;
-    }else{
-      let current = this.head;
-      let tailNode;
-      while (current !== null){
-        if (current.next === null) { tailNode = current;}
-        current = current.next; 
-      }
-      return tailNode;
-    }
+    let pointsAtNull = (element) => { return element.next === null}
+    return (this.size < 1) ? null : this.filter(pointsAtNull)[0];
   }
 
   /**
@@ -129,6 +111,7 @@ export default class LList {
     return new LList(this.filter(notLast).map(LList.getData));
   }
 
+  //Functional helper methods
   forEach(cb) {
     let current = this.head;
     while (current !== null){
@@ -151,23 +134,42 @@ export default class LList {
         filtered.push(node);
       }
     });
-
     return filtered;
   }
 
-  reduce(){
-    //sig: prev, current, index, list
+  /**
+   * Creates individual nodes, from anything that can be stored
+   * in an immutable Seq.
+   * Can be passed null to create tails.
+   * @param  {[Primitive, Object]}   data []
+   * @param  {[New Node, null]} next []
+   * @return {[object]}        []
+   */
+  static makeNode(data, next) {
+    let node = {
+      data: data, 
+      next: next,
+    };
+    node[LList._LLNODE_SENTINEL_()] = true;
+    return node;
   }
 
+  static makeHead(seq) {
+    if (seq === null || seq.size === 0) { 
+      return null; 
+    } else {
+      let rest = seq.rest();
+      rest = (rest.size === 0) ? null : rest;
+      return LList.makeNode(seq.first(), LList.makeHead(rest));
+    } 
+  }
+
+  //Extracts data from Nodes
   static getData(node) {
     return (
       (LList.isNode(node)) ? node.data : 
       new Error('getData only accepts nodes.')
     );
-  }
-
-  static nodeConstructor() {
-    return LLNode;
   }
 
   static isLList(maybeLList){
@@ -190,8 +192,6 @@ export default class LList {
   static _LLNODE_SENTINEL_(){
     return "@@__LL_NODE__@@"
   }
-
 }
 
 LList.prototype[LList._LL_SENTINEL_()] = true;
-
