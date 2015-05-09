@@ -2,7 +2,7 @@ jest.autoMockOff();
 const IM = require('immutable');
 const Heap = require('../../../src/heaps/Heap');
 
-describe("Heap Operations", () => {
+xdescribe("Heap Operations", () => {
   describe("Instantiation", () => {
     let newHeap = new Heap();
     it("instantiates a min-heap", () => {
