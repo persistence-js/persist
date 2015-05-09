@@ -126,9 +126,10 @@ describe('SLinkedList', () => {
     describe('appends', () => {
 
       it('returns a new list when appends undefined', () => {
-        let nList = sLLArray.append();
-        expect(nList).toNotBe(sLLArray);
+        let nList = sLLNumber.append();
+        expect(nList).toNotBe(sLLNumber);
         expect(nList.head.data).toBe(1);
+        expect(nList.size).toBe(sLLNumber.size+1);
       });
 
       it('appends single numbers', () => {
@@ -151,7 +152,7 @@ describe('SLinkedList', () => {
       it('appends nodes, copying only a node\'s data', () => {
         let nList = sLLArray.prepend(sLLArray.head);
         expect(nList.head.data).toEqual('random string');
-        exoect(nList.head).toNotBe(sLLArray.head);
+        expect(nList.head).toNotBe(sLLArray.head);
         expect(nList.size).toBe(sLLArray.size+1);
 
       });
@@ -178,12 +179,13 @@ describe('SLinkedList', () => {
       });
 
       it('removes-tail', () => {
-        let sLLNumber2 = sLLNumber.append(2);
-        let sLLNumber3 = sLLNumber2.removeTail();
+        let sLLNumber2  = sLLNumber.append(2);
+        let sLLNumber3  = sLLNumber2.removeTail();
+        let sLLEmpty    = sLLNumber.removeTail();
         expect(sLLNumber.head.data).toEqual(1); // shouldn't mutate original list
         expect(sLLNumber2.head.data).toEqual(1); // shouldn't mutate any copied lists
         expect(sLLNumber3.head.data).toEqual(1);
-        expect(sLLNumber3.tail).toBeNull();
+        expect(sLLEmpty.tail).toBeNull();
       });
 
     });
@@ -207,7 +209,7 @@ describe('SLinkedList', () => {
 
         describe('reverse', () => {
           it('reverses', () =>{
-            expect(sLLArray.reverse().head.data['name'].toEqual('anna'));
+            expect(sLLArray.reverse().head.data['name']).toEqual('anna');
           });
         });  
     });
