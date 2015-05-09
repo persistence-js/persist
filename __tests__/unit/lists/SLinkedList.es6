@@ -95,8 +95,10 @@ describe('SLinkedList', () => {
         expect(sLLArray.prepend([[1,2,3],[1,2]]).head.data).toEqual([1,2,3]);
       });
 
-      it('prepends nodes', () => {
-        expect(sLLArray.prepend(sLLArray.head).head.data).toEqual('random string');
+      it('prepends nodes, copying only a node\'s data', () => {
+        let nList = sLLArray.prepend(sLLArray.head);
+        expect(nList.head.data).toEqual('random string');
+        expect(nList.size).toBe(sLLArray.size+1);
       });
 
       it('prepends other LLs', () => {
@@ -146,8 +148,12 @@ describe('SLinkedList', () => {
         expect(sLLArray.append([[1,2,3],[1,2]]).tail.data).toEqual([1,2]);
       });
 
-      it('appends nodes', () => {
-        expect(sLLArray.append(sLLArray.head).tail.data).toEqual('random string');
+      it('appends nodes, copying only a node\'s data', () => {
+        let nList = sLLArray.prepend(sLLArray.head);
+        expect(nList.head.data).toEqual('random string');
+        exoect(nList.head).toNotBe(sLLArray.head)l
+        expect(nList.size).toBe(sLLArray.size+1);
+
       });
 
       it('appends other LLs', () => {
@@ -194,7 +200,7 @@ describe('SLinkedList', () => {
         xdescribe('map', ()=>{
           
         });
-        
+
         xdescribe('forEach', ()=>{
           
         });
