@@ -147,33 +147,19 @@ describe('BinarySearchTree', () => {
 
     });
 
-    xdescribe('#remove', () => {
+    xdescribe('#remove', () => {});
 
-    });
+    xdescribe('#find', () => {});
 
-    xdescribe('#find', () => {
+    xdescribe('#get', () => {});
 
-    });
+    xdescribe('#contains', () => {});
 
-    xdescribe('#get', () => {
+    xdescribe('#forEach', () => {});
 
-    });
+    xdescribe('#insertAll', () => {});
 
-    xdescribe('#contains', () => {
-
-    });
-
-    xdescribe('#forEach', () => {
-
-    });
-
-    xdescribe('#insertAll', () => {
-
-    });
-
-    xdescribe('#balanceTree', () => {
-
-    });
+    xdescribe('#balanceTree', () => {});
 
   });
 
@@ -297,41 +283,23 @@ describe('BinarySearchTree', () => {
 
   xdescribe('Static Methods', () => {
 
-    xdescribe('.setComparator', () => {
+    xdescribe('.setComparator', () => {});
 
-    });
+    xdescribe('.defaultComp', () => {});
 
-    xdescribe('.defaultComp', () => {
+    xdescribe('.isBSTNode', () => {});
 
-    });
+    xdescribe('.cloneNode', () => {});
 
-    xdescribe('.isBSTNode', () => {
+    xdescribe('.findInOrderPredecessor', () => {});
 
-    });
+    xdescribe('.findInOrderSuccessor', () => {});
 
-    xdescribe('.cloneNode', () => {
+    xdescribe('.traverseInOrder', () => {});
 
-    });
+    xdescribe('.traverseSide', () => {});
 
-    xdescribe('.findInOrderPredecessor', () => {
-
-    });
-
-    xdescribe('.findInOrderSuccessor', () => {
-
-    });
-
-    xdescribe('.traverseInOrder', () => {
-
-    });
-
-    xdescribe('.traverseSide', () => {
-
-    });
-
-    xdescribe('.recursiveSearch', () => {
-
-    });
+    xdescribe('.recursiveSearch', () => {});
 
   });
 
