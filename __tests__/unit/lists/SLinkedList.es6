@@ -77,7 +77,7 @@ describe('SLinkedList', () => {
       });
 
       it('prepends an array', () => {
-        expect(sLLArray.prepend([1,2,3].head.next.data)).toEqual(2);
+        expect(sLLArray.prepend([1,2,3]).head.next.data).toEqual(2);
       });
 
       it('prepends nested arrays', () => {
@@ -87,6 +87,12 @@ describe('SLinkedList', () => {
       it('prepends nodes', () => {
         expect(sLLArray.prepend(sLLArray.head).head.data).toEqual('random string');
       });
+
+      it('prepends other LLs', () => {
+        expect(sLLArray.prepend(sLLArray).size).toEqual(sLLArray.size*2);
+        expect(sLLArray.tail.data).toEqual(sLLArray.tail.data);
+      });
+
     });
 
     describe('appends', () => {
