@@ -7,6 +7,10 @@ export default class LinkedListBase {
       IM.Seq([].concat(itemOrList));
     this.head = LinkedListBase.makeHead(items);
     this.size = items.size;
+
+    //Recursive freeze;
+    this.forEach(Object.freeze);
+    Object.freeze(this);
   }
 
   static makeMap(data, next) {
@@ -14,9 +18,9 @@ export default class LinkedListBase {
       data: data, 
       next: next,
     };
-    return Object.freeze(node);
+    return (node);
   }
-  
+
   static makeHead(seq) {
     let LLB = LinkedListBase;
     if (seq === null || seq.size === 0) { 
@@ -43,13 +47,11 @@ export default class LinkedListBase {
     }
   }
 
-  prepend() {
-    //RETURNS A LIST, new LZ Store
-
-    //make new list:
-    //head: data, next is this.head()
-    //tail: this.tail()
-    //lzStore: Use Cached result from previous call, and shift...
+  prepend(itemOrList = []) {
+    //create a new list with these inputs,
+    //  when the tail is created, point it at this...
+    //
+    //make Head
   }
   reverse(){
     //returns a list
@@ -83,8 +85,12 @@ export default class LinkedListBase {
     return this._lzStore.contains(target);
   }
 
-  traverse(cb) {
-    this._lzStore.toArray().forEach(cb);
+  forEach(cb) {
+    let current = this.head;
+    while (current !== null){
+      cb(current);
+      current = current.next;
+    }
   }
 
   filter() {
