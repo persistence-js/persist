@@ -34,7 +34,7 @@ describe('BSTree', () => {
 
   describe('Instance Methods', () => {
 
-    xdescribe('#insert', () => {
+    describe('#insert', () => {
 
       xdescribe('empty trees', () => {
         let bst = new BSTree();
@@ -139,9 +139,18 @@ describe('BSTree', () => {
 
       xdescribe('insertion operation immutability', () => {
 
-        it('returns immutable tree with immutable nodes', () => {});
+        it('does not mutate tree', () => {
+          let bst = new BSTree();
+          bst.insert(1, 'a');
+          expect(bst.size).toEqual(0);
+        });
 
-        it('does not mutate tree or nodes', () => {});
+        it('does not mutate nodes', () => {
+          let node = new BSTNode(1, 'a', null, null, 1),
+              bst = new BSTree(node);
+          bst.insert(2, 'b');
+          expect(node.right).toBeNull();
+        });
 
       });
 
