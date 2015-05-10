@@ -149,9 +149,45 @@ describe('BSTree', () => {
 
     xdescribe('#remove', () => {});
 
-    xdescribe('#find', () => {});
+    xdescribe('#find', () => {
 
-    xdescribe('#get', () => {});
+    });
+
+    describe('#get', () => {
+
+      describe('key not present in tree', () => {
+
+        it('returns null for empty tree', () => {
+          expect((new BSTree()).get(1)).toBeNull();
+        });
+
+        it('returns null for nonempty tree', () => {
+          let bst = new BSTree(null, new BSTNode(1, 'a', null, null, 1));
+          expect(bst.get(20)).toBeNull();
+        });
+
+      });
+
+      xdescribe('key present in tree', () => {
+
+        it('returns associated node value, shallow tree', () => {
+          let node = new BSTNode(1, 'a', null, null, 1),
+              bst = new BSTree(null, node);
+          expect(bst.get(1)).toBe('a');
+        });
+
+        it('returns associated node value, deep tree', () => {
+          let maxNode = new BSTNode(100, 'max', null, null, 4),
+              rootRight = new BSTNode(75, 'b', null, maxNode, 2),
+              rootLeft = new BSTNode(25, 'c', null, null, 3),
+              rootNode = new BSTNode(50, 'a', rootLeft, rootRight, 1),
+              bst = new BSTree(null, rootNode);
+          expect(bst.get(100)).toBe('max');
+        });
+
+      });
+
+    });
 
     xdescribe('#contains', () => {});
 
