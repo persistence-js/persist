@@ -32,7 +32,7 @@ describe('BSTree', () => {
 
   });
 
-  describe('Basic Instance Methods', () => {
+  describe('Instance Methods', () => {
 
     xdescribe('#insert', () => {
 
@@ -147,7 +147,9 @@ describe('BSTree', () => {
 
     });
 
-    xdescribe('#remove', () => {});
+    xdescribe('#remove', () => {
+
+    });
 
     describe('#find', () => {
 
@@ -257,11 +259,36 @@ describe('BSTree', () => {
 
     });
 
-    xdescribe('#forEach', () => {});
+    describe('#forEach', () => {
 
-    xdescribe('#insertAll', () => {});
+      it('does not execute callback for empty tree', () => {
+        let bstEmpty = new BSTree(),
+            result = [];
+        bstEmpty.forEach(node => result.push(node.key));
+        expect(result.length).toBe(0);
+      });
 
-    xdescribe('#balanceTree', () => {});
+      it('executes callback on each node in order for nonempty tree', () => {
+        let maxNode = new BSTNode(100, 'max', null, null, 4),
+            rootRight = new BSTNode(75, 'b', null, maxNode, 2),
+            rootLeft = new BSTNode(25, 'c', null, null, 3),
+            rootNode = new BSTNode(50, 'a', rootLeft, rootRight, 1),
+            bst = new BSTree(null, rootNode),
+            result = [];
+        bst.forEach(node => result.push(node.key));
+        expect(result.length).toBe(4);
+        expect(result).toEqual([25, 50, 75, 100]);
+      });
+
+    });
+
+    xdescribe('#insertAll', () => {
+
+    });
+
+    xdescribe('#balanceTree', () => {
+
+    });
 
   });
 
@@ -380,28 +407,6 @@ describe('BSTree', () => {
       });
 
     });
-
-  });
-
-  xdescribe('Static Methods', () => {
-
-    xdescribe('.setComparator', () => {});
-
-    xdescribe('.defaultComp', () => {});
-
-    xdescribe('.isBSTNode', () => {});
-
-    xdescribe('.cloneNode', () => {});
-
-    xdescribe('.findInOrderPredecessor', () => {});
-
-    xdescribe('.findInOrderSuccessor', () => {});
-
-    xdescribe('.traverseInOrder', () => {});
-
-    xdescribe('.traverseSide', () => {});
-
-    xdescribe('.recursiveSearch', () => {});
 
   });
 
