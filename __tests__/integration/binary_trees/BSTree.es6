@@ -221,7 +221,41 @@ describe('BSTree', () => {
 
     });
 
-    xdescribe('#contains', () => {});
+    describe('#contains', () => {
+
+      describe('value not present in tree', () => {
+
+        it('returns false for empty tree', () => {
+          expect((new BSTree()).contains(1)).toBe(false);
+        });
+
+        it('returns false for nonempty tree', () => {
+          let bst = new BSTree(null, new BSTNode(1, 'a', null, null, 1));
+          expect(bst.contains('b')).toBe(false);
+        });
+
+      });
+
+      describe('value present in tree', () => {
+
+        it('returns true, shallow tree', () => {
+          let node = new BSTNode(1, 'a', null, null, 1),
+              bst = new BSTree(null, node);
+          expect(bst.contains('a')).toBe(true);
+        });
+
+        it('returns true, deep tree', () => {
+          let maxNode = new BSTNode(100, 'max', null, null, 4),
+              rootRight = new BSTNode(75, 'b', null, maxNode, 2),
+              rootLeft = new BSTNode(25, 'c', null, null, 3),
+              rootNode = new BSTNode(50, 'a', rootLeft, rootRight, 1),
+              bst = new BSTree(null, rootNode);
+          expect(bst.contains('max')).toBe(true);
+        });
+
+      });
+
+    });
 
     xdescribe('#forEach', () => {});
 
