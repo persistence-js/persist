@@ -67,6 +67,7 @@ export default class LList {
         { circular: this.circular });
     }
 
+    //Else, prepend in O(1);
     return (
       LList.isNode(toPre) ? new LList(LList.getData(toPre), opts) : 
       LList.isLList(toPre) ? new LList(toPre.map(LList.getData), opts) : 
@@ -115,7 +116,8 @@ export default class LList {
     let notFirst = (node) => {
       return (node !==  this.head);
     }
-    return new LList(this.filter(notFirst).map(LList.getData), { circular: this.circular });
+    return new LList(this.filter(notFirst).map(LList.getData),
+     { circular: this.circular });
   }
 
   /**
@@ -126,7 +128,8 @@ export default class LList {
     let notLast = (node) => {
       return (node !== this.tail)
     }
-    return new LList(this.filter(notLast).map(LList.getData), { circular: this.circular });
+    return new LList(this.filter(notLast).map(LList.getData),
+     { circular: this.circular });
   }
 
   //Returns a new list, removing one node after the specified node.
@@ -143,44 +146,39 @@ export default class LList {
   }
 
   //Returns a new list, adding one node after the specified node.
-  addAfter(nodeToAddAfter, addition){
-    let additionList = new LList(addition);
-    if (LList.isLList(additionList) && LList.isNode(nodeToAddAfter)){
-      let newList = [];
-      this.forEach((node) => {
-        newList.push(node.data);
-        if(node === nodeToAddAfter){
-          newList = newList.concat(additionList.map(LList.getData));
-        }
-      });
-      return new LList(newList, { circular: this.circular });      
-    }
-
-    return new Error("Error, inputs must be LList Nodes.")
+  addAfter(atNode, addition) {
+    return this.addBefore(atNode, addition, false);
   }
 
   //Returns a new list, adding one node before the specified node.
-  addBefore(nodeToAddBefore, addition){
+  addBefore(atNode, addition, before = true) {
     let additionList = new LList(addition);
-    if (LList.isLList(additionList) && LList.isNode(nodeToAddBefore)){
+    let insert = () => {
       let newList = [];
       this.forEach((node) => {
-        if(node === nodeToAddBefore){
+        if(node === atNode && !!before){
           newList = newList.concat(additionList.map(LList.getData));
         }
         newList.push(node.data);
-      });      
-      return new LList(newList, { circular: this.circular });      
-    }
+        if(node === atNode && !before){
+          newList = newList.concat(additionList.map(LList.getData));
+        }
+      });
 
-    return new Error("Error, inputs must be LList Nodes.")
+      return new LList(newList, { circular: this.circular });      
+    }.bind(this);
+
+    return (LList.isNode(atNode)) ? insert() :
+      new Error("Error, inputs must be LList Nodes.");
   }
 
+  //Helper functions
   remove(nodeToRemove){
     let notNode = (nodeToCheck) => {
       return nodeToCheck !== nodeToRemove;
     }
-    return new LList(this.filter(notNode).map(LList.getData), { circular: this.circular });
+    return new LList(this.filter(notNode).map(LList.getData),
+     { circular: this.circular });
   }
   //Functional helper methods
   forEach(cb) {
