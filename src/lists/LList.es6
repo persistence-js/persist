@@ -33,8 +33,12 @@ export default class LList {
    * @return {[Node]} [last node in the linked list, null if list is empty]
    */
   get tail() {
-    let pointsAtNull = (element) => { return element.next === null}
-    return (this.size < 1) ? null : this.filter(pointsAtNull)[0];
+    let pointsAt = (point) => { 
+      return (element) => {
+        return element.next === point;
+      }
+    }
+    return (this.size < 1) ? null : this.filter(pointsAt(null))[0];
   }
 
   /**
