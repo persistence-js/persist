@@ -1,10 +1,10 @@
 jest.autoMockOff();
 var IM = require('immutable'),
-    SLinkedList = require('../../../src/lists/LList');
+    LList = require('../../../src/lists/LList');
 
-describe('SLinkedList', () => {
+describe('LList', () => {
   describe('new instance initialization', () => {
-    let sLLEmpty = new SLinkedList();
+    let sLLEmpty = new LList();
 
     it('starts with a null head', () => {
       expect(sLLEmpty.head).toBeNull();
@@ -19,7 +19,7 @@ describe('SLinkedList', () => {
     });
 
     it('stores a number on initialization', () => {
-      let sLLNumber = new SLinkedList(1);
+      let sLLNumber = new LList(1);
       expect(sLLNumber.size).toBe(1);
       expect(sLLNumber.head.data).toEqual(1);
       expect(sLLNumber.head.next).toBeNull();
@@ -27,7 +27,7 @@ describe('SLinkedList', () => {
     });
 
     it('stores a string on initialization', () => {
-      let sLLString = new SLinkedList('string value');
+      let sLLString = new LList('string value');
       expect(sLLString.size).toBe(1);
       expect(sLLString.head.next).toBeNull();
       expect(sLLString.head.data).toEqual('string value');
@@ -37,7 +37,7 @@ describe('SLinkedList', () => {
     });
 
     it('stores an object on initialization', () => {
-      let sLLObject = new SLinkedList({ name: 'clark' });
+      let sLLObject = new LList({ name: 'clark' });
       expect(sLLObject.size).toBe(1);
       expect(sLLObject.head.next).toBeNull();
       expect(sLLObject.tail.next).toBeNull();
@@ -46,7 +46,7 @@ describe('SLinkedList', () => {
     });
 
     it('stores an array on initialization', () => {
-      let sLLArray = new SLinkedList([
+      let sLLArray = new LList([
           'random string', 
           {'asdfasdf':'asdf'}, 
           { name: 'anna' }, 
@@ -63,7 +63,7 @@ describe('SLinkedList', () => {
     });
 
     it('contains immutable nodes', () => {
-      let sLLNumber = new SLinkedList(1);
+      let sLLNumber = new LList(1);
       let changeSomething = () =>{
         sLLNumber.head.data = 2;
       }
@@ -73,8 +73,8 @@ describe('SLinkedList', () => {
   });
 
   describe('public interface instance methods', () => {
-    let sLLNumber = new SLinkedList(1);
-    let sLLArray = new SLinkedList([
+    let sLLNumber = new LList(1);
+    let sLLArray = new LList([
         'random string', 
         {'asdfasdf':'asdf'}, 
         { name: 'anna' },
@@ -208,6 +208,92 @@ describe('SLinkedList', () => {
             expect(sLLArray.reverse().head.data['name']).toEqual('anna');
           });
         });  
+    });
+
+    describe('Circular Linked Lists', function() {
+      let oneToFive = [1,2,3,4,5];
+      let cLL = new LList(oneToFive, {circular: true});
+      let midNode = cLL.head.next.next;
+
+      describe('Basic Instance Methods & Properties', function() {
+        it('is circular', function() {
+          expect(cLL.tail.next).toBe(cLL.head);
+        });
+
+        it('has correct values midpoint, head, tail, and size values', function() {
+          expect(midNode.data).toBe(3);
+          expect(cLL.head.data).toBe(1);
+          expect(cLL.tail.data).toBe(5);
+          expect(cLL.size).toBe(5);
+        });
+
+        it('appends and prepends, immutably', function() {
+          expect(cLL.append('NEW').tail.data).toBe('NEW');
+          expect(cLL.prepend('NEW').head.data).toBe('NEW');
+          expect(cLL.head.data).toNotBe('NEW');
+        });
+        
+      });
+
+      describe('Add before', function() {
+        it('behaves exactly as prepend should, when called with head', function() {
+          expect(cLL.addBefore(cLL.head, 0)).toBe(cLL.prepend(0).head);
+          
+        });
+
+        it('returns a new list, with the correct inserted value', function() {
+          let nList = cLL.addBefore(midpoint, 0);
+          expect(cLL.size).toNotBe(nList.size);
+          expect(nList.head.next.next.data).toBe(0);
+        });
+
+      });
+
+      describe('Remove before', function() {
+        it('removes tail, when called with head', function() {
+          expect(cLL.removeBefore(cLL.head).tail.data).toBe(cLL.removeTail().tail.data);
+          expect(cLL.removeBefore(cLL.head).head.data).toBe(cLL.removeTail().head.data);
+        });
+
+        it('returns a new list, with the correct length', function() {
+          
+        });
+        it('does not contain the removed node', function() {
+          
+        });
+
+      });
+
+      describe('Add after', function() {
+        it('behaves exactly as append should, when called with tail', function() {
+          
+        });
+
+        it('returns a new list', function() {
+          
+        });
+
+        it('has the correct inserted value', function() {
+          
+        });
+
+      });
+
+      describe('Remove after', function() {
+        it('removes head, when called with tail', function() {
+          
+        });
+
+        it('returns a new list, with the correct length', function() {
+          
+        });
+
+        it('does not contain the removed node', function() {
+          
+        });
+
+      });
+
     });
 
   });
