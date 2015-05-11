@@ -202,7 +202,6 @@ describe('LList', () => {
     });
 
     describe('functional methods', () => {
-
         describe('reverse', () => {
           it('reverses', () =>{
             expect(sLLArray.reverse().head.data['name']).toEqual('anna');
@@ -236,9 +235,8 @@ describe('LList', () => {
       });
 
       describe('Add before', function() {
-        it('behaves exactly as prepend should, when called with head', function() {
-          expect(cLL.addBefore(cLL.head, 0)).toBe(cLL.prepend(0).head);
-          
+        it('when called with head, behaves exactly as prepend should, ', function() {
+          expect(cLL.addBefore(cLL.head, 0).head.data).toBe(cLL.prepend(0).head.data);
         });
 
         it('returns a new list, with the correct inserted value', function() {
@@ -250,46 +248,63 @@ describe('LList', () => {
       });
 
       describe('Remove before', function() {
+          let removeBeforeResult = cLL.removeBefore(cLL.head);
+          let removeTailResult = cLL.removeTail()
+
         it('removes tail, when called with head', function() {
-          expect(cLL.removeBefore(cLL.head).tail.data).toBe(cLL.removeTail().tail.data);
-          expect(cLL.removeBefore(cLL.head).head.data).toBe(cLL.removeTail().head.data);
+          expect(removeBeforeResult.tail.data).toBe(removeTailResult.data);
+          expect(removeBeforeResult.head.data).toBe(removeTailResult.head.data);
         });
 
         it('returns a new list, with the correct length', function() {
-          
+          expect(removeBeforeResult.size).toBe(cLL.size-1);
         });
+
         it('does not contain the removed node', function() {
-          
+          let tailValue = cLL.tail;
+          let isTail = (node) => {
+            return node === tailValue;
+          }
+          expect(removeBeforeResult.filter(isTail).length).toBeFalsy();  
         });
 
       });
 
       describe('Add after', function() {
-        it('behaves exactly as append should, when called with tail', function() {
-          
+        it('when called with tail, behaves exactly as append should', function() {
+          expect(cLL.addAfter(cLL.tail, 0).head.data).toBe(cLL.prepend(0).head.data);
+                    
         });
 
-        it('returns a new list', function() {
-          
-        });
-
-        it('has the correct inserted value', function() {
+        it('returns a new list, with the correct inserted value', function() {
+          let nList = cLL.addAfter(midpoint, 0);
+          expect(cLL.size).toNotBe(nList.size);
+          expect(nList.head.next.next.next.data).toBe(0);
           
         });
 
       });
 
       describe('Remove after', function() {
+        let removeAfterResult = cLL.removeAfter(cLL.tail);
+        let removeHeadResult = cLL.removeHead();
+
         it('removes head, when called with tail', function() {
-          
+          expect(removeAfterResult.tail.data).toBe(removeHeadResult.data);
+          expect(removeAfterResult.head.data).toBe(removeHeadResult.head.data);
+
         });
 
         it('returns a new list, with the correct length', function() {
-          
+          expect(removeAfterResult.size).toBe(cLL.size-1);
         });
 
         it('does not contain the removed node', function() {
-          
+          let headValue = cLL.head;
+          let isHead = (node) => {
+            return node === headValue;
+          }
+          expect(removeAfterResult.filter(isHead).length).toBeFalsy();  
         });
 
       });
