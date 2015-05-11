@@ -226,8 +226,12 @@ describe('LList', () => {
           expect(cLL.size).toBe(5);
         });
 
-        it('appends and prepends, immutably', function() {
+        it('appends, not modifying the original list', function() {
           expect(cLL.append('NEW').tail.data).toBe('NEW');
+          expect(cLL.head.data).toNotBe('NEW');
+        });
+
+        it('prepends, not modifying the original list', function() {
           expect(cLL.prepend('NEW').head.data).toBe('NEW');
           expect(cLL.head.data).toNotBe('NEW');
         });
@@ -240,7 +244,7 @@ describe('LList', () => {
         });
 
         it('returns a new list, with the correct inserted value', function() {
-          let nList = cLL.addBefore(midpoint, 0);
+          let nList = cLL.addBefore(midNode, 0);
           expect(cLL.size).toNotBe(nList.size);
           expect(nList.head.next.next.data).toBe(0);
         });
@@ -248,16 +252,16 @@ describe('LList', () => {
       });
 
       describe('Remove before', function() {
-          let removeBeforeResult = cLL.removeBefore(cLL.head);
-          let removeTailResult = cLL.removeTail()
+        let removeBeforeResult = cLL.removeBefore(cLL.head);
+        let removeTailResult = cLL.removeTail();
 
         it('removes tail, when called with head', function() {
-          expect(removeBeforeResult.tail.data).toBe(removeTailResult.data);
+          expect(removeBeforeResult.tail.data).toBe(removeTailResult.tail.data);
           expect(removeBeforeResult.head.data).toBe(removeTailResult.head.data);
         });
 
         it('returns a new list, with the correct length', function() {
-          expect(removeBeforeResult.size).toBe(cLL.size-1);
+          expect(removeBeforeResult.size).toBe(cLL.size - 1);
         });
 
         it('does not contain the removed node', function() {
@@ -272,12 +276,12 @@ describe('LList', () => {
 
       describe('Add after', function() {
         it('when called with tail, behaves exactly as append should', function() {
-          expect(cLL.addAfter(cLL.tail, 0).head.data).toBe(cLL.prepend(0).head.data);
+          expect(cLL.addAfter(cLL.tail, 0).head.data).toBe(cLL.append(0).head.data);
                     
         });
 
         it('returns a new list, with the correct inserted value', function() {
-          let nList = cLL.addAfter(midpoint, 0);
+          let nList = cLL.addAfter(midNode, 0);
           expect(cLL.size).toNotBe(nList.size);
           expect(nList.head.next.next.next.data).toBe(0);
           
@@ -285,12 +289,12 @@ describe('LList', () => {
 
       });
 
-      describe('Remove after', function() {
+      xdescribe('Remove after', function() {
         let removeAfterResult = cLL.removeAfter(cLL.tail);
         let removeHeadResult = cLL.removeHead();
 
         it('removes head, when called with tail', function() {
-          expect(removeAfterResult.tail.data).toBe(removeHeadResult.data);
+          expect(removeAfterResult.tail.data).toBe(removeHeadResult.tail.data);
           expect(removeAfterResult.head.data).toBe(removeHeadResult.head.data);
 
         });
