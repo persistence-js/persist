@@ -289,7 +289,7 @@ describe('LList', () => {
 
       });
 
-      xdescribe('Remove after', function() {
+      describe('Remove after', function() {
         let removeAfterResult = cLL.removeAfter(cLL.tail);
         let removeHeadResult = cLL.removeHead();
 

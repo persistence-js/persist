@@ -24,6 +24,11 @@ export default class LList {
       this.size = this.size + options.oldSize;
     }
 
+    if (options.circular){
+      this.tail.next = this.head;
+      this.circular = options.circular;      
+    }
+
     this.forEach(Object.freeze);
     Object.freeze(this);
   }
@@ -38,7 +43,8 @@ export default class LList {
         return element.next === point;
       }
     }
-    return (this.size < 1) ? null : this.filter(pointsAt(null))[0];
+    let sentinel = (this.circular) ? this.head : null;
+    return (this.size < 1) ? null : this.filter(pointsAt(sentinel))[0];
   }
 
   /**
@@ -49,10 +55,17 @@ export default class LList {
    */
   prepend(toPre = []) {
     let opts = { 
-      circular  : false,
+      circular  : this.circular,
       prependTo : this.head, 
       oldSize   : this.size,
     };
+
+    //If circular, can't use tail-sharing.
+    if (this.circular){
+      toPre = LList.convertToSeq(toPre);
+      return new LList(toPre.concat(this.map(LList.getData)).toArray(), 
+        { circular: this.circular });
+    }
 
     return (
       LList.isNode(toPre) ? new LList(LList.getData(toPre), opts) : 
@@ -69,13 +82,14 @@ export default class LList {
    * @return {[type]}       [description]
    */
   append(toApp) {
+    let opts = { circular : this.circular,}
     return (
       new LList(
         this.map(LList.getData).concat(
           LList.isNode(toApp) ? LList.getData(toApp) : 
           LList.isLList(toApp) ? toApp.map(LList.getData) : 
           LList.convertToSeq(toApp).toArray()
-        )
+        ), opts
       )
     );
   }
@@ -89,7 +103,7 @@ export default class LList {
     let reversed = [];
     let unShiftToList = (element) => { reversed.unshift(element)}
     this.map(LList.getData).forEach(unShiftToList);
-    return new LList(reversed);
+    return new LList(reversed, { circular: this.circular });
   }
 
   /**
@@ -101,7 +115,7 @@ export default class LList {
     let notFirst = (node) => {
       return (node !==  this.head);
     }
-    return new LList(this.filter(notFirst).map(LList.getData));
+    return new LList(this.filter(notFirst).map(LList.getData), { circular: this.circular });
   }
 
   /**
@@ -112,15 +126,70 @@ export default class LList {
     let notLast = (node) => {
       return (node !== this.tail)
     }
-    return new LList(this.filter(notLast).map(LList.getData));
+    return new LList(this.filter(notLast).map(LList.getData), { circular: this.circular });
   }
 
+  //Returns a new list, removing one node after the specified node.
+  removeAfter(nodeToRemove) {
+    return this.remove(nodeToRemove.next);
+  }
+
+  //Returns a new list, removing one node before the specified node.
+  removeBefore(nodeToRemoveBefore) {
+    let isTarget = (nodeToCheck) => {
+      return nodeToCheck.next === nodeToRemoveBefore;
+    }
+    return this.remove(this.filter(isTarget)[0]);
+  }
+
+  //Returns a new list, adding one node after the specified node.
+  addAfter(nodeToAddAfter, addition){
+    let additionList = new LList(addition);
+    if (LList.isLList(additionList) && LList.isNode(nodeToAddAfter)){
+      let newList = [];
+      this.forEach((node) => {
+        newList.push(node.data);
+        if(node === nodeToAddAfter){
+          newList = newList.concat(additionList.map(LList.getData));
+        }
+      });
+      return new LList(newList, { circular: this.circular });      
+    }
+
+    return new Error("Error, inputs must be LList Nodes.")
+  }
+
+  //Returns a new list, adding one node before the specified node.
+  addBefore(nodeToAddBefore, addition){
+    let additionList = new LList(addition);
+    if (LList.isLList(additionList) && LList.isNode(nodeToAddBefore)){
+      let newList = [];
+      this.forEach((node) => {
+        if(node === nodeToAddBefore){
+          newList = newList.concat(additionList.map(LList.getData));
+        }
+        newList.push(node.data);
+      });      
+      return new LList(newList, { circular: this.circular });      
+    }
+
+    return new Error("Error, inputs must be LList Nodes.")
+  }
+
+  remove(nodeToRemove){
+    let notNode = (nodeToCheck) => {
+      return nodeToCheck !== nodeToRemove;
+    }
+    return new LList(this.filter(notNode).map(LList.getData), { circular: this.circular });
+  }
   //Functional helper methods
   forEach(cb) {
     let current = this.head;
     while (current !== null){
       cb(current);
       current = current.next;
+      //for circular lists:
+      if (current === this.head){ break;}
     }
   }
 
