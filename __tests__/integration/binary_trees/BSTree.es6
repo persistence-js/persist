@@ -144,7 +144,7 @@ describe('BSTree', () => {
 
         it('does not mutate nodes', () => {
           let node = new BSTNode(1, 'a', null, null, 1),
-              bst = new BSTree(node);
+              bst = new BSTree(null, node);
           bst.insert(2, 'b');
           expect(node.right).toBeNull();
         });
@@ -153,7 +153,7 @@ describe('BSTree', () => {
 
     });
 
-    xdescribe('#remove', () => {
+    describe('#remove', () => {
 
       xdescribe('empty trees', () => {
         let bst = new BSTree();
@@ -221,13 +221,119 @@ describe('BSTree', () => {
       });
 
       xdescribe('target node with two children', () => {
-        let childLeft = new BSTNode(1, 'reset my position', null, null, 2),
-            childRight = new BSTNode(9, 'reset my position', null, null, 3),
-            target = new BSTNode(5, 'remove me', childLeft, childRight, 1),
-            bst = new BSTree(null, target);
 
-        // no right children of left child case
-        // > 0 right children of left child case
+        xdescribe('left child of target has 0 right children', () => {
+          let childLeft = new BSTNode(1, 'reset my position', null, null, 2),
+              childRight = new BSTNode(9, 'reset my position', null, null, 3),
+              target = new BSTNode(5, 'remove me', childLeft, childRight, 1),
+              bst = new BSTree(null, target);
+
+          it('repositions left child', () => {
+            // assuming rearrangement based on in-order predecessor swap
+            expect(bst.remove(5).root.key).toBe(1);
+          });
+
+          it('repositions right child', () => {
+            // assuming rearrangement based on in-order predecessor swap
+            expect(bst.remove(5).root.right.key).toBe(9);
+          });
+
+        });
+
+        xdescribe('left child of target has > 0 right children', () => {
+          let inOrderPredChild = new BSTNode(3, 'swap me with target', null, null, 4),
+              childLeft = new BSTNode(1, 'reset my position', null, inOrderPredChild, 2),
+              childRight = new BSTNode(9, 'reset my position', null, null, 3),
+              target = new BSTNode(5, 'remove me', childLeft, childRight, 1),
+              bst = new BSTree(null, target),
+              removalResult = bst.remove(5);
+
+          it('sets root to in-order predecessor of target', () => {
+            expect(removalResult.root.key).toBe(3);
+          });
+
+          it('resets left child of new root', () => {
+            let left = removalResult.root.left;
+            expect(left.key).toBe(1);
+            expect(left.right).toBeNull();
+          });
+
+          it('resets right child of new root', () => {
+            expect(removalResult.root.right.key).toBe(9);
+          });
+
+        });
+
+      });
+
+      xdescribe('chained removal', () => {
+        let childRightRight = new BSTNode(100, 'd', null, null, 4),
+            childRightLeft = new BSTNode(60, 'e', null, null, 5),
+            childRight = new BSTNode(75, 'c', childRightLeft, childRightRight, 3),
+            childLeftRight = new BSTNode(35, 'f', null, null, 6),
+            childLeftLeft = new BSTNode(0, 'g', null, null, 7),
+            childLeft = new BSTNode(25, 'b', childLeftLeft, childLeftRight, 2),
+            rootNode = new BSTNode(50, 'root', childLeft, childRight, 1),
+            bst = new BSTree(null, rootNode),
+            chainedResult = bst.remove(50).remove(75).remove(35);
+
+        xdescribe('resulting tree', () => {
+
+          it('returns a new tree', () => {
+            expect(chainedResult).toEqual(jasmine.any(BSTree));
+          });
+
+          it('has correct max node', () => {
+            expect(chainedResult.max.key).toBe(100);
+          });
+
+          it('has correct min node', () => {
+            expect(chainedResult.min.key).toBe(0);
+          });
+
+        });
+
+        xdescribe('root node of chained tree', () => {
+
+          it('has the correct id', () => {
+            expect(chainedResult.root.id).toBe(2);
+          });
+
+          it('has the correct key', () => {
+            expect(chainedResult.root.key).toBe(25);
+          });
+
+          it('has the correct value', () => {
+            expect(chainedResult.root.value).toBe('b');
+          });
+
+          it('has the correct left and right nodes', () => {
+            expect(chainedResult.root.left).toBe(childLeftLeft);
+            expect(chainedResult.root.right.key).toBe(60);
+            expect(chainedResult.root.right.right.key).toBe(100);
+          });
+
+        });
+
+      });
+
+      xdescribe('removal operation immutability', () => {
+
+        it('does not mutate tree', () => {
+          let rootNode = new BSTNode(50, 'root', null, null, 1),
+              bst = new BSTree(null, rootNode);
+          bst.remove(50);
+          expect(bst.size).toBe(1);
+        });
+
+        it('does not mutate nodes', () => {
+          let target = new BSTNode(2, 'b', null, null, 2)
+              node = new BSTNode(1, 'a', null, target, 1),
+              bst = new BSTree(null, node);
+          bst.remove(2);
+          expect(node.right).toBe(target);
+        });
+
       });
 
     });
