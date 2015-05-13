@@ -1,10 +1,10 @@
 jest.autoMockOff();
 var IM = require('immutable'),
-    SLinkedList = require('../../../src/lists/LList');
+    LList = require('../../../src/lists/LList');
 
-describe('SLinkedList', () => {
+describe('LList', () => {
   describe('new instance initialization', () => {
-    let sLLEmpty = new SLinkedList();
+    let sLLEmpty = new LList();
 
     it('starts with a null head', () => {
       expect(sLLEmpty.head).toBeNull();
@@ -14,20 +14,25 @@ describe('SLinkedList', () => {
       expect(sLLEmpty.tail).toBeNull();
     });
 
-    it('starts with an empty _lzStore', () => {
+    it('starts with 0 size', () => {
       expect(sLLEmpty.size).toBe(0);
     });
 
+    it('returns true for empty size', function() {
+      expect(sLLEmpty.isEmpty()).toBeTruthy();
+    });
+
     it('stores a number on initialization', () => {
-      let sLLNumber = new SLinkedList(1);
+      let sLLNumber = new LList(1);
       expect(sLLNumber.size).toBe(1);
+      expect(sLLNumber.isEmpty()).toBeFalsy();
       expect(sLLNumber.head.data).toEqual(1);
       expect(sLLNumber.head.next).toBeNull();
       expect(sLLNumber.tail.data).toEqual(1);
     });
 
     it('stores a string on initialization', () => {
-      let sLLString = new SLinkedList('string value');
+      let sLLString = new LList('string value');
       expect(sLLString.size).toBe(1);
       expect(sLLString.head.next).toBeNull();
       expect(sLLString.head.data).toEqual('string value');
@@ -37,7 +42,7 @@ describe('SLinkedList', () => {
     });
 
     it('stores an object on initialization', () => {
-      let sLLObject = new SLinkedList({ name: 'clark' });
+      let sLLObject = new LList({ name: 'clark' });
       expect(sLLObject.size).toBe(1);
       expect(sLLObject.head.next).toBeNull();
       expect(sLLObject.tail.next).toBeNull();
@@ -46,7 +51,7 @@ describe('SLinkedList', () => {
     });
 
     it('stores an array on initialization', () => {
-      let sLLArray = new SLinkedList([
+      let sLLArray = new LList([
           'random string', 
           {'asdfasdf':'asdf'}, 
           { name: 'anna' }, 
@@ -63,7 +68,7 @@ describe('SLinkedList', () => {
     });
 
     it('contains immutable nodes', () => {
-      let sLLNumber = new SLinkedList(1);
+      let sLLNumber = new LList(1);
       let changeSomething = () =>{
         sLLNumber.head.data = 2;
       }
@@ -73,8 +78,8 @@ describe('SLinkedList', () => {
   });
 
   describe('public interface instance methods', () => {
-    let sLLNumber = new SLinkedList(1);
-    let sLLArray = new SLinkedList([
+    let sLLNumber = new LList(1);
+    let sLLArray = new LList([
         'random string', 
         {'asdfasdf':'asdf'}, 
         { name: 'anna' },
@@ -202,13 +207,11 @@ describe('SLinkedList', () => {
     });
 
     describe('functional methods', () => {
-
         describe('reverse', () => {
           it('reverses', () =>{
             expect(sLLArray.reverse().head.data['name']).toEqual('anna');
           });
         });  
     });
-
   });
 });

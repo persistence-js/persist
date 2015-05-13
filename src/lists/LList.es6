@@ -24,6 +24,11 @@ export default class LList {
       this.size = this.size + options.oldSize;
     }
 
+    if (options.circular){
+      this.tail.next = this.head;
+      this.circular = options.circular;      
+    }
+
     this.forEach(Object.freeze);
     Object.freeze(this);
   }
@@ -33,8 +38,13 @@ export default class LList {
    * @return {[Node]} [last node in the linked list, null if list is empty]
    */
   get tail() {
-    let pointsAtNull = (element) => { return element.next === null}
-    return (this.size < 1) ? null : this.filter(pointsAtNull)[0];
+    let pointsAt = (point) => { 
+      return (element) => {
+        return element.next === point;
+      }
+    }
+    let sentinel = (this.circular) ? this.head : null;
+    return (this.size < 1) ? null : this.filter(pointsAt(sentinel))[0];
   }
 
   /**
@@ -45,11 +55,19 @@ export default class LList {
    */
   prepend(toPre = []) {
     let opts = { 
-      circular  : false,
+      circular  : this.circular,
       prependTo : this.head, 
       oldSize   : this.size,
     };
 
+    //If circular, can't use tail-sharing.
+    if (this.circular){
+      toPre = LList.convertToSeq(toPre);
+      return new LList(toPre.concat(this.map(LList.getData)).toArray(), 
+        { circular: this.circular });
+    }
+
+    //Else, prepend in O(1);
     return (
       LList.isNode(toPre) ? new LList(LList.getData(toPre), opts) : 
       LList.isLList(toPre) ? new LList(toPre.map(LList.getData), opts) : 
@@ -65,13 +83,14 @@ export default class LList {
    * @return {[type]}       [description]
    */
   append(toApp) {
+    let opts = { circular : this.circular,}
     return (
       new LList(
         this.map(LList.getData).concat(
           LList.isNode(toApp) ? LList.getData(toApp) : 
           LList.isLList(toApp) ? toApp.map(LList.getData) : 
           LList.convertToSeq(toApp).toArray()
-        )
+        ), opts
       )
     );
   }
@@ -85,7 +104,7 @@ export default class LList {
     let reversed = [];
     let unShiftToList = (element) => { reversed.unshift(element)}
     this.map(LList.getData).forEach(unShiftToList);
-    return new LList(reversed);
+    return new LList(reversed, { circular: this.circular });
   }
 
   /**
@@ -97,7 +116,8 @@ export default class LList {
     let notFirst = (node) => {
       return (node !==  this.head);
     }
-    return new LList(this.filter(notFirst).map(LList.getData));
+    return new LList(this.filter(notFirst).map(LList.getData),
+     { circular: this.circular });
   }
 
   /**
@@ -108,15 +128,18 @@ export default class LList {
     let notLast = (node) => {
       return (node !== this.tail)
     }
-    return new LList(this.filter(notLast).map(LList.getData));
+    return new LList(this.filter(notLast).map(LList.getData),
+     { circular: this.circular });
   }
-
+  
   //Functional helper methods
   forEach(cb) {
     let current = this.head;
     while (current !== null){
       cb(current);
       current = current.next;
+      //for circular lists:
+      if (current === this.head){ break;}
     }
   }
 
@@ -135,6 +158,10 @@ export default class LList {
       }
     });
     return filtered;
+  }
+
+  isEmpty() {
+    return (this.size <= 0);
   }
 
   /**
