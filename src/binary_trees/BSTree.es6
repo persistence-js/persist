@@ -60,19 +60,15 @@ export default class BSTree {
     if (!key) return this;
 
     if (!this.size) {
-      let newNode = new BSTNode(key, value, null, null, 1);
-      return new BSTree(this.comparator, newNode, 1);
+      return new BSTree(this.comparator, new BSTNode(key, value, null, null, 1), 1);
     }
 
     let finalTree,
         searchArgs = [],
         [node, ancestors] = BSTree.recursiveSearch(this.comparator, this.root, key);
 
-    if (node) {
-      node = new BSTNode(node._store.set('_value', value));
-    } else {
-      node = new BSTNode(key, value, null, null, this.size + 1);
-    }
+    node = node ? new BSTNode(node._store.set('_value', value)) :
+                  new BSTNode(key, value, null, null, this.size + 1);
 
     // reconstruct tree from leaf node
     while (ancestors.length) {
