@@ -8,8 +8,8 @@ describe('BSTree', () => {
 
   describe('Instantiation', () => {
     let bst = new BSTree(),
-        node = new BSTNode(0, 'first node value', null, null, 1),
-        bstWithNode = new BSTree(null, node);
+        _node = new BSTNode(0, 'first node value', null, null, 1),
+        bstWithNode = new BSTree(null, _node);
 
     it('instantiates empty, checks size', () => {
       expect(bst.size).toBe(0);
@@ -36,7 +36,7 @@ describe('BSTree', () => {
 
     describe('#insert', () => {
 
-      xdescribe('empty trees', () => {
+      describe('empty trees', () => {
         let bst = new BSTree();
 
         it('returns current tree when no args', () => {
@@ -48,14 +48,14 @@ describe('BSTree', () => {
         });
 
         it('returns a tree with the correct root node', () => {
-          let node = bst.insert(2, 'val').root;
-          expect(node.key).toBe(2);
-          expect(node.value).toBe('val');
+          let _node = bst.insert(2, 'val').root;
+          expect(_node.key).toBe(2);
+          expect(_node.value).toBe('val');
         });
 
       })
 
-      xdescribe('nonempty trees', () => {
+      describe('nonempty trees', () => {
         let rootNode = new BSTNode(1, 'hi', null, null, 1),
             bst = new BSTree(null, rootNode);
 
@@ -63,86 +63,83 @@ describe('BSTree', () => {
           expect(bst.insert(2, 'a')).toEqual(jasmine.any(BSTree));
         });
 
-        xdescribe('root node', () => {
+        describe('root node', () => {
           let newTree1 = bst.insert(8, 'string');
 
           it('has correct id', () => {
-            expect(newTree1.root.id).toBe(2);
+            expect(newTree1.root.id).toBe(1);
           });
 
           it('has correct key', () => {
-            expect(newTree1.root.key).toBe(8);
+            expect(newTree1.root.key).toBe(1);
           });
 
           it('has correct value', () => {
-            expect(newTree1.root.value).toBe('string');
+            expect(newTree1.root.value).toBe('hi');
           });
 
           it('has correct right child', () => {
-            expect(newTree1.root.right).toBeNull();
+            expect(newTree1.root.right).toEqual(new BSTNode(8, 'string', null, null, 2));
           });
 
           it('has correct left child', () => {
-            expect(newTree1.root.left).toBe(rootNode);
+            expect(newTree1.root.left).toBeNull();
           });
 
         });
 
       });
 
-      xdescribe('chained insertion', () => {
+      describe('chained insertion', () => {
         let rootNode = new BSTNode(50, 'hi', null, null, 1),
             bst = new BSTree(undefined, rootNode),
-            node1 = new BSTNode(25, 'a', null, null, 2),
-            node2 = new BSTNode(75, 'b', null, null, 3),
-            node3 = new BSTNode(95, 'c', null, null, 4),
-            chainedResult = bst.insert(node1).insert(node2).insert(node3);
+            chainedResult = bst.insert(25, 'a').insert(75, 'b').insert(95, 'c');
 
-        xdescribe('resulting tree', () => {
+        describe('resulting tree', () => {
 
           it('returns a new tree', () => {
             expect(chainedResult).toEqual(jasmine.any(BSTree));
           });
 
           it('has correct max node', () => {
-            expect(chainedResult.max).toBe(node3);
+            expect(chainedResult.max.key).toBe(95);
           });
 
           it('has correct min node', () => {
-            expect(chainedResult.min).toBe(node1);
+            expect(chainedResult.min.key).toBe(25);
           });
 
         });
 
-        xdescribe('root node of chained tree', () => {
+        describe('root node of chained tree', () => {
 
           it('has the correct id', () => {
             expect(chainedResult.root.id).toBe(1);
           });
 
           it('has the correct key', () => {
-            expect(chainedResult.root.left).toBe(50);
+            expect(chainedResult.root.key).toBe(50);
           });
 
           it('has the correct value', () => {
-            expect(chainedResult.root.left).toBe('hi');
+            expect(chainedResult.root.value).toBe('hi');
           });
 
           it('has the correct left and right nodes', () => {
-            expect(chainedResult.root.left).toBe(node1);
-            expect(chainedResult.root.right).toBe(node2);
+            expect(chainedResult.root.left.key).toBe(25);
+            expect(chainedResult.root.right.key).toBe(75);
           });
 
         });
 
       });
 
-      xdescribe('insertion operation immutability', () => {
+      describe('insertion operation immutability', () => {
 
         it('does not mutate tree', () => {
           let bst = new BSTree();
           bst.insert(1, 'a');
-          expect(bst.size).toEqual(0);
+          expect(bst.size).toBe(0);
         });
 
         it('does not mutate nodes', () => {
