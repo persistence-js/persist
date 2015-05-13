@@ -5,14 +5,13 @@ const BSTNode = require('./BSTNode');
 
 export default class BSTree {
 
-  constructor(comparator, _root, _count) {
+  constructor(comparator, _root) {
     this._comparator = BSTree.setComparator(comparator);
+    this._root = null;
+    this._count = 0;
     if (BSTree.isBSTNode(_root)) {
       this._root = BSTree.cloneNode(_root);
-      this._count = this._root.id;
-    } else {
-      this._root = null;
-      this._count = 0;
+      this._count = BSTree.recount(_root);
     }
     Object.freeze(this);
   }
@@ -140,6 +139,12 @@ export default class BSTree {
     return new BSTNode(node.key, node.value, node.left, node.right, node.id);
   }
 
+  static recount(_root) {
+    let count = 0;
+    BSTree.traverseInOrder(_root, () => count++);
+    return count;
+  }
+
   // returns node or null
   static findInOrderPredecessor() {
 
@@ -176,10 +181,10 @@ export default class BSTree {
     if (!node) return [null, ancestorStack];
     let comparisons = comparator(node.key, key);
     if (comparisons === -1) {
-      ancestorStack.push(['R', node])
+      ancestorStack.push(['_right', node])
       return BSTree.recursiveSearch(comparator, node.right, key, ancestorStack);
     } else if (comparisons === 1) {
-      ancestorStack.push(['L', node])
+      ancestorStack.push(['_left', node])
       return BSTree.recursiveSearch(comparator, node.left, key, ancestorStack);
     } else {
       return [node, ancestorStack];
