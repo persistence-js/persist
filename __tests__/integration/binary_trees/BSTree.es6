@@ -155,6 +155,81 @@ describe('BSTree', () => {
 
     xdescribe('#remove', () => {
 
+      xdescribe('empty trees', () => {
+        let bst = new BSTree();
+
+        it('returns current tree when no args', () => {
+          expect(bst.remove()).toEqual(bst);
+        });
+
+        it('returns current tree when args', () => {
+          expect(bst.remove(2)).toEqual(bst);
+        });
+
+      })
+
+      xdescribe('nonempty trees', () => {
+
+        it('returns a new tree', () => {
+          let rootNode = new BSTNode(1, 'hi', null, null, 1),
+              bst = new BSTree(null, rootNode);
+          expect(bst.remove(1)).toEqual(jasmine.any(BSTree));
+        });
+
+        xdescribe('root node', () => {
+          let minNode = new BSTNode(0, 'min', null, null, 4),
+              rootRight = new BSTNode(75, 'max', null, null, 2),
+              rootLeft = new BSTNode(25, 'c', minNode, null, 3),
+              rootNode = new BSTNode(50, 'a', rootLeft, rootRight, 1),
+              bst = new BSTree(null, rootNode),
+              newTreeRoot = bst.remove(25).root;
+
+          it('has correct left child', () => {
+            expect(newTreeRoot.left).toBe(minNode);
+          });
+
+        });
+
+      });
+
+      xdescribe('target node with no children', () => {
+        let target = new BSTNode(1, 'remove me', null, null, 1),
+            parent = new BSTNode(99, 'reset my children', target, null, 2),
+            bst = new BSTree(null, parent);
+
+        it('sets parent node side to null', () => {
+          expect(bst.remove(1).root.left).toBeNull();
+        });
+
+      });
+
+      xdescribe('target node with one child', () => {
+        let child = new BSTNode(99, 'reset my position to root', null, null, 1),
+            targetLeft = new BSTNode(1, 'remove me', child, null, 2),
+            targetRight = new BSTNode(1, 'remove me', null, child, 2),
+            bstLeft = new BSTree(null, targetLeft),
+            bstRight = new BSTree(null, targetRight);
+
+        it('left child', () => {
+          expect(bstLeft.remove(1).root).toEqual(child);
+        });
+
+        it('right child', () => {
+          expect(bstRight.remove(1).root).toEqual(child);
+        });
+
+      });
+
+      xdescribe('target node with two children', () => {
+        let childLeft = new BSTNode(1, 'reset my position', null, null, 2),
+            childRight = new BSTNode(9, 'reset my position', null, null, 3),
+            target = new BSTNode(5, 'remove me', childLeft, childRight, 1),
+            bst = new BSTree(null, target);
+
+        // no right children of left child case
+        // > 0 right children of left child case
+      });
+
     });
 
     describe('#find', () => {
