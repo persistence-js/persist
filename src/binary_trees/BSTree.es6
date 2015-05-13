@@ -63,17 +63,25 @@ export default class BSTree {
       let newNode = new BSTNode(key, value, null, null, 1);
       return new BSTree(this.comparator, newNode, 1);
     }
+
     let finalTree,
         searchArgs = [],
-        BSTSearch = BSTree.recursiveSearch,
-        [node, ancestors] = BSTSearch(this.comparator, this.root, key);
+        [node, ancestors] = BSTree.recursiveSearch(this.comparator, this.root, key);
 
-    // reconstruct 'new' tree from leaf node
-    let parentNode = ancestors.pop();
-
-    if (selfBalance) {
-      return this.balanceTree();
+    if (node) {
+      node = new BSTNode(node._store.set('_value', value));
+    } else {
+      node = new BSTNode(key, value, null, null, this.size + 1);
     }
+
+    // reconstruct tree from leaf node
+    while (ancestors.length) {
+      let [childSide, parentNode] = ancestors.pop();
+      node = new BSTNode(parentNode._store.set(childSide, node));
+    }
+
+    finalTree = new BSTree(this.comparator, node);
+    return selfBalance ? this.balanceTree(finalTree) : finalTree;
   }
 
   // returns a new BST post removal of node with matching key
