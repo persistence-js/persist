@@ -1,6 +1,7 @@
 import 'core-js/shim';
 let IM = require('immutable');
 
+
 export default class LList {
   /**
    * Accepts items and list-like objects.
@@ -26,7 +27,7 @@ export default class LList {
 
     if (options.circular){
       this.tail.next = this.head;
-      this.circular = options.circular;      
+      this.circular = options.circular;
     }
 
     this.forEach(Object.freeze);
@@ -38,7 +39,7 @@ export default class LList {
    * @return {[Node]} [last node in the linked list, null if list is empty]
    */
   get tail() {
-    let pointsAt = (point) => { 
+    let pointsAt = (point) => {
       return (element) => {
         return element.next === point;
       }
@@ -54,23 +55,23 @@ export default class LList {
    * @return {[type]}           [description]
    */
   prepend(toPre = []) {
-    let opts = { 
+    let opts = {
       circular  : this.circular,
-      prependTo : this.head, 
+      prependTo : this.head,
       oldSize   : this.size,
     };
 
     //If circular, can't use tail-sharing.
     if (this.circular){
       toPre = LList.convertToSeq(toPre);
-      return new LList(toPre.concat(this.map(LList.getData)).toArray(), 
+      return new LList(toPre.concat(this.map(LList.getData)).toArray(),
         { circular: this.circular });
     }
 
     //Else, prepend in O(1);
     return (
-      LList.isNode(toPre) ? new LList(LList.getData(toPre), opts) : 
-      LList.isLList(toPre) ? new LList(toPre.map(LList.getData), opts) : 
+      LList.isNode(toPre) ? new LList(LList.getData(toPre), opts) :
+      LList.isLList(toPre) ? new LList(toPre.map(LList.getData), opts) :
       new LList(toPre, opts)
     );
 
@@ -87,8 +88,8 @@ export default class LList {
     return (
       new LList(
         this.map(LList.getData).concat(
-          LList.isNode(toApp) ? LList.getData(toApp) : 
-          LList.isLList(toApp) ? toApp.map(LList.getData) : 
+          LList.isNode(toApp) ? LList.getData(toApp) :
+          LList.isLList(toApp) ? toApp.map(LList.getData) :
           LList.convertToSeq(toApp).toArray()
         ), opts
       )
@@ -131,7 +132,7 @@ export default class LList {
     return new LList(this.filter(notLast).map(LList.getData),
      { circular: this.circular });
   }
-  
+
   //Functional helper methods
   forEach(cb) {
     let current = this.head;
@@ -174,7 +175,7 @@ export default class LList {
    */
   static makeNode(data, next) {
     let node = {
-      data: data, 
+      data: data,
       next: next,
     };
     node[LList._LLNODE_SENTINEL_()] = true;
@@ -182,19 +183,19 @@ export default class LList {
   }
 
   static makeHead(seq) {
-    if (seq === null || seq.size === 0) { 
-      return null; 
+    if (seq === null || seq.size === 0) {
+      return null;
     } else {
       let rest = seq.rest();
       rest = (rest.size === 0) ? null : rest;
       return LList.makeNode(seq.first(), LList.makeHead(rest));
-    } 
+    }
   }
 
   //Extracts data from Nodes
   static getData(node) {
     return (
-      (LList.isNode(node)) ? node.data : 
+      (LList.isNode(node)) ? node.data :
       new Error('getData only accepts nodes.')
     );
   }

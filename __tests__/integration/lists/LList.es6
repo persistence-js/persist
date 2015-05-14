@@ -2,6 +2,7 @@ jest.autoMockOff();
 var IM = require('immutable'),
     LList = require('../../../src/lists/LList');
 
+
 describe('LList', () => {
   describe('new instance initialization', () => {
     let sLLEmpty = new LList();
