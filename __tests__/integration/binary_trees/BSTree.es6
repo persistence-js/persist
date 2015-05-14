@@ -39,8 +39,8 @@ describe('BSTree', () => {
       describe('empty trees', () => {
         let bst = new BSTree();
 
-        it('returns current tree when no args', () => {
-          expect(bst.insert()).toBe(bst);
+        it('returns clone of current tree when no args', () => {
+          expect(bst.insert()).toEqual(bst);
         });
 
         it('returns new tree for simple insert into empty tree', () => {
@@ -151,11 +151,40 @@ describe('BSTree', () => {
 
       });
 
+      describe('insertion self-balancing', () => {
+        let left = new BSTNode(0, 'b', null, null, 2),
+            rightLeft = new BSTNode(5, 'd', null, null, 4),
+            right = new BSTNode(10, 'c', rightLeft, null, 3),
+            node = new BSTNode(1, 'a', left, right, 1),
+            bst = new BSTree(null, node),
+            balanced = bst.insert(100, 'max', true);
+
+        it('maintains size while balancing', () => {
+          expect(balanced.size).toBe(bst.size + 1);
+        });
+
+        it('balances on mid-key', () => {
+          expect(balanced.root.key).toBe(5);
+        });
+
+        it('balances left of mid-key', () => {
+          expect(balanced.root.left.key).toBe(1);
+          expect(balanced.root.left.left.key).toBe(0);
+          expect(balanced.root.left.right).toBeNull();
+        });
+
+        it('balances right of mid-key', () => {
+          expect(balanced.root.right.key).toBe(10);
+          expect(balanced.root.right.left).toBeNull();
+          expect(balanced.root.right.right.key).toBe(100);
+        });
+      });
+
     });
 
     describe('#remove', () => {
 
-      xdescribe('empty trees', () => {
+      describe('empty trees', () => {
         let bst = new BSTree();
 
         it('returns current tree when no args', () => {
@@ -168,7 +197,7 @@ describe('BSTree', () => {
 
       })
 
-      xdescribe('nonempty trees', () => {
+      describe('nonempty trees', () => {
 
         it('returns a new tree', () => {
           let rootNode = new BSTNode(1, 'hi', null, null, 1),
@@ -176,7 +205,7 @@ describe('BSTree', () => {
           expect(bst.remove(1)).toEqual(jasmine.any(BSTree));
         });
 
-        xdescribe('root node', () => {
+        describe('root node', () => {
           let minNode = new BSTNode(0, 'min', null, null, 4),
               rootRight = new BSTNode(75, 'max', null, null, 2),
               rootLeft = new BSTNode(25, 'c', minNode, null, 3),
@@ -188,11 +217,16 @@ describe('BSTree', () => {
             expect(newTreeRoot.left).toBe(minNode);
           });
 
+
+          it('has correct right child', () => {
+            expect(newTreeRoot.right).toBe(rootRight);
+          });
+
         });
 
       });
 
-      xdescribe('target node with no children', () => {
+      describe('target node with no children', () => {
         let target = new BSTNode(1, 'remove me', null, null, 1),
             parent = new BSTNode(99, 'reset my children', target, null, 2),
             bst = new BSTree(null, parent);
@@ -203,26 +237,43 @@ describe('BSTree', () => {
 
       });
 
-      xdescribe('target node with one child', () => {
-        let child = new BSTNode(99, 'reset my position to root', null, null, 1),
-            targetLeft = new BSTNode(1, 'remove me', child, null, 2),
-            targetRight = new BSTNode(1, 'remove me', null, child, 2),
-            bstLeft = new BSTree(null, targetLeft),
-            bstRight = new BSTree(null, targetRight);
+      describe('target node with one child', () => {
 
-        it('left child', () => {
-          expect(bstLeft.remove(1).root).toEqual(child);
+        describe('no ancestor', () => {
+          let childL = new BSTNode(0, 'reset my position to root', null, null, 1),
+              childR = new BSTNode(99, 'reset my position to root', null, null, 1),
+              targetLeft = new BSTNode(1, 'remove me', childL, null, 2),
+              targetRight = new BSTNode(1, 'remove me', null, childR, 2),
+              bstLeft = new BSTree(null, targetLeft),
+              bstRight = new BSTree(null, targetRight);
+
+          it('left child', () => {
+            expect(bstLeft.remove(1).root).toEqual(childL);
+          });
+
+          it('right child', () => {
+            expect(bstRight.remove(1).root).toEqual(childR);
+          });
+
         });
 
-        it('right child', () => {
-          expect(bstRight.remove(1).root).toEqual(child);
+        describe('ancestor', () => {
+          let child = new BSTNode(-99, 'b', null, null, 3),
+              target = new BSTNode(0, 'remove me', child, null, 2),
+              _root = new BSTNode(1, 'a', target, null, 1),
+              bst = new BSTree(null, _root);
+
+          it('promotes child and updates child of ancestor', () => {
+            expect(bst.remove(0).root.left).toEqual(child);
+          });
+
         });
 
       });
 
-      xdescribe('target node with two children', () => {
+      describe('target node with two children', () => {
 
-        xdescribe('left child of target has 0 right children', () => {
+        describe('left child of target has 0 right children', () => {
           let childLeft = new BSTNode(1, 'reset my position', null, null, 2),
               childRight = new BSTNode(9, 'reset my position', null, null, 3),
               target = new BSTNode(5, 'remove me', childLeft, childRight, 1),
@@ -230,7 +281,9 @@ describe('BSTree', () => {
 
           it('repositions left child', () => {
             // assuming rearrangement based on in-order predecessor swap
-            expect(bst.remove(5).root.key).toBe(1);
+            let _root = bst.remove(5).root;
+            expect(_root.key).toBe(1);
+            expect(_root.left).toBeNull();
           });
 
           it('repositions right child', () => {
@@ -240,7 +293,7 @@ describe('BSTree', () => {
 
         });
 
-        xdescribe('left child of target has > 0 right children', () => {
+        describe('left child of target has > 0 right children', () => {
           let inOrderPredChild = new BSTNode(3, 'swap me with target', null, null, 4),
               childLeft = new BSTNode(1, 'reset my position', null, inOrderPredChild, 2),
               childRight = new BSTNode(9, 'reset my position', null, null, 3),
@@ -266,7 +319,7 @@ describe('BSTree', () => {
 
       });
 
-      xdescribe('chained removal', () => {
+      describe('chained removal', () => {
         let childRightRight = new BSTNode(100, 'd', null, null, 4),
             childRightLeft = new BSTNode(60, 'e', null, null, 5),
             childRight = new BSTNode(75, 'c', childRightLeft, childRightRight, 3),
@@ -277,7 +330,7 @@ describe('BSTree', () => {
             bst = new BSTree(null, rootNode),
             chainedResult = bst.remove(50).remove(75).remove(35);
 
-        xdescribe('resulting tree', () => {
+        describe('resulting tree', () => {
 
           it('returns a new tree', () => {
             expect(chainedResult).toEqual(jasmine.any(BSTree));
@@ -293,7 +346,7 @@ describe('BSTree', () => {
 
         });
 
-        xdescribe('root node of chained tree', () => {
+        describe('root node of chained tree', () => {
 
           it('has the correct id', () => {
             expect(chainedResult.root.id).toBe(2);
@@ -310,6 +363,7 @@ describe('BSTree', () => {
           it('has the correct left and right nodes', () => {
             expect(chainedResult.root.left).toBe(childLeftLeft);
             expect(chainedResult.root.right.key).toBe(60);
+            expect(chainedResult.root.right.left).toBeNull();
             expect(chainedResult.root.right.right.key).toBe(100);
           });
 
@@ -317,7 +371,7 @@ describe('BSTree', () => {
 
       });
 
-      xdescribe('removal operation immutability', () => {
+      describe('removal operation immutability', () => {
 
         it('does not mutate tree', () => {
           let rootNode = new BSTNode(50, 'root', null, null, 1),
@@ -332,6 +386,36 @@ describe('BSTree', () => {
               bst = new BSTree(null, node);
           bst.remove(2);
           expect(node.right).toBe(target);
+        });
+
+      });
+
+      describe('removal self-balancing', () => {
+        let left = new BSTNode(0, 'b', null, null, 2),
+            rightLeft = new BSTNode(5, 'd', null, null, 4),
+            right = new BSTNode(10, 'c', rightLeft, null, 3),
+            node = new BSTNode(1, 'a', left, right, 1),
+            bst = new BSTree(null, node),
+            balanced = bst.remove(0, true);
+
+        it('maintains size while balancing', () => {
+          expect(balanced.size).toBe(bst.size - 1);
+        });
+
+        it('balances on mid-key', () => {
+          expect(balanced.root.key).toBe(5);
+        });
+
+        it('balances left of mid-key', () => {
+          expect(balanced.root.left.key).toBe(1);
+          expect(balanced.root.left.left).toBeNull();
+          expect(balanced.root.left.right).toBeNull();
+        });
+
+        it('balances right of mid-key', () => {
+          expect(balanced.root.right.key).toBe(10);
+          expect(balanced.root.right.left).toBeNull();
+          expect(balanced.root.right.right).toBeNull();
         });
 
       });
@@ -469,11 +553,23 @@ describe('BSTree', () => {
 
     });
 
-    xdescribe('#insertAll', () => {
+    describe('#insertAll', () => {
+      let pairs = [[1, 'a'], [2, 'b'], [5, 'root'], [100, 'max']],
+          bst = new BSTree(),
+          bstFull = bst.insertAll(pairs),
+          bstFullBalanced = bst.insertAll(pairs, true);
 
-    });
+      it('adds nodes to tree based on input order, balance false', () => {
+        expect(bstFull.root.key).toBe(1);
+        expect(bstFull.max.key).toBe(100);
+        expect(bstFull.min.key).toBe(1);
+      });
 
-    xdescribe('#balanceTree', () => {
+      it('adds nodes to tree in balanced order, balance true', () => {
+        expect(bstFullBalanced.root.key).toBe(5);
+        expect(bstFullBalanced.max.key).toBe(100);
+        expect(bstFullBalanced.min.key).toBe(1);
+      });
 
     });
 
@@ -481,7 +577,7 @@ describe('BSTree', () => {
 
   describe('Basic Getters', () => {
 
-    xdescribe('get size', () => {
+    describe('get size', () => {
 
       it('returns current number of nodes in tree', () => {
         let bst1 = new BSTree(),
