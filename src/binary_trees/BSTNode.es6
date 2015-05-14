@@ -37,4 +37,11 @@ export default class BSTNode {
     return this.store.get('_id');
   }
 
+  get children() {
+    let children = [];
+    if (this.left) children.push(['_left', this.left]);
+    if (this.right) children.push(['_right', this.right]);
+    return children;
+  }
+
 }

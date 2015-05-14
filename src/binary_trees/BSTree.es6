@@ -57,32 +57,28 @@ export default class BSTree {
 
   // returns a new BST with the key-value pair inserted
   insert(key, value, selfBalance = false) {
-    if (!key) return this;
-
-    if (!this.size) {
+    if (key === undefined) {
+      return this.clone();
+    } else if (!this.size) {
       return new BSTree(this.comparator, new BSTNode(key, value, null, null, 1), 1);
+    } else {
+      let finalTree, node, ancestors;
+      [node, ancestors] = BSTree.recursiveSearch(this.comparator, this.root, key);
+      node = node ? new BSTNode(node._store.set('_value', value)) :
+                    new BSTNode(key, value, null, null, this.size + 1);
+      finalTree = new BSTree(this.comparator, BSTree.constructFromLeaf(node, ancestors));
+      return selfBalance ? BSTree.balanceTree(finalTree) : finalTree;
     }
-
-    let finalTree,
-        searchArgs = [],
-        [node, ancestors] = BSTree.recursiveSearch(this.comparator, this.root, key);
-
-    node = node ? new BSTNode(node._store.set('_value', value)) :
-                  new BSTNode(key, value, null, null, this.size + 1);
-
-    // reconstruct tree from leaf node
-    while (ancestors.length) {
-      let [childSide, parentNode] = ancestors.pop();
-      node = new BSTNode(parentNode._store.set(childSide, node));
-    }
-
-    finalTree = new BSTree(this.comparator, node);
-    return selfBalance ? this.balanceTree(finalTree) : finalTree;
   }
 
   // returns a new BST post removal of node with matching key
-  remove(key) {
-
+  remove(key, selfBalance = false) {
+    let [node, ancestors] = BSTree.recursiveSearch(this.comparator, this.root, key);
+    if (!this.size || key === undefined || !node) {
+      return this.clone();
+    } else if (node) {
+      return BSTree.removeFound(this.comparator, node, ancestors, selfBalance);
+    }
   }
 
   // returns BSTNode or null
@@ -109,15 +105,16 @@ export default class BSTree {
   }
 
   // returns a new BST with the list's key-value pairs inserted
-  insertAll(listToInsert, selfBalance = false) {
-    // iterate list and insert each item into BST (mutative)
-      // if selfBalance, balance tree after each insertion
-    // return the new BST
+  insertAll(listToInsert = [], selfBalance = false) {
+    let resultTree = this;
+    listToInsert.forEach(pair => {
+      resultTree = resultTree.insert(pair[0], pair[1], selfBalance);
+    });
+    return resultTree;
   }
 
-  // returns a balanced BST
-  balanceTree() {
-
+  clone() {
+    return new BSTree(this.comparator, this.root);
   }
 
   // returns the given comparator or the default comparator function
@@ -149,14 +146,14 @@ export default class BSTree {
     return count;
   }
 
-  // returns node or null
-  static findInOrderPredecessor() {
-
-  }
-
-  // returns node or null
-  static findInOrderSuccessor() {
-
+  static findInOrderPredecessor(leftChild) {
+    let currentIop = leftChild,
+        ancestors = [];
+    while (currentIop.right) {
+      ancestors.push(['_right', currentIop]);
+      currentIop = currentIop.right;
+    }
+    return [ancestors, currentIop];
   }
 
   // recursively traverses tree nodes in-order and applies cb to each node
@@ -193,6 +190,92 @@ export default class BSTree {
     } else {
       return [node, ancestorStack];
     }
+  }
+
+  static removeNoChildren(node, ancestors) {
+    if (ancestors.length) {
+      let [childSide, parentNode] = ancestors.pop();
+      node = new BSTNode(parentNode._store.set(childSide, null));
+    }
+    return BSTree.constructFromLeaf(node, ancestors)
+  }
+
+  static removeOneChild(node, ancestors) {
+    let childNode = node.children[0][1];
+    if (!ancestors.length) {
+      return childNode;
+    } else {
+      let [childSide, parentNode] = ancestors.pop(),
+          leaf = new BSTNode(parentNode._store.set(childSide, childNode));
+      return BSTree.constructFromLeaf(leaf, ancestors);
+    }
+  }
+
+  static removeTwoChildren(comparator, node, ancestors, selfBalance = false) {
+    let [rightAncestors, iop] = BSTree.findInOrderPredecessor(node.left);
+    let iopReplacementStore = iop.store.withMutations(_store => {
+      _store.set('_key', node.key).set('_value', node.value).set('_id', node.id);
+    });
+    let targetReplacementStore = node.store.withMutations(_store => {
+      _store.set('_key', iop.key)
+            .set('_value', iop.value)
+            .set('_id', iop.id)
+            .set('_left', new BSTNode(iopReplacementStore));
+    });
+    let newIopNode = new BSTNode(targetReplacementStore);
+    ancestors = ancestors.concat([['_left', newIopNode]], rightAncestors);
+    return BSTree.removeFound(comparator, newIopNode.left, ancestors, selfBalance);
+  }
+
+  static removeFound(comparator, node, ancestors, selfBalance = false) {
+    let finalTree;
+    switch (node.children.length) {
+      case 1:
+        finalTree = new BSTree(comparator, BSTree.removeOneChild(node, ancestors));
+        break;
+      case 2:
+        finalTree = BSTree.removeTwoChildren(comparator, node, ancestors, selfBalance);
+        break;
+      default:
+        finalTree = new BSTree(comparator, BSTree.removeNoChildren(node, ancestors));
+        break;
+    }
+    return selfBalance ? BSTree.balanceTree(finalTree) : finalTree;
+  }
+
+  static constructFromLeaf(node, ancestors) {
+    while (ancestors.length) {
+      let [childSide, parentNode] = ancestors.pop();
+      node = new BSTNode(parentNode._store.set(childSide, node));
+    }
+    return node;
+  }
+
+  // returns a balanced BST
+  static balanceTree(tree) {
+    let mid = Math.floor(tree.size / 2),
+        keys = tree.keys,
+        values = tree.values,
+        midKey = keys[mid],
+        midValue = values[mid],
+        balanced = new BSTree(tree.comparator, new BSTNode(midKey, midValue, null, null, 1)),
+        left  = mid - 1,
+        right = mid + 1;
+    while (left >= 0 || right < tree.size) {
+      let leftKey = keys[left],
+          leftValue = values[left],
+          rightKey = keys[right],
+          rightValue = values[right];
+      if (leftKey !== undefined) {
+        balanced = balanced.insert(leftKey, leftValue);
+        left -= 1;
+      }
+      if (rightKey !== undefined) {
+        balanced = balanced.insert(rightKey, rightValue);
+        right += 1;
+      }
+    }
+    return balanced;
   }
 
 }
