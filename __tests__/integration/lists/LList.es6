@@ -51,19 +51,11 @@ describe('LList', () => {
     });
 
     it('stores an array on initialization', () => {
-<<<<<<< HEAD:__tests__/unit/lists/LList.es6
       let sLLArray = new LList([
-          'random string', 
-          {'asdfasdf':'asdf'}, 
-          { name: 'anna' }, 
-          26, 
-=======
-      let sLLArray = new SLinkedList([
           'random string',
           {'asdfasdf':'asdf'},
           { name: 'anna' },
           26,
->>>>>>> Fix rebase conflict of __tests__ dir structure:__tests__/integration/lists/LList.es6
           ['tail value'],
         ]);
       expect(sLLArray.size).toBe(5);
@@ -86,17 +78,10 @@ describe('LList', () => {
   });
 
   describe('public interface instance methods', () => {
-<<<<<<< HEAD:__tests__/unit/lists/LList.es6
     let sLLNumber = new LList(1);
     let sLLArray = new LList([
-        'random string', 
-        {'asdfasdf':'asdf'}, 
-=======
-    let sLLNumber = new SLinkedList(1);
-    let sLLArray = new SLinkedList([
         'random string',
         {'asdfasdf':'asdf'},
->>>>>>> Fix rebase conflict of __tests__ dir structure:__tests__/integration/lists/LList.es6
         { name: 'anna' },
       ]);
 
