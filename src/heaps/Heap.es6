@@ -1,6 +1,7 @@
 import 'core-js/shim';
 const IM = require('immutable');
 
+
 export default class Heap {
   /**
    * Heap constructor
@@ -30,12 +31,12 @@ export default class Heap {
   }
   //Returns a new Heap, with the new value inserted.
   push(value) {
-    let childIndex = this.storage.size; 
+    let childIndex = this.storage.size;
     let parentIndex = Heap.findParentWithChild(childIndex);
     let newStorage = this.storage.push(value);
     let finalStorageList = this.siftUp(parentIndex, childIndex, newStorage);
 
-    return new Heap(finalStorageList, this.isMaxHeap, this.comparator);    
+    return new Heap(finalStorageList, this.isMaxHeap, this.comparator);
   }
   /**
    * Returns a new Heap with the extracted value (max or min)
@@ -123,7 +124,7 @@ export default class Heap {
       }.bind(this);
       let parentIndex = indexToSift;
       let children = Heap.findChildrenWithParent(parentIndex, list);
-      while (!this.integrityCheck(parentIndex,children.left,finalList) 
+      while (!this.integrityCheck(parentIndex,children.left,finalList)
         || !this.integrityCheck(parentIndex,children.right,finalList)) {
         if        (children.left && children.right) {
           //must select correct child to switch:
@@ -182,13 +183,13 @@ export default class Heap {
       }
       if (a < b) {
         return -1;
-      } 
+      }
       return 0;
     }
   }
   integrityCheck(parentIndex, childIndex, list) {
     if (parentIndex === null || childIndex === null) {return true;}
-    let parentNode = list.get(parentIndex); 
+    let parentNode = list.get(parentIndex);
     let childNode = list.get(childIndex);
     let comparison = this.comparatorFunction(parentNode, childNode);
     if (this.isMaxHeap) {
@@ -215,7 +216,7 @@ export default class Heap {
     }
   }
   static findParentWithChild(childIndex) {
-    return (childIndex === 0) ? null : 
+    return (childIndex === 0) ? null :
     (childIndex % 2 === 0 ? childIndex / 2 - 1 : Math.floor(childIndex / 2));
   }
 }

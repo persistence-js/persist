@@ -1,5 +1,5 @@
 import 'core-js/shim';
-let IM = require('immutable');
+const IM = require('immutable');
 
 
 export default class LList {
