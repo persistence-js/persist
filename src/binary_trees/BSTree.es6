@@ -4,7 +4,14 @@ const BSTNode = require('./BSTNode');
 
 
 export default class BSTree {
-
+  /**
+   * Accepts optional custom comparator function for sorting keys,
+   * and optional BSTNode to use as root of new tree.
+   * If no comparator, default comparator with #sort interface will be used.
+   * @param {[Function]} comparator [must return 0, 1, or -1 to sort subtrees]
+   * @param {[BSTNode]} _root [optional root from which to construct tree]
+   * @constructor
+   */
   constructor(comparator, _root) {
     this._comparator = BSTree.setComparator(comparator);
     this._root = null;
@@ -16,46 +23,74 @@ export default class BSTree {
     Object.freeze(this);
   }
 
-  // returns the number of nodes in the tree
+  /**
+   * Get the number of nodes in the tree
+   * @return {[Number]} [count of all nodes]
+   */
   get size() {
     return this._count;
   }
 
-  // returns the key comparator for the tree
+  /**
+   * Get the key comparator function of the tree
+   * @return {[Function]} [custom comparator, default if no custom comparator]
+   */
   get comparator() {
     return this._comparator;
   }
 
-  // returns first node in sorted tree
+  /**
+   * Get the first node in tree
+   * @return {[BSTNode|null]} [root node, null if tree is empty]
+   */
   get root() {
     return this._root;
   }
 
-  // returns node with smallest key in tree or null
+  /**
+   * Get the node with the smallest key in tree in O(log n).
+   * @return {[BSTNode|null]} [min node, null if tree is empty]
+   */
   get min() {
     return BSTree.traverseSide('left', this);
   }
 
-  // returns node with largest key in tree or null
+  /**
+   * Get the node with the largest key in tree in O(log n).
+   * @return {[BSTNode|null]} [max node, null if tree is empty]
+   */
   get max() {
     return BSTree.traverseSide('right', this);
   }
 
-  // returns an array of all the keys in the tree
+  /**
+   * Get all of the keys in tree in an ordered array in O(n).
+   * @return {[Array]} [all the keys in the tree, ordered based on comparator]
+   */
   get keys() {
     let keys = [];
     this.forEach(node => keys.push(node.key));
     return keys;
   }
 
-  // returns an array of all the values in the tree
+  /**
+   * Get all of the values in tree in a key-ordered array in O(n).
+   * @return {[Array]} [all the values in the tree, ordered based on key comparison]
+   */
   get values() {
     let values = [];
     this.forEach(node => values.push(node.value));
     return values;
   }
 
-  // returns a new BST with the key-value pair inserted
+  /**
+   * Returns a new tree with the key and value inserted.
+   * Optional self-balancing after each insertion.
+   * @param {[*]} key [the key with which to store the value parameter]
+   * @param {[*]} value [the value to store with key parameter]
+   * @param {[Boolean]} selfBalance [optional flag to rebalance tree after insertion]
+   * @return {[BSTree]} [new BST with the key-value pair inserted]
+   */
   insert(key, value, selfBalance = false) {
     if (key === undefined) {
       return this.clone();
@@ -71,7 +106,14 @@ export default class BSTree {
     }
   }
 
-  // returns a new BST post removal of node with matching key
+  /**
+   * Returns a new tree with the given node removed. If the key is not found,
+   * returns a clone of current tree.
+   * Optional self-balancing after each removal.
+   * @param {[*]} key [the key of the node to remove]
+   * @param {[Boolean]} selfBalance [optional flag to rebalance tree after removal]
+   * @return {[BSTree]} [new BST with the given node removed]
+   */
   remove(key, selfBalance = false) {
     let [node, ancestors] = BSTree.recursiveSearch(this.comparator, this.root, key);
     if (!this.size || key === undefined || !node) {
@@ -81,30 +123,50 @@ export default class BSTree {
     }
   }
 
-  // returns BSTNode or null
-  // O(log n)
+  /**
+   * Get the node with the matching key in tree in O(log n).
+   * @param {[*]} key [the key of the node to find]
+   * @return {[BSTNode|null]} [found node, null if key not found]
+   */
   find(key) {
     return BSTree.recursiveSearch(this.comparator, this.root, key)[0];
   }
 
-  // returns value or null
+  /**
+   * Get the value of the node with the matching key in tree in O(log n).
+   * @param {[*]} key [the key of the value to get]
+   * @return {[*]} [value of found node, null if key not found]
+   */
   get(key) {
     let [search,] = BSTree.recursiveSearch(this.comparator, this.root, key);
     return !search ? null : search.value;
   }
 
-  // returns true or false
-  // O(n)
+  /**
+   * Check if there is a node with the matching value in tree in O(n).
+   * @param {[*]} value [the value of the node for which to search]
+   * @return {[Boolean]} [true if found, false if not found]
+   */
   contains(value) {
     return this.values.indexOf(value) > -1;
   }
 
-  // returns undefined, applies callback to nodes in-order
+  /**
+   * Apply the callback to each node in the tree, in-order.
+   * @param {[Function]} callback [recieves a BSTNode as input]
+   * @return {[undefined]} [side-effect function]
+   */
   forEach(callback) {
     BSTree.traverseInOrder(this.root, callback);
   }
 
-  // returns a new BST with the list's key-value pairs inserted
+  /**
+   * Returns a new tree with the list's key-value pairs inserted.
+   * Optional self-balancing after each insertion.
+   * @param {[Array]} listToInsert [an array of key-value tuples to insert]
+   * @param {[Boolean]} selfBalance [optional flag to rebalance tree after each insertion]
+   * @return {[BSTree]} [new BST with the all the key-value pairs inserted]
+   */
   insertAll(listToInsert = [], selfBalance = false) {
     let resultTree = this;
     listToInsert.forEach(pair => {
@@ -113,39 +175,70 @@ export default class BSTree {
     return resultTree;
   }
 
+  /**
+   * Clone the current tree.
+   * @return {[BSTree]} [new BST clone of current tree]
+   */
   clone() {
     return new BSTree(this.comparator, this.root);
   }
 
-  // returns the given comparator or the default comparator function
+  /**
+   * Returns the given comparator if acceptable, or the default comparator function.
+   * @param {[Function]} comparator [must return {1, 0, -1} when comparing two inputs]
+   * @return {[Function]} [custom comparator if given, default comparator otherwise]
+   */
   static setComparator(comparator) {
     let isComparator = !!comparator && typeof comparator === 'function';
     return isComparator ? comparator : BSTree.defaultComp;
   }
 
-  // based on default comparison criteria - returns -1, 1, or 0
+  /**
+   * Returns 1, 0, or -1 based on default comparison criteria.
+   * @param {[*]} keyA [the first key for comparison]
+   * @param {[*]} keyB [the second key for comparison]
+   * @return {[Number]} [-1 if keyA is smaller, 1 if keyA is bigger, 0 if the same]
+   */
   static defaultComp(keyA, keyB) {
     if (keyA < keyB) return -1;
     else if (keyA > keyB) return 1;
     else return 0;
   }
 
-  // returns true if maybe is a BSTNode
+  /**
+   * Checks if a given input is a BSTNode.
+   * @param {[*]} maybe [entity to check for BSTNode-ness]
+   * @return {[Boolean]} [true if maybe is a BSTNode, false otherwise]
+   */
   static isBSTNode(maybe) {
     return !!maybe && maybe.constructor === BSTNode;
   }
 
-  // returns new BSTNode clone of input node
+  /**
+   * Clone the input BSTNode.
+   * @param {[BSTNode]} node [node to clone]
+   * @return {[BSTNode]} [new BSTNode clone of input node]
+   */
   static cloneNode(node) {
     return new BSTNode(node.key, node.value, node.left, node.right, node.id);
   }
 
+  /**
+   * Returns the count of nodes present in _root input.
+   * @param {[BSTNode]} _root [the root to recount]
+   * @return {[Number]} [count of nodes in _root]
+   */
   static recount(_root) {
     let count = 0;
     BSTree.traverseInOrder(_root, () => count++);
     return count;
   }
 
+  /**
+   * Returns the ancestor nodes and in-order predecessor of the input node.
+   * @param {[BSTNode]} leftChild [node from which to start the search for IOP]
+   * @return {[Array]} [tuple containing a stack of ancestors and the IOP]
+   */
   static findInOrderPredecessor(leftChild) {
     let currentIop = leftChild,
         ancestors = [];
@@ -156,7 +249,13 @@ export default class BSTree {
     return [ancestors, currentIop];
   }
 
-  // recursively traverses tree nodes in-order and applies cb to each node
+  /**
+   * Apply the callback to each node, in-order.
+   * Recursive traversal, static version of #forEach
+   * @param {[BSTNode]} node [the root node from which to start traversal]
+   * @param {[Function]} callback [recieves a BSTNode as input]
+   * @return {[undefined]} [side-effect function]
+   */
   static traverseInOrder(node, cb) {
     if (!node) return;
     let left = node.left, right = node.right;
@@ -165,7 +264,10 @@ export default class BSTree {
     if (right) BSTree.traverseInOrder(right, cb);
   }
 
-  // returns the leaf BSTNode furthest down a given side, or null
+  /**
+   * Returns the leaf BSTNode furthest down a given side of tree in O(log n).
+   * @return {[BSTNode|null]} [max or min node, null if tree is empty]
+   */
   static traverseSide(side, tree) {
     let currentRoot = tree.root;
     if (!currentRoot) return null;
@@ -177,7 +279,15 @@ export default class BSTree {
     return currentRoot;
   }
 
-  // returns node with matching key or null
+  /**
+   * Returns tuple of the found node and a stack of ancestor nodes.
+   * Generic O(log n) recursive search of BSTree.
+   * @param {[Function]} comparator [must return {1, 0, -1} when comparing two inputs]
+   * @param {[BSTNode]} node [node from which to start the search]
+   * @param {[*]} key [the key used for search]
+   * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
+   * @return {[Array]} [tuple containing null or the found node, and a stack of ancestors]
+   */
   static recursiveSearch(comparator, node, key, ancestorStack = []) {
     if (!node) return [null, ancestorStack];
     let comparisons = comparator(node.key, key);
@@ -192,6 +302,13 @@ export default class BSTree {
     }
   }
 
+  /**
+   * Returns new root node with input node removed.
+   * Input node must have no children.
+   * @param {[BSTNode]} node [node from which to start the removal]
+   * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
+   * @return {[BSTNode]} [new root node constructed from tree with input node removed]
+   */
   static removeNoChildren(node, ancestors) {
     if (ancestors.length) {
       let [childSide, parentNode] = ancestors.pop();
@@ -200,6 +317,13 @@ export default class BSTree {
     return BSTree.constructFromLeaf(node, ancestors)
   }
 
+  /**
+   * Returns new root node with input node removed.
+   * Input node must have exactly one child.
+   * @param {[BSTNode]} node [node from which to start the removal]
+   * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
+   * @return {[BSTNode]} [new root node with input node removed and children repositioned]
+   */
   static removeOneChild(node, ancestors) {
     let childNode = node.children[0][1];
     if (!ancestors.length) {
@@ -211,6 +335,15 @@ export default class BSTree {
     }
   }
 
+  /**
+   * Returns new root node with input node removed.
+   * Input node must have exactly two children.
+   * @param {[Function]} comparator [must return {1, 0, -1} when comparing two inputs]
+   * @param {[BSTNode]} node [node from which to start the removal]
+   * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
+   * @param {[Boolean]} selfBalance [optional flag to rebalance root after removal]
+   * @return {[BSTNode]} [new root node with input node removed and children repositioned]
+   */
   static removeTwoChildren(comparator, node, ancestors, selfBalance = false) {
     let [rightAncestors, iop] = BSTree.findInOrderPredecessor(node.left);
     let iopReplacementStore = iop.store.withMutations(_store => {
@@ -227,6 +360,15 @@ export default class BSTree {
     return BSTree.removeFound(comparator, newIopNode.left, ancestors, selfBalance);
   }
 
+  /**
+   * Returns new root node with input node removed.
+   * Input node can have any number of children. Dispatches to correct removal method.
+   * @param {[Function]} comparator [must return {1, 0, -1} when comparing two inputs]
+   * @param {[BSTNode]} node [node from which to start the removal]
+   * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
+   * @param {[Boolean]} selfBalance [optional flag to rebalance root after removal]
+   * @return {[BSTNode]} [new root node with input node removed and children repositioned]
+   */
   static removeFound(comparator, node, ancestors, selfBalance = false) {
     let finalTree;
     switch (node.children.length) {
@@ -243,6 +385,12 @@ export default class BSTree {
     return selfBalance ? BSTree.balanceTree(finalTree) : finalTree;
   }
 
+  /**
+   * Returns new root node reconstructed from a leaf node and ancestors.
+   * @param {[BSTNode]} node [leaf node from which to start the construction]
+   * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
+   * @return {[BSTNode]} [new root node reconstructed from leaf and ancestors stack]
+   */
   static constructFromLeaf(node, ancestors) {
     while (ancestors.length) {
       let [childSide, parentNode] = ancestors.pop();
@@ -251,7 +399,11 @@ export default class BSTree {
     return node;
   }
 
-  // returns a balanced BST
+  /**
+   * Returns a new balanced BSTree based on input tree.
+   * @param {[BSTree]} tree [tree to balance]
+   * @return {[BSTree]} [new balanced tree]
+   */
   static balanceTree(tree) {
     let mid = Math.floor(tree.size / 2),
         keys = tree.keys,
