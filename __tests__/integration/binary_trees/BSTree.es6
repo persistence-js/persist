@@ -151,35 +151,6 @@ describe('BSTree', () => {
 
       });
 
-      describe('insertion self-balancing', () => {
-        let left = new BSTNode(0, 'b', null, null, 2),
-            rightLeft = new BSTNode(5, 'd', null, null, 4),
-            right = new BSTNode(10, 'c', rightLeft, null, 3),
-            node = new BSTNode(1, 'a', left, right, 1),
-            bst = new BSTree(null, node),
-            balanced = bst.insert(100, 'max', true);
-
-        it('maintains size while balancing', () => {
-          expect(balanced.size).toBe(bst.size + 1);
-        });
-
-        it('balances on mid-key', () => {
-          expect(balanced.root.key).toBe(5);
-        });
-
-        it('balances left of mid-key', () => {
-          expect(balanced.root.left.key).toBe(1);
-          expect(balanced.root.left.left.key).toBe(0);
-          expect(balanced.root.left.right).toBeNull();
-        });
-
-        it('balances right of mid-key', () => {
-          expect(balanced.root.right.key).toBe(10);
-          expect(balanced.root.right.left).toBeNull();
-          expect(balanced.root.right.right.key).toBe(100);
-        });
-      });
-
     });
 
     describe('#remove', () => {
@@ -390,36 +361,6 @@ describe('BSTree', () => {
 
       });
 
-      describe('removal self-balancing', () => {
-        let left = new BSTNode(0, 'b', null, null, 2),
-            rightLeft = new BSTNode(5, 'd', null, null, 4),
-            right = new BSTNode(10, 'c', rightLeft, null, 3),
-            node = new BSTNode(1, 'a', left, right, 1),
-            bst = new BSTree(null, node),
-            balanced = bst.remove(0, true);
-
-        it('maintains size while balancing', () => {
-          expect(balanced.size).toBe(bst.size - 1);
-        });
-
-        it('balances on mid-key', () => {
-          expect(balanced.root.key).toBe(5);
-        });
-
-        it('balances left of mid-key', () => {
-          expect(balanced.root.left.key).toBe(1);
-          expect(balanced.root.left.left).toBeNull();
-          expect(balanced.root.left.right).toBeNull();
-        });
-
-        it('balances right of mid-key', () => {
-          expect(balanced.root.right.key).toBe(10);
-          expect(balanced.root.right.left).toBeNull();
-          expect(balanced.root.right.right).toBeNull();
-        });
-
-      });
-
     });
 
     describe('#find', () => {
@@ -556,19 +497,12 @@ describe('BSTree', () => {
     describe('#insertAll', () => {
       let pairs = [[1, 'a'], [2, 'b'], [5, 'root'], [100, 'max']],
           bst = new BSTree(),
-          bstFull = bst.insertAll(pairs),
-          bstFullBalanced = bst.insertAll(pairs, true);
+          bstFull = bst.insertAll(pairs);
 
-      it('adds nodes to tree based on input order, balance false', () => {
+      it('adds nodes to tree based on input order', () => {
         expect(bstFull.root.key).toBe(1);
         expect(bstFull.max.key).toBe(100);
         expect(bstFull.min.key).toBe(1);
-      });
-
-      it('adds nodes to tree in balanced order, balance true', () => {
-        expect(bstFullBalanced.root.key).toBe(5);
-        expect(bstFullBalanced.max.key).toBe(100);
-        expect(bstFullBalanced.min.key).toBe(1);
       });
 
     });

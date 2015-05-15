@@ -85,41 +85,35 @@ export default class BSTree {
 
   /**
    * Returns a new tree with the key and value inserted.
-   * Optional self-balancing after each insertion.
    * @param {[*]} key [the key with which to store the value parameter]
    * @param {[*]} value [the value to store with key parameter]
-   * @param {[Boolean]} selfBalance [optional flag to rebalance tree after insertion]
    * @return {[BSTree]} [new BST with the key-value pair inserted]
    */
-  insert(key, value, selfBalance = false) {
+  insert(key, value) {
     if (key === undefined) {
       return this.clone();
     } else if (!this.size) {
       return new BSTree(this.comparator, new BSTNode(key, value, null, null, 1), 1);
     } else {
-      let finalTree, node, ancestors;
-      [node, ancestors] = BSTree.recursiveSearch(this.comparator, this.root, key);
+      let [node, ancestors] = BSTree.recursiveSearch(this.comparator, this.root, key);
       node = node ? new BSTNode(node._store.set('_value', value)) :
                     new BSTNode(key, value, null, null, this.size + 1);
-      finalTree = new BSTree(this.comparator, BSTree.constructFromLeaf(node, ancestors));
-      return selfBalance ? BSTree.balanceTree(finalTree) : finalTree;
+      return new BSTree(this.comparator, BSTree.constructFromLeaf(node, ancestors));
     }
   }
 
   /**
    * Returns a new tree with the given node removed. If the key is not found,
    * returns a clone of current tree.
-   * Optional self-balancing after each removal.
    * @param {[*]} key [the key of the node to remove]
-   * @param {[Boolean]} selfBalance [optional flag to rebalance tree after removal]
    * @return {[BSTree]} [new BST with the given node removed]
    */
-  remove(key, selfBalance = false) {
+  remove(key) {
     let [node, ancestors] = BSTree.recursiveSearch(this.comparator, this.root, key);
     if (!this.size || key === undefined || !node) {
       return this.clone();
     } else if (node) {
-      return BSTree.removeFound(this.comparator, node, ancestors, selfBalance);
+      return BSTree.removeFound(this.comparator, node, ancestors);
     }
   }
 
@@ -162,15 +156,13 @@ export default class BSTree {
 
   /**
    * Returns a new tree with the list's key-value pairs inserted.
-   * Optional self-balancing after each insertion.
    * @param {[Array]} listToInsert [an array of key-value tuples to insert]
-   * @param {[Boolean]} selfBalance [optional flag to rebalance tree after each insertion]
    * @return {[BSTree]} [new BST with the all the key-value pairs inserted]
    */
-  insertAll(listToInsert = [], selfBalance = false) {
+  insertAll(listToInsert = []) {
     let resultTree = this;
     listToInsert.forEach(pair => {
-      resultTree = resultTree.insert(pair[0], pair[1], selfBalance);
+      resultTree = resultTree.insert(pair[0], pair[1]);
     });
     return resultTree;
   }
@@ -341,10 +333,9 @@ export default class BSTree {
    * @param {[Function]} comparator [must return {1, 0, -1} when comparing two inputs]
    * @param {[BSTNode]} node [node from which to start the removal]
    * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
-   * @param {[Boolean]} selfBalance [optional flag to rebalance root after removal]
    * @return {[BSTNode]} [new root node with input node removed and children repositioned]
    */
-  static removeTwoChildren(comparator, node, ancestors, selfBalance = false) {
+  static removeTwoChildren(comparator, node, ancestors) {
     let [rightAncestors, iop] = BSTree.findInOrderPredecessor(node.left);
     let iopReplacementStore = iop.store.withMutations(_store => {
       _store.set('_key', node.key).set('_value', node.value).set('_id', node.id);
@@ -357,7 +348,7 @@ export default class BSTree {
     });
     let newIopNode = new BSTNode(targetReplacementStore);
     ancestors = ancestors.concat([['_left', newIopNode]], rightAncestors);
-    return BSTree.removeFound(comparator, newIopNode.left, ancestors, selfBalance);
+    return BSTree.removeFound(comparator, newIopNode.left, ancestors);
   }
 
   /**
@@ -366,23 +357,20 @@ export default class BSTree {
    * @param {[Function]} comparator [must return {1, 0, -1} when comparing two inputs]
    * @param {[BSTNode]} node [node from which to start the removal]
    * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
-   * @param {[Boolean]} selfBalance [optional flag to rebalance root after removal]
    * @return {[BSTNode]} [new root node with input node removed and children repositioned]
    */
-  static removeFound(comparator, node, ancestors, selfBalance = false) {
-    let finalTree;
+  static removeFound(comparator, node, ancestors) {
     switch (node.children.length) {
       case 1:
-        finalTree = new BSTree(comparator, BSTree.removeOneChild(node, ancestors));
+        return new BSTree(comparator, BSTree.removeOneChild(node, ancestors));
         break;
       case 2:
-        finalTree = BSTree.removeTwoChildren(comparator, node, ancestors, selfBalance);
+        return BSTree.removeTwoChildren(comparator, node, ancestors);
         break;
       default:
-        finalTree = new BSTree(comparator, BSTree.removeNoChildren(node, ancestors));
+        return new BSTree(comparator, BSTree.removeNoChildren(node, ancestors));
         break;
     }
-    return selfBalance ? BSTree.balanceTree(finalTree) : finalTree;
   }
 
   /**
@@ -397,37 +385,6 @@ export default class BSTree {
       node = new BSTNode(parentNode._store.set(childSide, node));
     }
     return node;
-  }
-
-  /**
-   * Returns a new balanced BSTree based on input tree.
-   * @param {[BSTree]} tree [tree to balance]
-   * @return {[BSTree]} [new balanced tree]
-   */
-  static balanceTree(tree) {
-    let mid = Math.floor(tree.size / 2),
-        keys = tree.keys,
-        values = tree.values,
-        midKey = keys[mid],
-        midValue = values[mid],
-        balanced = new BSTree(tree.comparator, new BSTNode(midKey, midValue, null, null, 1)),
-        left  = mid - 1,
-        right = mid + 1;
-    while (left >= 0 || right < tree.size) {
-      let leftKey = keys[left],
-          leftValue = values[left],
-          rightKey = keys[right],
-          rightValue = values[right];
-      if (leftKey !== undefined) {
-        balanced = balanced.insert(leftKey, leftValue);
-        left -= 1;
-      }
-      if (rightKey !== undefined) {
-        balanced = balanced.insert(rightKey, rightValue);
-        right += 1;
-      }
-    }
-    return balanced;
   }
 
 }
