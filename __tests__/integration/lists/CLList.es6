@@ -2,12 +2,14 @@ jest.autoMockOff();
 var IM = require('immutable'),
     CLList = require('../../../src/lists/CLList');
 
+
 describe('Circular Linked Lists', function() {
   let oneToFive = [1,2,3,4,5];
   let cLL = new CLList(oneToFive);
   let midNode = cLL.head.next.next;
 
   describe('CLL-Specific Basic Instance Methods & Properties', function() {
+
     it('is circular', function() {
       expect(cLL.tail.next).toBe(cLL.head);
     });
@@ -28,10 +30,11 @@ describe('Circular Linked Lists', function() {
       expect(cLL.prepend('NEW').head.data).toBe('NEW');
       expect(cLL.head.data).toNotBe('NEW');
     });
-    
+
   });
 
   describe('Add before', function() {
+
     it('when called with head, behaves exactly as prepend should, ', function() {
       expect(cLL.addBefore(cLL.head, 0).head.data).toBe(cLL.prepend(0).head.data);
     });
@@ -62,22 +65,23 @@ describe('Circular Linked Lists', function() {
       let isTail = (node) => {
         return node === tailValue;
       }
-      expect(removeBeforeResult.filter(isTail).length).toBeFalsy();  
+      expect(removeBeforeResult.filter(isTail).length).toBeFalsy();
     });
 
   });
 
   describe('Add after', function() {
+
     it('when called with tail, behaves exactly as append should', function() {
       expect(cLL.addAfter(cLL.tail, 0).head.data).toBe(cLL.append(0).head.data);
-                
+
     });
 
     it('returns a new list, with the correct inserted value', function() {
       let nList = cLL.addAfter(midNode, 0);
       expect(cLL.size).toNotBe(nList.size);
       expect(nList.head.next.next.next.data).toBe(0);
-      
+
     });
 
   });
@@ -101,7 +105,9 @@ describe('Circular Linked Lists', function() {
       let isHead = (node) => {
         return node === headValue;
       }
-      expect(removeAfterResult.filter(isHead).length).toBeFalsy();  
+      expect(removeAfterResult.filter(isHead).length).toBeFalsy();
     });
+
   });
+
 });

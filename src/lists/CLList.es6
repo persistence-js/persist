@@ -1,6 +1,7 @@
 import 'core-js/shim';
-let IM = require('immutable');
-  LList = require('./LList.es6');
+const IM = require('immutable');
+const LList = require('./LList.es6');
+
 
 export default class CLList extends LList {
 
@@ -42,7 +43,7 @@ export default class CLList extends LList {
         }
       });
 
-      return new CLList(newList);      
+      return new CLList(newList);
     }.bind(this);
 
     return (LList.isNode(atNode)) ? insert() :
