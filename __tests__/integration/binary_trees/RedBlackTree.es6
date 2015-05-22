@@ -191,11 +191,17 @@ describe('Red-Black Tests', function() {
       //then repaint...
       //then construct the new tree with the root node of that stack....
       //pass comparator...
+      //
+      //If deleted node is red, delete, label child black.
+      //else:
+      //Label the child of a deleted node, taking its place:
+      //double black.
+      //https://www.cs.purdue.edu/homes/ayg/CS251/slides/chap13c.pdf
       it('deletes a red node with copying, no rotations', function() {
         
       });
 
-      it('delets a black node', function() {
+      it('deletes a black node, by pointing its parent at child', function() {
         
       });
     });
