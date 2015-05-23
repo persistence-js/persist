@@ -2,6 +2,7 @@ jest.autoMockOff();
 const IM = require('immutable');
 const RBTree = require('../../../src/binary_trees/BSTree');
 const RBNode = require('../../../src/binary_trees/BSTNode');
+const nil = RBTree._nil;
 
 describe('Red-Black Tests', function() {
   
@@ -20,51 +21,39 @@ describe('Red-Black Tests', function() {
       expect(node1.value).toEqual('hi');
     });
 
-    //if implementing a rotation method for nodes, chain insert here
-
-    xit('has rotate left around a node', function() {
-      expect(node1.rotateLeft).toHaveBeenCalled();
-    });
-
-    xit('has rotate right around a node', function() {
-      expect(node2.rotateRight).toHaveBeenCalled();
-    });
   });
 
   describe('Tree Tests', function() {
 
-    //insert a demo'd, pre-visualized  small tree
-    //
-    //Insertion pseudocode:
-    //10, 
-    //
-    //8, (Red, Left child )
-    //
-    //9, (searches down to Right of 8, 
-    //---Single Rotate Left about 9.
-    //  "Node and parent both red. Node is right, parent is left."
-    //  Rotation Left.
-    //---Single Rotate Right about 9.
-    //  "Node and parent both red, node is left, parent is left."
-    //  --Therefore, fix with single rotation.
-    //  9 is now root node with (8, 10)
-    //  --Repaint??? 
-    //    Questions:
-    //      (do all right rotations require a repaint?)
-    //      -Do all left rotations not require a repaint?
-    //      ---"RB Tree": --- Rotation Rules; Repainting rules
-    //16, 
-    //  right right insert...
-    //  "Node and parent are both red...Uncle of node is red."
-    //  ---Push Blackness down from Grandparent
-    //  http://i.imgur.com/6suUc0V.png
-    //19, 
-    //
-    //14, 
-    //
-    //22
-    //
-    //4
+    describe('Rotation Tests', function() {
+      //Creates 3 default Red nodes to test rotation
+      let _beta = new RBNode(-5, "beta", nil, nil, 4);
+      let _gamma = new RBNode(15, "gamma", nil, nil, 5)
+      let _left = new RBNode(-10, "left", nil, nil, 2);
+      let _right = new RBNode(10, "right", _beta, _gamma, 3);
+      let _root = new RBNode(0, "root", _left, _right, 1);
+      let gammaStack = IM.Seq([_root, _right, _gamma]);
+      let betaStack = IM.Seq([_root, _right, _beta]);
+
+
+
+      it('has rotation methods: rotate, rotateRight, and RotateLeft', function() {
+        expect(typeof RBTree.rotate).toBe('function');
+        expect(typeof RBTree.rotateRight).toBe('function');
+        expect(typeof RBTree.rotateLeft).toBe('function');
+      });
+
+      it('can be called by RotateRight', function() {
+        //will it need to rotate by index?
+
+      });
+
+      it('can be called by RotateLeft', function() {
+        
+      });
+      
+    });
+
     describe('Insertion Tests', function() {
       let RB_Tree = new RBTree();
       let seq = [ 
