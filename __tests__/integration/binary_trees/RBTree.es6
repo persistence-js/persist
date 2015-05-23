@@ -1,15 +1,34 @@
 jest.autoMockOff();
 const IM = require('immutable');
-const RBTree = require('../../../src/binary_trees/BSTree');
-const RBNode = require('../../../src/binary_trees/BSTNode');
+const RBTree = require('../../../src/binary_trees/RBTree');
+const RBNode = require('../../../src/binary_trees/RBNode');
 const nil = RBTree._nil;
 
 describe('Red-Black Tests', function() {
+
+  describe('Class Properties and methods', function() {
+    describe('_nil', function() {
+       it('is a static property', function() {
+         expect(RBTree._nil).toBeTruthy;
+         expect(RBTree._nil).toEqual(RBTree._nil);
+       });
+
+       it('is a black Node', function() {
+         expect(RBTree._nil.color).toEqual(RBTree.B);
+       });
+       it('has null pointers for value, id, left, and right', function() {
+         expect(RBTree._nil.value).toBeNull();
+         expect(RBTree._nil.id).toBeNull();
+         expect(RBTree._nil.left).toBeNull();
+         expect(RBTree._nil.right).toBeNull();
+       });
+     }); 
+  });
   
   describe('Node Tests', function() {
     let node1 = new RBNode(1, 'hi');
 
-    it('has a color property', function() {
+    it('has a color property, default red', function() {
       expect(node1.color).toBeTruthy();
     });
 
@@ -24,18 +43,59 @@ describe('Red-Black Tests', function() {
   });
 
   describe('Tree Tests', function() {
+    //Creates 3 default Red nodes to test rotation
+    let _beta = new RBNode(-5, "beta", nil, nil, 4);
+    let _gamma = new RBNode(15, "gamma", nil, nil, 5)
+    let _right = new RBNode(10, "right", _beta, _gamma, 3);
+    let _left = new RBNode(-10, "left", nil, nil, 2);
+    let _root = new RBNode(0, "root", _left, _right, 1);
+    let gammaStack = IM.Seq([_root, _right, _gamma]);
+    let betaStack = IM.Seq([_root, _right, _beta]);
+
+    describe('stackSearch', function() {
+      
+      it('returns the element if key found', function() {
+        expect(RBTree.stackSearch(_root, 15).found).toBe(_gamma);
+      });
+
+      it('returns an ancestor stack + insertion direction if key not found ', function() {
+        let result = RBTree.stackSearch(_root, 16);
+        expect(result.found).toBeFalsy();
+        expect(result.ancestorStack).toBe(jasmine.any(IM.Seq));
+      });
+
+      describe('the ancestor stack', function() {
+        let aStack = RBTree.stackSearch(_root, 16).ancestorStack;
+
+        it('has the correct nodes', function() {
+          aStack.forEach((element, index) => {
+            expect(element.n).toBe(gammaStack.at(index));
+          })
+        });
+
+        it('has the correct order of directions', function() {
+          let directions = IM.Seq([null, 1, 1]);
+          aStack.forEach((element, index) => {
+            expect(element.d).toBe(directions.at(index));
+          })
+          
+        });
+
+        it('has the correct colors (default red before in a tree)', function() {
+          let colors = IM.Seq([0, 0, 0]);
+          aStack.forEach((element, index) => {
+            expect(element.c).toBe(colors.at(index));
+          })
+          
+        });
+      });
+    });
+
+    describe('Repainting Tests', function() {
+      
+    });
 
     describe('Rotation Tests', function() {
-      //Creates 3 default Red nodes to test rotation
-      let _beta = new RBNode(-5, "beta", nil, nil, 4);
-      let _gamma = new RBNode(15, "gamma", nil, nil, 5)
-      let _left = new RBNode(-10, "left", nil, nil, 2);
-      let _right = new RBNode(10, "right", _beta, _gamma, 3);
-      let _root = new RBNode(0, "root", _left, _right, 1);
-      let gammaStack = IM.Seq([_root, _right, _gamma]);
-      let betaStack = IM.Seq([_root, _right, _beta]);
-
-
 
       it('has rotation methods: rotate, rotateRight, and RotateLeft', function() {
         expect(typeof RBTree.rotate).toBe('function');
@@ -51,6 +111,10 @@ describe('Red-Black Tests', function() {
       it('can be called by RotateLeft', function() {
         
       });
+      
+    });
+
+    describe('Tree Reconstruction', function() {
       
     });
 
@@ -128,7 +192,6 @@ describe('Red-Black Tests', function() {
       //define whiteboarded Tree
       //4 cases: R-R, L-R
       //R-L, L-L
-      //
       let setDoubleRed = new RBTree();
       setDoubleRed = 
         setDoubleRed
