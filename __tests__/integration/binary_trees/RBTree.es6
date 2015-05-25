@@ -1,26 +1,30 @@
 jest.autoMockOff();
+debugger;
 const IM = require('immutable');
-const RBTree = require('../../../src/binary_trees/RBTree');
-const RBNode = require('../../../src/binary_trees/RBNode');
-const nil = RBTree._nil;
+// const RBTree = require('../../../src/binary_trees/RBTree');
+const {RBTree: RBTree} = require('../../../src/binary_trees/RBTree');
+const {RBNode: RBNode, B: Black, R: Red} = require('../../../src/binary_trees/RBNode');
 
 describe('Red-Black Tests', function() {
 
   describe('Class Properties and methods', function() {
     describe('_nil', function() {
+
        it('is a static property', function() {
-         expect(RBTree._nil).toBeTruthy;
-         expect(RBTree._nil).toEqual(RBTree._nil);
+        debugger;
+         expect(RBTree.getNull()).toBeTruthy;
+         expect(RBTree.getNull()).toEqual(RBTree.getNull());
        });
 
        it('is a black Node', function() {
-         expect(RBTree._nil.color).toEqual(RBTree.B);
+        debugger;
+         expect(RBTree.getNull().color).toEqual(RBNode.B);
        });
        it('has null pointers for value, id, left, and right', function() {
-         expect(RBTree._nil.value).toBeNull();
-         expect(RBTree._nil.id).toBeNull();
-         expect(RBTree._nil.left).toBeNull();
-         expect(RBTree._nil.right).toBeNull();
+         expect(RBTree.getNull().value).toBeNull();
+         expect(RBTree.getNull().id).toBeNull();
+         expect(RBTree.getNull().left).toBeNull();
+         expect(RBTree.getNull().right).toBeNull();
        });
      }); 
   });
