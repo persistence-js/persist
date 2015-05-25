@@ -7,10 +7,10 @@ export class RBTree extends BSTree {
 
   constructor() {
     super();
-    // this._nil = __NULL_REF;
   }
 
   static repaintNode(node) {
+
   }
 
   static rotateLeft() {
@@ -28,5 +28,4 @@ export class RBTree extends BSTree {
   static rotate() {
 
   }
-
 }
