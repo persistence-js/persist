@@ -1,7 +1,6 @@
 import 'core-js/shim';
 const IM = require('immutable');
 
-
 export default class BSTNode {
 
   constructor(key, value, left, right, id, derived = false) {

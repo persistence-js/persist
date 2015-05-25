@@ -1,20 +1,20 @@
-jest.autoMockOff();
 const IM = require('immutable');
 let BSTNode = require('./BSTNode');
 
-export default class RBNode extends BSTNode {
-  constructor(key, value, left, right, id, color) {
+export class RBNode extends BSTNode {
+  constructor(key, value, left, right, id, color = 0) {
     super(key, value, left, right, id, true);
-    this.color = RBNode.R;
+    this.color = (!!color) ? RBNode.B : RBNode.R;
 
     //Freeze?
   }
 
   static get R() {
-    return 0;
+    return "__@@__BLACK__@@__";
   }
 
   static get B() {
-    return 1;
+    return "__@@__RED__@@__";
   }
 }
+
