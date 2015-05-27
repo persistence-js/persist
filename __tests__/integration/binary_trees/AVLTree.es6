@@ -120,7 +120,7 @@ describe('AVLTree', () => {
           expect(avl.height).toBe(2);
         });
 
-        xit('returns height of unbalanced tree', () => {
+        xit('returns height of temporarily unbalanced tree', () => {
           let avl = new AVLTree().insert(1, 'a').insert(2, 'b').insert(3, 'c');
           expect(avl.height).toBe(2);
         });
@@ -148,7 +148,7 @@ describe('AVLTree', () => {
         expect((new AVLTree).rebalanceCount).toBe(0);
       });
 
-      xit('returns greater than 0 for an temporarily unbalanced tree', () => {
+      xit('returns greater than 0 for a temporarily unbalanced tree', () => {
         expect((new AVLTree().insert(1, 'a').insert(2, 'b').insert(3, 'c')).rebalanceCount).toBe(1);
       });
 
@@ -156,17 +156,69 @@ describe('AVLTree', () => {
 
     describe('get min', () => {
 
+      it('returns null for empty tree', () => {
+        expect((new AVLTree()).min).toBeNull();
+      });
+
+      it('returns node with min key for nonempty tree', () => {
+        let minNode = new AVLNode(0, 'min'),
+            rootRight = new AVLNode(75, 'b'),
+            rootLeft = new AVLNode(25, 'c', minNode),
+            rootNode = new AVLNode(50, 'a', rootLeft, rootRight),
+            avl = new AVLTree(null, rootNode);
+        expect(avl.min).toEqual(minNode);
+      });
+
     });
 
     describe('get max', () => {
 
+      it('returns null for empty tree', () => {
+        expect((new AVLTree()).max).toBeNull();
+      });
+
+      it('returns node with max key for nonempty tree', () => {
+        let maxNode = new AVLNode(100, 'max'),
+            rootRight = new AVLNode(75, 'b', null, maxNode),
+            rootLeft = new AVLNode(25, 'c'),
+            rootNode = new AVLNode(50, 'a', rootLeft, rootRight),
+            avl = new AVLTree(null, rootNode);
+        expect(avl.max).toEqual(maxNode);
+      });
+
     });
 
-    describe('get keys', () => {
+    xdescribe('get keys', () => {
+
+      it('returns empty array for empty tree', () => {
+        expect((new AVLTree()).keys).toEqual([]);
+      });
+
+      it('returns in-order array of all node keys for nonempty tree', () => {
+        let maxNode = new AVLNode(100, 'max'),
+            rootRight = new AVLNode(75, 'b', null, maxNode),
+            rootLeft = new AVLNode(25, 'c'),
+            rootNode = new AVLNode(50, 'a', rootLeft, rootRight),
+            avl = new AVLTree(null, rootNode);
+        expect(avl.keys).toEqual([25, 50, 75, 100]);
+      });
 
     });
 
-    describe('get values', () => {
+    xdescribe('get values', () => {
+
+      it('returns empty array for empty tree', () => {
+        expect((new AVLTree()).values).toEqual([]);
+      });
+
+      it('returns in-order array of all node values for nonempty tree', () => {
+        let maxNode = new AVLNode(100, 'max'),
+            rootRight = new AVLNode(75, 'b', null, maxNode),
+            rootLeft = new AVLNode(25, 'c'),
+            rootNode = new AVLNode(50, 'a', rootLeft, rootRight),
+            avl = new AVLTree(null, rootNode);
+        expect(avl.values).toEqual(['c', 'a', 'b', 'max']);
+      });
 
     });
 
