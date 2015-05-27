@@ -161,12 +161,10 @@ describe('AVLTree', () => {
       });
 
       it('returns node with min key for nonempty tree', () => {
-        let minNode = new AVLNode(0, 'min'),
-            rootRight = new AVLNode(75, 'b'),
-            rootLeft = new AVLNode(25, 'c', minNode),
-            rootNode = new AVLNode(50, 'a', rootLeft, rootRight),
-            avl = new AVLTree(null, rootNode);
-        expect(avl.min).toEqual(minNode);
+        let avl = new AVLTree().insert(50, 'a').insert(25, 'c').insert(75, 'b').insert(0, 'min'),
+            min = avl.min;
+        expect(min.key).toBe(0);
+        expect(min.value).toBe('min');
       });
 
     });
@@ -178,12 +176,10 @@ describe('AVLTree', () => {
       });
 
       it('returns node with max key for nonempty tree', () => {
-        let maxNode = new AVLNode(100, 'max'),
-            rootRight = new AVLNode(75, 'b', null, maxNode),
-            rootLeft = new AVLNode(25, 'c'),
-            rootNode = new AVLNode(50, 'a', rootLeft, rootRight),
-            avl = new AVLTree(null, rootNode);
-        expect(avl.max).toEqual(maxNode);
+        let avl = new AVLTree().insert(50, 'a').insert(25, 'c').insert(75, 'b').insert(100, 'max'),
+            max = avl.max;
+        expect(max.key).toBe(100);
+        expect(max.value).toBe('max');
       });
 
     });
@@ -195,11 +191,7 @@ describe('AVLTree', () => {
       });
 
       it('returns in-order array of all node keys for nonempty tree', () => {
-        let maxNode = new AVLNode(100, 'max'),
-            rootRight = new AVLNode(75, 'b', null, maxNode),
-            rootLeft = new AVLNode(25, 'c'),
-            rootNode = new AVLNode(50, 'a', rootLeft, rootRight),
-            avl = new AVLTree(null, rootNode);
+        let avl = new AVLTree().insert(50, 'a').insert(25, 'c').insert(75, 'b').insert(100, 'max');
         expect(avl.keys).toEqual([25, 50, 75, 100]);
       });
 
@@ -212,11 +204,7 @@ describe('AVLTree', () => {
       });
 
       it('returns in-order array of all node values for nonempty tree', () => {
-        let maxNode = new AVLNode(100, 'max'),
-            rootRight = new AVLNode(75, 'b', null, maxNode),
-            rootLeft = new AVLNode(25, 'c'),
-            rootNode = new AVLNode(50, 'a', rootLeft, rootRight),
-            avl = new AVLTree(null, rootNode);
+        let avl = new AVLTree().insert(50, 'a').insert(25, 'c').insert(75, 'b').insert(100, 'max');
         expect(avl.values).toEqual(['c', 'a', 'b', 'max']);
       });
 
