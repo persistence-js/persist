@@ -1,11 +1,68 @@
 const IM = require('immutable');
-let BSTNode = require('./BSTNode');
-export const B = "__@@__BLACK__@@__";
-export const R = "__@@__RED__@@__";
 
-export class RBNode extends BSTNode {
-  constructor(key, value, left, right, id, color = 0) {
-    super(key, value, left, right, id, true);
-    this.color = (!!color) ? B : R;
+export default class RBNode { //RBNode
+  constructor(key, value, left, right, id, color = RBNode.__RED) {
+    debugger;
+    if (IM.Map.isMap(key)) {
+      this._store = key;
+    } else {
+      this._store = IM.Map({ 
+        '_key': key,
+        '_value': value,
+        '_left': left, 
+        '_right': right, 
+        '_id': id, 
+        '_color': color
+      });
+    }
+    //TODO: Freeze implementation in tree OR node.
+  }
+
+  get store() {
+    return this._store;
+  }
+
+  get key() {
+    return this.store.get('_key');
+  }
+
+  get value() {
+    return this.store.get('_value');
+  }
+
+  get left() {
+    return this.store.get('_left', null);
+  }
+
+  get right() {
+    return this.store.get('_right', null);
+  }
+
+  get id() {
+    return this.store.get('_id');
+  }
+
+  //Why not an object?
+  get children() {
+    let children = [];
+    if (this.left) children.push(['_left', this.left]);
+    if (this.right) children.push(['_right', this.right]);
+    return children;
+  }
+
+  get color() {
+    return this.store.get('_color');
+  }
+
+  static get __RED(){
+    return "__@@__RED__@@__";
+  }
+
+  static get __BLACK(){
+    return "__@@__BLACK__@@__";
+  }
+
+  static get __DBLACK(){
+    return "__@@__DOBULE_BLACK__@@__";
   }
 }

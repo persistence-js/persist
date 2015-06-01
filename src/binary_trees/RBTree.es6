@@ -1,13 +1,20 @@
 const IM = require('immutable');
-let BSTree = require('./BSTree');
-let RBNode = require('./RBNode').RBNode;
-debugger;
-// import { RBNode } from './RBNode';
-export const _NULL_SENTINEL = new RBNode(null, null, null, null, null, 1);
-export class RBTree extends BSTree {
+const RBNode = require('./RBNode');
+// import {RBNode} from './RBNode';
+const _NULL_SENTINEL = new RBNode(null, null, null, null, null, 1);
+export default class RBTree {//RBTree
 
-  constructor() {
-    super();
+  constructor() { 
+  }
+
+  /**
+   * Accepts a root node and key.
+   * Will return an object, containing either the found node,
+   * or the ancestor stack for the node, were it to be inserted...
+   * @return {[type]} [Node, or stack]
+   */
+  static stackSearch() {
+
   }
 
   static repaintNode(node) {
@@ -30,8 +37,7 @@ export class RBTree extends BSTree {
 
   }
 
-  static getNull() {
-    debugger;
+  static get nullPointer() {
     return _NULL_SENTINEL;
   }
 }
