@@ -4,7 +4,15 @@ const RBNode = require('./RBNode');
 const _NULL_SENTINEL = new RBNode(null, null, null, null, null, 1);
 export default class RBTree {//RBTree
 
-  constructor() { 
+  constructor(comparator, _root) {
+    this._comparator = BSTree.setComparator(comparator);
+    this._root = null;
+    this._count = 0;
+    if (BSTree.isBSTNode(_root)) {
+      this._root = BSTree.cloneNode(_root);
+      this._count = BSTree.recount(_root);
+    }
+    Object.freeze(this);
   }
 
   /**
