@@ -1,15 +1,15 @@
 const IM = require('immutable');
 const RBNode = require('./RBNode');
-const _NULL_SENTINEL = new RBNode(null, null, null, null, null, 1);
+const _NULL_SENTINEL = new RBNode(null, null, null, null, null, RBNode.__BLACK);
 export default class RBTree {//RBTree
 
   constructor(comparator, _root) {
-    this._comparator = BSTree.setComparator(comparator);
+    this._comparator = RBTree.setComparator(comparator);
     this._root = null;
     this._count = 0;
-    if (BSTree.isBSTNode(_root)) {
-      this._root = BSTree.cloneNode(_root);
-      this._count = BSTree.recount(_root);
+    if (RBTree.isRBNode(_root)) {
+      this._root = RBTree.cloneNode(_root);
+      this._count = RBTree.recount(_root);
     }
     Object.freeze(this);
   }
@@ -32,7 +32,7 @@ export default class RBTree {//RBTree
 
   /**
    * Get the first node in tree
-   * @return {[BSTNode|null]} [root node, null if tree is empty]
+   * @return {[RBNode|null]} [root node, null if tree is empty]
    */
   get root() {
     return this._root;
@@ -40,18 +40,18 @@ export default class RBTree {//RBTree
 
   /**
    * Get the node with the smallest key in tree in O(log n).
-   * @return {[BSTNode|null]} [min node, null if tree is empty]
+   * @return {[RBNode|null]} [min node, null if tree is empty]
    */
   get min() {
-    return BSTree.traverseSide('left', this);
+    return RBTree.traverseSide('left', this);
   }
 
   /**
    * Get the node with the largest key in tree in O(log n).
-   * @return {[BSTNode|null]} [max node, null if tree is empty]
+   * @return {[RBNode|null]} [max node, null if tree is empty]
    */
   get max() {
-    return BSTree.traverseSide('right', this);
+    return RBTree.traverseSide('right', this);
   }
 
   /**
@@ -78,44 +78,235 @@ export default class RBTree {//RBTree
    * Returns a new tree with the key and value inserted.
    * @param {[*]} key [the key with which to store the value parameter]
    * @param {[*]} value [the value to store with key parameter]
-   * @return {[BSTree]} [new BST with the key-value pair inserted]
+   * @return {[RBTree]} [new BST with the key-value pair inserted]
    */
   insert(key, value) {
     if (key === undefined) {
       return this.clone();
-    } else if (!this.size) {
-      return new BSTree(this.comparator, new BSTNode(key, value, null, null, 1), 1);
+    } else if (!this.size) { //empty tree
+      return new RBTree(this.comparator, new RBNode(key, value, RBTree.nullPointer, RBTree.nullPointer, 1, RBNode.__BLACK));
     } else {
-      let [node, ancestors] = BSTree.recursiveSearch(this.comparator, this.root, key);
-      node = node ? new BSTNode(node._store.set('_value', value)) : //override
-                    new BSTNode(key, value, null, null, this.size + 1); // new leaf node
-      return new BSTree(this.comparator, BSTree.constructFromLeaf(node, ancestors)); //insertion mods happen in
-        //constructFromLeaf
+      let [newNode, ancestors] = RBTree.recursiveSearch(this.comparator, this.root, key);
+      let newStack;
+      //save root node, and ancestors...
+      //constructfromleaf...returns root node and ancestors..
+      if (newNode) {//is a duplicate case
+        newNode = new RBNode(newNode._store.set('_value', value));
+        newStack = RBTree.checkAndModifyStack(newNode, ancestors, ancestors.length);
+      } else {
+        //*** **** 
+        //not duplicate...call checkInvariants, rotate, and repaint functions as needed...
+        newNode = new RBNode(key, value, RBTree.nullPointer, RBTree.nullPointer, this.size + 1, RBNode.__RED);
+        newStack = RBTree.checkAndModifyStack(newNode, ancestors, ancestors.length);
+        //Modify stack here:
+        //left and right rotations
+        //repainting: 'pushing blackness down from a parent (newly rotated or not)'
+        //high level invariant checking function needs to be recursive
+      }
+      return new RBTree(this.comparator, RBTree.constructFromLeaf(newStack[0], newStack[1]));
     }
+  }
+
+  static checkAndModifyStack(node, ancestors, childIdx) {
+    //expect childIdx to exceed current ancestor stack, unless in a recursive call
+    //
+    if (ancestors[0][1].color !== RBNode.__BLACK){
+      ancestors[0][1] = new RBNode(ancestors[0][1]._store.set('_color', RBNode.__BLACK));
+      return [node, ancestors];
+    }
+    if (childIdx <= 1){
+      return [node, ancestors];
+    }
+    //each tuple in stack contains: [childSide, node]
+    let child = (!ancestors[childIdx]) ? node : ancestors[childIdx][1]; 
+    let parentIdx = (!ancestors[childIdx]) ? ancestors.length-1 : childIdx-1;
+    let parent = ancestors[parentIdx][1];
+    if (child.color === RBNode.__BLACK || parent.color === RBNode.__BLACK) {
+      return [child, ancestors];
+    }
+
+    let grandparentIdx = (!ancestors[childIdx]) ? ancestors.length-2 : childIdx-2;
+    let grandparent = ancestors[grandparentIdx][1];
+
+    if (grandparent.color !== RBNode.__BLACK) {
+      throw new Error("Grandparent should be black, tree invariant broken in earlier step!")
+    }
+    let uncle = (ancestors[grandparentIdx][0] === '_left') ? grandparent.right : grandparent.left;
+
+    if (uncle.color === RBNode.__RED) {
+      [child, ancestors] = RBTree.pushBlackness(child, ancestors, grandparentIdx);
+      return RBTree.checkAndModifyStack(child, ancestors, grandparentIdx); 
+      //after pushing blackness, GP is now red. must perform a final check, if grand-grand parent is red.
+    } else {
+      childSide = ancestors[parentIdx][0];
+      parentSide = ancestors[grandparentIdx][0];
+
+      if (childSide === '_right' && parentSide === '_left') {
+        //Rotate Left, Child:
+        let tempChild = child;
+        child = ancestors[parentIdx][1];
+        //adjust child with WithMutations
+        child = new RBNode(child._store.withMutations( (map) => {
+          return map.set('_right',tempChild._store.get('_left'));
+        }));
+        //adjust tempChild with WithMutations, to point at completed child
+        ancestors[parentIdx][1] = new RBNode(tempChild._store.withMutations( (map) => {
+          return map.set('_left', child);
+        }));
+        ancestors[parentIdx][0] = parentSide;
+
+        let newChildIdx = parentIdx+1;
+        return RBTree.checkAndModifyStack(child, ancestors, newChildIdx);
+      } else if (childSide === '_left' && parentSide === '_left') {
+        //RotateRight, Parent:
+        ancestors[grandparentIdx][1] = new RBNode(parent._store.withMutations( (map) => {
+          map.set(
+            '_right', 
+            new RBNode(
+              grandparent._store.withMutations( (newRight) => {
+                return newRight.set('_left', map.get('_right')).set('_color', RBNode.__RED);
+              })
+            )
+          );
+          map.set('_color', RBNode.__BLACK);
+          return map; 
+        }));
+
+        ancestors[grandparentIdx][0] = parentSide;
+        let oldParent = ancestors.pop();
+        let oldParentIdx = grandparentIdx+1; 
+        //stack should now be 1 shorter, update childIdx
+        return RBTree.checkAndModifyStack(child, ancestors, oldParentIdx);
+      } else if (childSide === '_right' && parentSide === '_right') {
+        //rotate left, parent
+        ancestors[grandparentIdx][1] = new RBNode(parent._store.withMutations( (map) => {
+          map.set(
+            '_left', 
+            new RBNode(
+              grandparent._store.withMutations( (newLeft) => {
+                return newLeft.set('_right', map.get('_left')).set('_color', RBNode.__RED);
+              })
+            )
+          );
+          map.set('_color', RBNode.__BLACK);
+          return map; 
+        }));
+        ancestors[grandparentIdx][0] = parentSide;
+        let oldParent = ancestors.pop();
+        let oldParentIdx = grandparentIdx+1; 
+        return RBTree.checkAndModifyStack(child, ancestors, oldParentIdx);
+      } else if (childSide === '_left' && parentSide === '_right') {
+        //Rotate Right, Child:
+        let tempChild = child;
+        //Child takes parent's place in the stack
+        child = ancestors[parentIdx][1];
+        child = new RBNode(child._store.withMutations( (map) => {
+          return map.set('_left',tempChild._store.get('_right'));
+        }));
+        ancestors[parentIdx][1] = new RBNode(tempChild._store.withMutations( (map) => {
+          return map.set('_right', child);
+        }));
+        ancestors[parentIdx][0] = parentSide;
+
+        let newChildIdx = parentIdx+1;
+        return RBTree.checkAndModifyStack(child, ancestors, newChildIdx);
+      } else {
+        debugger;
+        throw new Error('Invalid case, childIdx: ${childIdx.toString()}, '+
+          'ancestors: ${ancestors.toString()}');
+      }
+    }
+    throw new Error('Invalid case, end of check function: childIdx: ${childIdx.toString()}, '+
+      'ancestors: ${ancestors.toString()}');
+  }
+
+  static pushBlackness(node, ancestors, blackNode) {
+    // push blackness
+    ancestors[blackNode+1][1] = new RBNode(ancestors[blackNode+1][1]._store.set('_color', RBNode.__BLACK));
+    ancestors[blackNode][1] = new RBNode(ancestors[blackNode][1]._store.withMutations( (map) => {
+      map.set('_color', RBNode.__RED);
+      let leftChild = map.get('_left'), rightChild = map.get('_right');
+      if (leftChild !== RBTree.nullPointer) {
+        map.set('_left', new RBNode(leftChild._store.set('_color', RBNode.__BLACK)));
+      }
+      if (rightChild !== RBTree.nullPointer) {
+        map.set('_right', new RBNode(rightChild._store.set('_color', RBNode.__BLACK)));
+      }
+      return map;
+    }));
+    return [node, ancestors];
+  }
+
+  // static rotate(node, ancestors, pivotIdx, direction) {
+
+  // }
+
+  /**
+   * Returns tuple of the found node and a stack of ancestor nodes.
+   * Generic O(log n) recursive search of RBTree.
+   * @param {[Function]} comparator [must return {1, 0, -1} when comparing two inputs]
+   * @param {[RBNode]} node [node from which to start the search]
+   * @param {[*]} key [the key used for search]
+   * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
+   * @return {[Array]} [tuple containing null or the found node, and a stack of ancestors]
+   */
+  static recursiveSearch(comparator, node, key, ancestorStack = []) {
+    if (node === RBTree.nullPointer) return [null, ancestorStack];
+    let comparisons = comparator(node.key, key);
+    if (comparisons === -1) {
+      ancestorStack.push(['_right', node])
+      return RBTree.recursiveSearch(comparator, node.right, key, ancestorStack);
+    } else if (comparisons === 1) {
+      ancestorStack.push(['_left', node])
+      return RBTree.recursiveSearch(comparator, node.left, key, ancestorStack);
+    } else {
+      //should only be inside here in a find operation: upon a successful find
+      return [node, ancestorStack];
+    }
+  }
+
+  static rotate(nodeStackAndIndex, direction) {
+    //rotates left or right depending on direction
+    let [node, ancestors, pivot] = nodeStackAndIndex;
+
+    return [node, ancestors, nextChildToCheck];
+  }
+  /**
+   * Returns new root node reconstructed from a leaf node and ancestors.
+   * @param {[RBNode]} node [leaf node from which to start the construction]
+   * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
+   * @return {[RBNode]} [new root node reconstructed from leaf and ancestors stack]
+   */
+  static constructFromLeaf(node, ancestors) {
+    while (ancestors.length) {
+      let [childSide, parentNode] = ancestors.pop();
+      node = new RBNode(parentNode._store.set(childSide, node));
+    }
+    return node;      
   }
 
   /**
    * Returns a new tree with the given node removed. If the key is not found,
    * returns a clone of current tree.
    * @param {[*]} key [the key of the node to remove]
-   * @return {[BSTree]} [new BST with the given node removed]
+   * @return {[RBTree]} [new BST with the given node removed]
    */
   remove(key) {
-    let [node, ancestors] = BSTree.recursiveSearch(this.comparator, this.root, key);
+    let [node, ancestors] = RBTree.recursiveSearch(this.comparator, this.root, key);
     if (!this.size || key === undefined || !node) {
       return this.clone();
     } else if (node) {
-      return BSTree.removeFound(this.comparator, node, ancestors);
+      return RBTree.removeFound(this.comparator, node, ancestors);
     }
   }
 
   /**
    * Get the node with the matching key in tree in O(log n).
    * @param {[*]} key [the key of the node to find]
-   * @return {[BSTNode|null]} [found node, null if key not found]
+   * @return {[RBNode|null]} [found node, null if key not found]
    */
   find(key) {
-    return BSTree.recursiveSearch(this.comparator, this.root, key)[0];
+    return RBTree.recursiveSearch(this.comparator, this.root, key)[0];
   }
 
   /**
@@ -124,7 +315,7 @@ export default class RBTree {//RBTree
    * @return {[*]} [value of found node, null if key not found]
    */
   get(key) {
-    let [search,] = BSTree.recursiveSearch(this.comparator, this.root, key);
+    let [search,] = RBTree.recursiveSearch(this.comparator, this.root, key);
     return !search ? null : search.value;
   }
 
@@ -139,17 +330,17 @@ export default class RBTree {//RBTree
 
   /**
    * Apply the callback to each node in the tree, in-order.
-   * @param {[Function]} callback [recieves a BSTNode as input]
+   * @param {[Function]} callback [recieves a RBNode as input]
    * @return {[undefined]} [side-effect function]
    */
   forEach(callback) {
-    BSTree.traverseInOrder(this.root, callback);
+    RBTree.traverseInOrder(this.root, callback);
   }
 
   /**
    * Returns a new tree with the list's key-value pairs inserted.
    * @param {[Array]} listToInsert [an array of key-value tuples to insert]
-   * @return {[BSTree]} [new BST with the all the key-value pairs inserted]
+   * @return {[RBTree]} [new BST with the all the key-value pairs inserted]
    */
   insertAll(listToInsert = []) {
     let resultTree = this;
@@ -161,10 +352,10 @@ export default class RBTree {//RBTree
 
   /**
    * Clone the current tree.
-   * @return {[BSTree]} [new BST clone of current tree]
+   * @return {[RBTree]} [new BST clone of current tree]
    */
   clone() {
-    return new BSTree(this.comparator, this.root);
+    return new RBTree(this.comparator, this.root);
   }
 
   /**
@@ -174,7 +365,7 @@ export default class RBTree {//RBTree
    */
   static setComparator(comparator) {
     let isComparator = !!comparator && typeof comparator === 'function';
-    return isComparator ? comparator : BSTree.defaultComp;
+    return isComparator ? comparator : RBTree.defaultComp;
   }
 
   /**
@@ -190,37 +381,37 @@ export default class RBTree {//RBTree
   }
 
   /**
-   * Checks if a given input is a BSTNode.
-   * @param {[*]} maybe [entity to check for BSTNode-ness]
-   * @return {[Boolean]} [true if maybe is a BSTNode, false otherwise]
+   * Checks if a given input is a RBNode.
+   * @param {[*]} maybe [entity to check for RBNode-ness]
+   * @return {[Boolean]} [true if maybe is a RBNode, false otherwise]
    */
-  static isBSTNode(maybe) {
-    return !!maybe && maybe.constructor === BSTNode;
+  static isRBNode(maybe) {
+    return !!maybe && maybe.constructor === RBNode;
   }
 
   /**
-   * Clone the input BSTNode.
-   * @param {[BSTNode]} node [node to clone]
-   * @return {[BSTNode]} [new BSTNode clone of input node]
+   * Clone the input RBNode.
+   * @param {[RBNode]} node [node to clone]
+   * @return {[RBNode]} [new RBNode clone of input node]
    */
   static cloneNode(node) {
-    return new BSTNode(node.key, node.value, node.left, node.right, node.id);
+    return new RBNode(node.key, node.value, node.left, node.right, node.id, node.color);
   }
 
   /**
    * Returns the count of nodes present in _root input.
-   * @param {[BSTNode]} _root [the root to recount]
+   * @param {[RBNode]} _root [the root to recount]
    * @return {[Number]} [count of nodes in _root]
    */
   static recount(_root) {
     let count = 0;
-    BSTree.traverseInOrder(_root, () => count++);
+    RBTree.traverseInOrder(_root, () => count++);
     return count;
   }
 
   /**
    * Returns the ancestor nodes and in-order predecessor of the input node.
-   * @param {[BSTNode]} leftChild [node from which to start the search for IOP]
+   * @param {[RBNode]} leftChild [node from which to start the search for IOP]
    * @return {[Array]} [tuple containing a stack of ancestors and the IOP]
    */
   static findInOrderPredecessor(leftChild) {
@@ -236,21 +427,21 @@ export default class RBTree {//RBTree
   /**
    * Apply the callback to each node, in-order.
    * Recursive traversal, static version of #forEach
-   * @param {[BSTNode]} node [the root node from which to start traversal]
-   * @param {[Function]} callback [recieves a BSTNode as input]
+   * @param {[RBNode]} node [the root node from which to start traversal]
+   * @param {[Function]} callback [recieves a RBNode as input]
    * @return {[undefined]} [side-effect function]
    */
   static traverseInOrder(node, cb) {
-    if (!node) return;
+    if (node === RBTree.nullPointer) return;
     let left = node.left, right = node.right;
-    if (left) BSTree.traverseInOrder(left, cb);
+    if (left !== RBTree.nullPointer) RBTree.traverseInOrder(left, cb);
     cb(node);
-    if (right) BSTree.traverseInOrder(right, cb);
+    if (right !== RBTree.nullPointer) RBTree.traverseInOrder(right, cb);
   }
 
   /**
-   * Returns the leaf BSTNode furthest down a given side of tree in O(log n).
-   * @return {[BSTNode|null]} [max or min node, null if tree is empty]
+   * Returns the leaf RBNode furthest down a given side of tree in O(log n).
+   * @return {[RBNode|null]} [max or min node, null if tree is empty]
    */
   static traverseSide(side, tree) {
     let currentRoot = tree.root;
@@ -264,49 +455,26 @@ export default class RBTree {//RBTree
   }
 
   /**
-   * Returns tuple of the found node and a stack of ancestor nodes.
-   * Generic O(log n) recursive search of BSTree.
-   * @param {[Function]} comparator [must return {1, 0, -1} when comparing two inputs]
-   * @param {[BSTNode]} node [node from which to start the search]
-   * @param {[*]} key [the key used for search]
-   * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
-   * @return {[Array]} [tuple containing null or the found node, and a stack of ancestors]
-   */
-  static recursiveSearch(comparator, node, key, ancestorStack = []) {
-    if (!node) return [null, ancestorStack];
-    let comparisons = comparator(node.key, key);
-    if (comparisons === -1) {
-      ancestorStack.push(['_right', node])
-      return BSTree.recursiveSearch(comparator, node.right, key, ancestorStack);
-    } else if (comparisons === 1) {
-      ancestorStack.push(['_left', node])
-      return BSTree.recursiveSearch(comparator, node.left, key, ancestorStack);
-    } else {
-      return [node, ancestorStack];
-    }
-  }
-
-  /**
    * Returns new root node with input node removed.
    * Input node must have no children.
-   * @param {[BSTNode]} node [node from which to start the removal]
+   * @param {[RBNode]} node [node from which to start the removal]
    * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
-   * @return {[BSTNode]} [new root node constructed from tree with input node removed]
+   * @return {[RBNode]} [new root node constructed from tree with input node removed]
    */
   static removeNoChildren(node, ancestors) {
     if (ancestors.length) {
       let [childSide, parentNode] = ancestors.pop();
-      node = new BSTNode(parentNode._store.set(childSide, null));
+      node = new RBNode(parentNode._store.set(childSide, null));
     }
-    return BSTree.constructFromLeaf(node, ancestors)
+    return RBTree.constructFromLeaf(node, ancestors)
   }
 
   /**
    * Returns new root node with input node removed.
    * Input node must have exactly one child.
-   * @param {[BSTNode]} node [node from which to start the removal]
+   * @param {[RBNode]} node [node from which to start the removal]
    * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
-   * @return {[BSTNode]} [new root node with input node removed and children repositioned]
+   * @return {[RBNode]} [new root node with input node removed and children repositioned]
    */
   static removeOneChild(node, ancestors) {
     let childNode = node.children[0][1];
@@ -314,8 +482,8 @@ export default class RBTree {//RBTree
       return childNode;
     } else {
       let [childSide, parentNode] = ancestors.pop(),
-          leaf = new BSTNode(parentNode._store.set(childSide, childNode));
-      return BSTree.constructFromLeaf(leaf, ancestors);
+          leaf = new RBNode(parentNode._store.set(childSide, childNode));
+      return RBTree.constructFromLeaf(leaf, ancestors);
     }
   }
 
@@ -323,12 +491,12 @@ export default class RBTree {//RBTree
    * Returns new root node with input node removed.
    * Input node must have exactly two children.
    * @param {[Function]} comparator [must return {1, 0, -1} when comparing two inputs]
-   * @param {[BSTNode]} node [node from which to start the removal]
+   * @param {[RBNode]} node [node from which to start the removal]
    * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
-   * @return {[BSTNode]} [new root node with input node removed and children repositioned]
+   * @return {[RBNode]} [new root node with input node removed and children repositioned]
    */
   static removeTwoChildren(comparator, node, ancestors) {
-    let [rightAncestors, iop] = BSTree.findInOrderPredecessor(node.left);
+    let [rightAncestors, iop] = RBTree.findInOrderPredecessor(node.left);
     let iopReplacementStore = iop.store.withMutations(_store => {
       _store.set('_key', node.key).set('_value', node.value).set('_id', node.id);
     });
@@ -336,54 +504,34 @@ export default class RBTree {//RBTree
       _store.set('_key', iop.key)
             .set('_value', iop.value)
             .set('_id', iop.id)
-            .set('_left', new BSTNode(iopReplacementStore));
+            .set('_left', new RBNode(iopReplacementStore));
     });
-    let newIopNode = new BSTNode(targetReplacementStore);
+    let newIopNode = new RBNode(targetReplacementStore);
     ancestors = ancestors.concat([['_left', newIopNode]], rightAncestors);
-    return BSTree.removeFound(comparator, newIopNode.left, ancestors);
+    return RBTree.removeFound(comparator, newIopNode.left, ancestors);
   }
 
   /**
    * Returns new root node with input node removed.
    * Input node can have any number of children. Dispatches to correct removal method.
    * @param {[Function]} comparator [must return {1, 0, -1} when comparing two inputs]
-   * @param {[BSTNode]} node [node from which to start the removal]
+   * @param {[RBNode]} node [node from which to start the removal]
    * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
-   * @return {[BSTNode]} [new root node with input node removed and children repositioned]
+   * @return {[RBNode]} [new root node with input node removed and children repositioned]
    */
   static removeFound(comparator, node, ancestors) {
     switch (node.children.length) {
       case 1:
-        return new BSTree(comparator, BSTree.removeOneChild(node, ancestors));
+        return new RBTree(comparator, RBTree.removeOneChild(node, ancestors));
         break;
       case 2:
-        return BSTree.removeTwoChildren(comparator, node, ancestors);
+        return RBTree.removeTwoChildren(comparator, node, ancestors);
         break;
       default:
-        return new BSTree(comparator, BSTree.removeNoChildren(node, ancestors));
+        return new RBTree(comparator, RBTree.removeNoChildren(node, ancestors));
         break;
     }
   }
-
-  /**
-   * Returns new root node reconstructed from a leaf node and ancestors.
-   * @param {[BSTNode]} node [leaf node from which to start the construction]
-   * @param {[Array]} ancestorStack [stack of tuples containing ancestor side and ancestor node]
-   * @return {[BSTNode]} [new root node reconstructed from leaf and ancestors stack]
-   */
-  static constructFromLeaf(node, ancestors) {
-    //if this is a duplication, use the same while loop
-    // else, not a duplication. New node is red:
-    //  -if no parent: recolor black
-    //  -if parent black: do nothing
-    //  -if parent red: follow more rules, rearranging the stack
-    while (ancestors.length) {
-      let [childSide, parentNode] = ancestors.pop();
-      node = new BSTNode(parentNode._store.set(childSide, node));
-    }
-    return node;
-  }
-
 
 
   /**
@@ -394,41 +542,8 @@ export default class RBTree {//RBTree
    *
    * 
    */
+  
 
-  /**
-   * Accepts a root node and key.
-   * Will return an object, containing either the found node,
-   * or the ancestor stack for the node, were it to be inserted...
-   * @return {[type]} [Node, or stack]
-   */
-  static stackSearch() {
-
-  }
-
-  /**
-   * Accepts a node.
-   * Returns a new node, repainted.
-   * @param  {[type]} node [description]
-   * @return {[type]}      [description]
-   */
-  static repaintNode(node) {
-
-  }
-
-  /**
-   * Accepts a root node and key. 
-   * Uses stackSearch to rotate an internally constructed
-   * ancestor stack.
-   * @param  {[type]} node [description]
-   * @return {[type]}      [description]
-   */
-  static rotateLeft() {
-
-  }
-
-  static rotateRight() {
-
-  }
 
   static get nullPointer() {
     return _NULL_SENTINEL;

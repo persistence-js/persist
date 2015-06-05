@@ -2,7 +2,6 @@ const IM = require('immutable');
 
 export default class RBNode { //RBNode
   constructor(key, value, left, right, id, color = RBNode.__RED) {
-    debugger;
     if (IM.Map.isMap(key)) {
       this._store = key;
     } else {
@@ -15,7 +14,6 @@ export default class RBNode { //RBNode
         '_color': color
       });
     }
-    //TODO: Freeze implementation in tree OR node.
   }
 
   get store() {
@@ -42,7 +40,6 @@ export default class RBNode { //RBNode
     return this.store.get('_id');
   }
 
-  //Why not an object?
   get children() {
     let children = [];
     if (this.left) children.push(['_left', this.left]);
@@ -54,15 +51,19 @@ export default class RBNode { //RBNode
     return this.store.get('_color');
   }
 
-  static get __RED(){
+  static get __RED() {
     return "__@@__RED__@@__";
   }
 
-  static get __BLACK(){
+  static get __BLACK() {
     return "__@@__BLACK__@@__";
   }
 
-  static get __DBLACK(){
+  static get __DBLACK() {
     return "__@@__DOBULE_BLACK__@@__";
+  }
+
+  static switchColor(color) {
+    return (color === RBNode.__Red) ? RBNode.__Red : RBNode.__Black;
   }
 }
