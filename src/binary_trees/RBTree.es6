@@ -82,7 +82,7 @@ export default class RBTree {//RBTree
    */
   insert(key, value) {
     if (key === undefined) {
-      return this.clone();
+      throw new Error ('Attempting to insert with undefined key.');
     } else if (!this.size) { //empty tree
       return new RBTree(this.comparator, new RBNode(key, value, RBTree.nullPointer, RBTree.nullPointer, 1, RBNode.__BLACK));
     } else {
@@ -92,7 +92,8 @@ export default class RBTree {//RBTree
       //constructfromleaf...returns root node and ancestors..
       if (newNode) {//is a duplicate case
         newNode = new RBNode(newNode._store.set('_value', value));
-        newStack = RBTree.checkAndModifyStack(newNode, ancestors, ancestors.length);
+        newStack = [newNode, ancestors]; 
+        // RBTree.checkAndModifyStack(newNode, ancestors, ancestors.length);
       } else {
         //*** **** 
         //not duplicate...call checkInvariants, rotate, and repaint functions as needed...
@@ -107,59 +108,60 @@ export default class RBTree {//RBTree
     }
   }
 
-  static checkAndModifyStack(node, ancestors, childIdx) {
-    //expect childIdx to exceed current ancestor stack, unless in a recursive call
+  static checkAndModifyStack(newNode, ancestors, indexOfNodeToCheck) {
+    //expect indexOfNodeToCheck to exceed current ancestor stack, unless in a recursive call
     //
     if (ancestors[0][1].color !== RBNode.__BLACK){
       ancestors[0][1] = new RBNode(ancestors[0][1]._store.set('_color', RBNode.__BLACK));
-      return [node, ancestors];
+      return [newNode, ancestors];
     }
-    if (childIdx <= 1){
-      return [node, ancestors];
+    if (indexOfNodeToCheck <= 1){
+      return [newNode, ancestors];
     }
-    //each tuple in stack contains: [childSide, node]
-    let child = (!ancestors[childIdx]) ? node : ancestors[childIdx][1]; 
-    let parentIdx = (!ancestors[childIdx]) ? ancestors.length-1 : childIdx-1;
+    //each tuple in stack contains: [childSide, newNode]
+    let nodeToCheck = (!ancestors[indexOfNodeToCheck]) ? newNode : ancestors[indexOfNodeToCheck][1]; 
+    let parentIdx = (!ancestors[indexOfNodeToCheck]) ? ancestors.length-1 : indexOfNodeToCheck-1;
     let parent = ancestors[parentIdx][1];
-    if (child.color === RBNode.__BLACK || parent.color === RBNode.__BLACK) {
-      return [child, ancestors];
+    if (nodeToCheck.color === RBNode.__BLACK || parent.color === RBNode.__BLACK) {
+      return [newNode, ancestors];
     }
 
-    let grandparentIdx = (!ancestors[childIdx]) ? ancestors.length-2 : childIdx-2;
+    let grandparentIdx = (!ancestors[indexOfNodeToCheck]) ? ancestors.length-2 : indexOfNodeToCheck-2;
     let grandparent = ancestors[grandparentIdx][1];
 
     if (grandparent.color !== RBNode.__BLACK) {
+      debugger;
       throw new Error("Grandparent should be black, tree invariant broken in earlier step!")
     }
     let uncle = (ancestors[grandparentIdx][0] === '_left') ? grandparent.right : grandparent.left;
 
     if (uncle.color === RBNode.__RED) {
-      [child, ancestors] = RBTree.pushBlackness(child, ancestors, grandparentIdx);
-      return RBTree.checkAndModifyStack(child, ancestors, grandparentIdx); 
+      [newNode, ancestors] = RBTree.pushBlackness(newNode, ancestors, grandparentIdx);
+      return RBTree.checkAndModifyStack(newNode, ancestors, grandparentIdx); 
       //after pushing blackness, GP is now red. must perform a final check, if grand-grand parent is red.
     } else {
       childSide = ancestors[parentIdx][0];
       parentSide = ancestors[grandparentIdx][0];
 
       if (childSide === '_right' && parentSide === '_left') {
-        //Rotate Left, Child:
-        let tempChild = child;
-        child = ancestors[parentIdx][1];
-        //adjust child with WithMutations
-        child = new RBNode(child._store.withMutations( (map) => {
+        //Rotate Left, nodeToCheck:
+        let tempChild = nodeToCheck;
+        nodeToCheck = ancestors[parentIdx][1];
+        //adjust nodeToCheck with WithMutations
+        nodeToCheck = new RBNode(nodeToCheck._store.withMutations( (map) => {
           return map.set('_right',tempChild._store.get('_left'));
         }));
-        //adjust tempChild with WithMutations, to point at completed child
+        //adjust tempChild with WithMutations, to point at completed nodeToCheck
         ancestors[parentIdx][1] = new RBNode(tempChild._store.withMutations( (map) => {
-          return map.set('_left', child);
+          return map.set('_left', nodeToCheck);
         }));
         ancestors[parentIdx][0] = parentSide;
 
         let newChildIdx = parentIdx+1;
-        return RBTree.checkAndModifyStack(child, ancestors, newChildIdx);
+        return RBTree.checkAndModifyStack(newNode, ancestors, newChildIdx);
       } else if (childSide === '_left' && parentSide === '_left') {
         //RotateRight, Parent:
-        ancestors[grandparentIdx][1] = new RBNode(parent._store.withMutations( (map) => {
+        ancestors[parentIdx][1] = new RBNode(parent._store.withMutations( (map) => {
           map.set(
             '_right', 
             new RBNode(
@@ -172,14 +174,14 @@ export default class RBTree {//RBTree
           return map; 
         }));
 
-        ancestors[grandparentIdx][0] = parentSide;
-        let oldParent = ancestors.pop();
-        let oldParentIdx = grandparentIdx+1; 
-        //stack should now be 1 shorter, update childIdx
-        return RBTree.checkAndModifyStack(child, ancestors, oldParentIdx);
+        ancestors[parentIdx][0] = parentSide;
+        ancestors.splice(grandparentIdx,1);
+        let oldParentIdx = grandparentIdx; 
+        //stack should now be 1 shorter, update indexOfNodeToCheck
+        return RBTree.checkAndModifyStack(newNode, ancestors, oldParentIdx);
       } else if (childSide === '_right' && parentSide === '_right') {
         //rotate left, parent
-        ancestors[grandparentIdx][1] = new RBNode(parent._store.withMutations( (map) => {
+        ancestors[parentIdx][1] = new RBNode(parent._store.withMutations( (map) => {
           map.set(
             '_left', 
             new RBNode(
@@ -191,36 +193,37 @@ export default class RBTree {//RBTree
           map.set('_color', RBNode.__BLACK);
           return map; 
         }));
-        ancestors[grandparentIdx][0] = parentSide;
-        let oldParent = ancestors.pop();
-        let oldParentIdx = grandparentIdx+1; 
-        return RBTree.checkAndModifyStack(child, ancestors, oldParentIdx);
+        ancestors[parentIdx][0] = parentSide;
+        ancestors.splice(grandparentIdx,1);
+        //used to point at 2. now 2 points too far ahead, decrement 2 by 1. needs to point at 1
+        let oldParentIdx = grandparentIdx; 
+        return RBTree.checkAndModifyStack(newNode, ancestors, oldParentIdx);
       } else if (childSide === '_left' && parentSide === '_right') {
-        //Rotate Right, Child:
-        let tempChild = child;
-        //Child takes parent's place in the stack
-        child = ancestors[parentIdx][1];
-        child = new RBNode(child._store.withMutations( (map) => {
+        //Rotate Right, nodeToCheck:
+        let tempChild = nodeToCheck;
+        //nodeToCheck takes parent's place in the stack
+        nodeToCheck = ancestors[parentIdx][1];
+        nodeToCheck = new RBNode(nodeToCheck._store.withMutations( (map) => {
           return map.set('_left',tempChild._store.get('_right'));
         }));
         ancestors[parentIdx][1] = new RBNode(tempChild._store.withMutations( (map) => {
-          return map.set('_right', child);
+          return map.set('_right', nodeToCheck);
         }));
         ancestors[parentIdx][0] = parentSide;
 
         let newChildIdx = parentIdx+1;
-        return RBTree.checkAndModifyStack(child, ancestors, newChildIdx);
+        return RBTree.checkAndModifyStack(newNode, ancestors, newChildIdx);
       } else {
         debugger;
-        throw new Error('Invalid case, childIdx: ${childIdx.toString()}, '+
+        throw new Error('Invalid case, indexOfNodeToCheck: ${indexOfNodeToCheck.toString()}, '+
           'ancestors: ${ancestors.toString()}');
       }
     }
-    throw new Error('Invalid case, end of check function: childIdx: ${childIdx.toString()}, '+
+    throw new Error('Invalid case, end of check function: indexOfNodeToCheck: ${indexOfNodeToCheck.toString()}, '+
       'ancestors: ${ancestors.toString()}');
   }
 
-  static pushBlackness(node, ancestors, blackNode) {
+  static pushBlackness(newNode, ancestors, blackNode) {
     // push blackness
     ancestors[blackNode+1][1] = new RBNode(ancestors[blackNode+1][1]._store.set('_color', RBNode.__BLACK));
     ancestors[blackNode][1] = new RBNode(ancestors[blackNode][1]._store.withMutations( (map) => {
@@ -234,7 +237,7 @@ export default class RBTree {//RBTree
       }
       return map;
     }));
-    return [node, ancestors];
+    return [newNode, ancestors, blackNode];
   }
 
   // static rotate(node, ancestors, pivotIdx, direction) {
@@ -345,6 +348,8 @@ export default class RBTree {//RBTree
   insertAll(listToInsert = []) {
     let resultTree = this;
     listToInsert.forEach(pair => {
+      // if (pair[0] >= 6){
+      // }
       resultTree = resultTree.insert(pair[0], pair[1]);
     });
     return resultTree;
@@ -497,6 +502,8 @@ export default class RBTree {//RBTree
    */
   static removeTwoChildren(comparator, node, ancestors) {
     let [rightAncestors, iop] = RBTree.findInOrderPredecessor(node.left);
+    //u is the IOP
+    //v is the node itself
     let iopReplacementStore = iop.store.withMutations(_store => {
       _store.set('_key', node.key).set('_value', node.value).set('_id', node.id);
     });
