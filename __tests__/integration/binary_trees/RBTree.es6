@@ -66,7 +66,6 @@ describe('Red-Black Tests', function() {
       //4 cases: R-R, L-R
       //R-L, L-L
       let setDoubleRed = new RBTree();
-      debugger;
       setDoubleRed = 
         setDoubleRed
         .insert(100, 'a')
@@ -74,7 +73,6 @@ describe('Red-Black Tests', function() {
         .insert(90, 'c');
 
       it('has a root black node, and two red child nodes', function() {
-        debugger;
         expect(setDoubleRed._root.color).toBe(RBNode.__BLACK);
         expect(setDoubleRed._root.value).toBe('c');
         expect(setDoubleRed.find(100).color).toBe(RBNode.__RED);
@@ -119,7 +117,7 @@ describe('Red-Black Tests', function() {
     });
 
     describe('Insertion & Deletion Tests', function() {
-      let RB_Tree = new RBTree();
+      let persistentTree = new RBTree();
       let seq = [ 
         [100, "1st"],
         [80, "2nd"],
@@ -142,45 +140,53 @@ describe('Red-Black Tests', function() {
 
       let addFromSeq = () => {
         let node = addOne();
-        RB_Tree = RB_Tree.insert(node[0], node[1]);
-        return RB_Tree;
+        persistentTree = persistentTree.insert(node[0], node[1]);
+        return persistentTree;
       }
       describe('8-element Insertion Tests', function() {
         it('inserts into empty', function() {
           addFromSeq(); //100
-          expect(RB_Tree.root.value).toBe("1st");
-          expect(RB_Tree.root.color).toBe(RBNode.__BLACK);
+          expect(persistentTree.root.value).toBe("1st");
+          expect(persistentTree.root.color).toBe(RBNode.__BLACK);
         });
 
         it('rotates left when required', function() {
           addFromSeq();//80
           addFromSeq();//90
-          expect(RB_Tree.find(80).value).toEqual('2nd')
+          expect(persistentTree.find(80).value).toEqual('2nd')
         });
 
         it('rotates and repaints for "Black Uncle, Child-R, Parent-R-Child" Case', function() {
           addFromSeq(); //160
-          expect(RB_Tree.find(80).color).toEqual(RBNode.__BLACK);
-          expect(RB_Tree.find(90).color).toEqual(RBNode.__BLACK);
-          expect(RB_Tree.find(100).color).toEqual(RBNode.__BLACK);
-          expect(RB_Tree.find(160).color).toEqual(RBNode.__RED);
+          expect(persistentTree.find(80).color).toEqual(RBNode.__BLACK);
+          expect(persistentTree.find(90).color).toEqual(RBNode.__BLACK);
+          expect(persistentTree.find(100).color).toEqual(RBNode.__BLACK);
+          expect(persistentTree.find(160).color).toEqual(RBNode.__RED);
         });
 
         it('repaints for "Red Uncle"', function() {
           addFromSeq(); //190
           addFromSeq(); //140
-          expect(RB_Tree.find(190).color).toEqual(RBNode.__BLACK);
-          expect(RB_Tree.find(100).color).toEqual(RBNode.__BLACK);
-          expect(RB_Tree.find(140).color).toEqual(RBNode.__RED);
+          expect(persistentTree.find(190).color).toEqual(RBNode.__BLACK);
+          expect(persistentTree.find(100).color).toEqual(RBNode.__BLACK);
+          expect(persistentTree.find(140).color).toEqual(RBNode.__RED);
         });
 
         it('simple inserts onto left subtree', function() {
           addFromSeq(); //95
           addFromSeq(); //40
-          expect(RB_Tree.size).toBe(8);
-          expect(RB_Tree.find(80).color).toEqual(RBNode.__BLACK);
-          expect(RB_Tree.find(40).color).toEqual(RBNode.__RED);
-          expect(RB_Tree.find(190).value).toEqual("5th");
+          expect(persistentTree.size).toBe(8);
+          expect(persistentTree.find(80).color).toEqual(RBNode.__BLACK);
+          expect(persistentTree.find(40).color).toEqual(RBNode.__RED);
+          expect(persistentTree.find(190).value).toEqual("5th");
+
+        });
+        it('passes final state tests', function() {
+          expect(persistentTree._root.right.right.key).toEqual(190);
+          expect(persistentTree._root.right.right.color).toEqual(RBNode.__BLACK);
+          expect(persistentTree._root.left.left.key).toEqual(40);
+          expect(persistentTree._root.right.left.left.key).toEqual(95);          
+          expect(persistentTree._root.right.left.right.key).toEqual(140);          
         });
       });
 
@@ -188,22 +194,37 @@ describe('Red-Black Tests', function() {
       describe('Deletion Tests', function() {
         
         it('deletes a red leaf with no further changes', function() {
-          
+          persistentTree.remove(40);
+          expect(persistentTree._root.left.left).toEqual(RBTree.nullPointer);
+          let rightSide = persistentTree._root.right;
+          expect(rightSide.key).toEqual(160);
+          expect(rightSide.color).toEqual(RBNode.__RED);
+          expect(rightSide.left.right.key).toBe(140);
+          expect(rightSide.right.key).toBe(190);
         });
 
         it('deletes a red non-leaf, with no further changes, replacing with predecessor', function() {
-          
+          persistentTree.remove(160);
+          let rootN = persistentTree._root;
+          let rSide = rootN.right;
+          expect(persistentTree.size).toEqual(6);
+          expect(rootN.color).toEqual(RBNode.__BLACK);
+          expect(rootN.key).toEqual(90);
+          expect(rSide.color).toEqual(RBNode.__RED);
+          expect(rSide.key).toEqual(140);
+          expect(rSide.left.left.key).toEqual(95);
+          expect(rSide.right.key).toEqual(190);
         });
 
         it('deletes a black node with red child, makes red child black', function() {
-          
+          //delete 100
         });
 
         describe('Double Black Cases', function() {
           describe('Case 1: Sibling Black, one child red:', function() {
-
+            //set up case...add nephews to 190, delete and RE-ADD 100.
             it('Handles a "LEFT double-black, right red nephew" Case.', function() {
-                          
+                  
             });
 
             it('Handles a "LEFT double-black, left red nephew" Case.', function() {
@@ -247,23 +268,39 @@ describe('Red-Black Tests', function() {
 
 
     });
-  xdescribe('Batch Insert with traversal', function() {
+  describe('Batch Insert with traversal', function() {
     let ten = new RBTree();
     let twentyThings = Array(20);
     for (let i = 0 ; i < 20; i++){
       //tested manually up to 9
       twentyThings[i] = [i, "valueForKey :" + i];
     }
-    // let completed = ten.insertAll(twentyThings);
-    // let counter = 0;
-    // RBTree.traverseInOrder(completed._root, (node) => {
-    //   expect(node.key).toEqual(counter++);
-    // });
+    let completed = ten.insertAll(twentyThings);
+    let counter = 0;
+    RBTree.traverseInOrder(completed._root, (node) => {
+      expect(node.key).toEqual(counter++);
+    });
   });
 
   describe('Large Batch Insert, with traversal and deletion', function() {
+    //WARN: This test takes 2-5 minutes in Jest + Babel.
+    let ten = new RBTree();
+    let manyThings = Array(10000);
+    for (let i = 0 ; i < 10000; i++){
+      //tested manually up to 9
+      manyThings[i] = [i, "valueForKey :" + i];
+    }
+    let completed = ten.insertAll(manyThings);
+    let counter = 0;
+    RBTree.traverseInOrder(completed._root, (node) => {
+      expect(node.key).toEqual(counter++);
+    });
+
     //insert only keys, with the same value
     //insert numbers from 0 to 10000
+    //
+    //
+    //
     //delete numbers from 1 to 10000
     //expect no errors throw, expect 0 to be the remaining node, red, size to be 1        
   });

@@ -158,7 +158,7 @@ export default class RBTree {//RBTree
         ancestors[parentIdx][0] = parentSide;
 
         let newChildIdx = parentIdx+1;
-        return RBTree.checkAndModifyStack(newNode, ancestors, newChildIdx);
+        return RBTree.checkAndModifyStack(nodeToCheck, ancestors, newChildIdx);
       } else if (childSide === '_left' && parentSide === '_left') {
         //RotateRight, Parent:
         ancestors[parentIdx][1] = new RBNode(parent._store.withMutations( (map) => {
@@ -212,7 +212,7 @@ export default class RBTree {//RBTree
         ancestors[parentIdx][0] = parentSide;
 
         let newChildIdx = parentIdx+1;
-        return RBTree.checkAndModifyStack(newNode, ancestors, newChildIdx);
+        return RBTree.checkAndModifyStack(nodeToCheck, ancestors, newChildIdx);
       } else {
         debugger;
         throw new Error('Invalid case, indexOfNodeToCheck: ${indexOfNodeToCheck.toString()}, '+
