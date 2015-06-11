@@ -40,6 +40,10 @@ export default class RBNode { //RBNode
     return this.store.get('_id');
   }
 
+  get isLeaf() {
+    return !!(this.children.length === 0);
+  }
+
   get children() {
     let children = [];
     if (this.left) children.push(['_left', this.left]);

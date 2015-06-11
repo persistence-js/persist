@@ -3,13 +3,13 @@ const RBNode = require('./RBNode');
 const _NULL_SENTINEL = new RBNode(null, null, null, null, null, RBNode.__BLACK);
 export default class RBTree {//RBTree
 
-  constructor(comparator, _root) {
+  constructor(comparator, _root, size = null) {
     this._comparator = RBTree.setComparator(comparator);
     this._root = null;
     this._count = 0;
     if (RBTree.isRBNode(_root)) {
       this._root = RBTree.cloneNode(_root);
-      this._count = RBTree.recount(_root);
+      this._count = size ? size : RBTree.recount(_root);
     }
     Object.freeze(this);
   }
@@ -303,6 +303,7 @@ export default class RBTree {//RBTree
     }
   }
 
+
   /**
    * Get the node with the matching key in tree in O(log n).
    * @param {[*]} key [the key of the node to find]
@@ -360,7 +361,7 @@ export default class RBTree {//RBTree
    * @return {[RBTree]} [new BST clone of current tree]
    */
   clone() {
-    return new RBTree(this.comparator, this.root);
+    return new RBTree(this.comparator, this.root, this.size);
   }
 
   /**
@@ -412,21 +413,6 @@ export default class RBTree {//RBTree
     let count = 0;
     RBTree.traverseInOrder(_root, () => count++);
     return count;
-  }
-
-  /**
-   * Returns the ancestor nodes and in-order predecessor of the input node.
-   * @param {[RBNode]} leftChild [node from which to start the search for IOP]
-   * @return {[Array]} [tuple containing a stack of ancestors and the IOP]
-   */
-  static findInOrderPredecessor(leftChild) {
-    let currentIop = leftChild,
-        ancestors = [];
-    while (currentIop.right) {
-      ancestors.push(['_right', currentIop]);
-      currentIop = currentIop.right;
-    }
-    return [ancestors, currentIop];
   }
 
   /**
@@ -527,19 +513,65 @@ export default class RBTree {//RBTree
    * @return {[RBNode]} [new root node with input node removed and children repositioned]
    */
   static removeFound(comparator, node, ancestors) {
-    switch (node.children.length) {
-      case 1:
-        return new RBTree(comparator, RBTree.removeOneChild(node, ancestors));
-        break;
-      case 2:
-        return RBTree.removeTwoChildren(comparator, node, ancestors);
-        break;
-      default:
-        return new RBTree(comparator, RBTree.removeNoChildren(node, ancestors));
-        break;
+    //See: 06-11-Delete-PseudoCode.md in scratchDB
+    let originalNodeToDelete = node;
+    //if node is leaf, check color, handle double black
+    //else if node has left subtree: find iOP
+    //else if node has only right subtree: assign, raise, handle
+    //  -if node removed was black: raise assign
+    //  -if node removed was red: throw: red can't have right only subtree
+    //    -i.e. a rotation should have happened already.
+    //  -color if now root
+    //else : not leaf, left, or right: throw error
+    if (node.isLeaf) {
+      //check color, handle double black
+    } else if (node.left !== RBTree.nullPointer){
+      //find iOP
+    } else if (node.right !== RBTree.nullPointer){
+      //assign/raise/handle
+    } else {
+      throw new Error("Case: Not a leaf, but no left or right subtree.")
     }
+    //return things here...
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //working with iOP:
+    //if replacement has:
+    //  0 children: delete, handle double Black
+    //  1 child: 
+    //    -check subtree.
+    //    -if none, delete, assign parentSide to deleted node's right
+    //      -raise blackness
+    //      -handle double blacks
+    //  2 children: not possible: throw an error
+    let replacementNode;
+    let ancestors;
+    if (node.left !== RBTree.nullPointer) {
+
+    } else if {
+
+    } 
   }
 
+  /**
+   * Returns the ancestor nodes and in-order predecessor of the input node.
+   * @param {[RBNode]} leftChild [node from which to start the search for IOP]
+   * @return {[Array]} [tuple containing a stack of ancestors and the IOP]
+   */
+  static findInOrderPredecessor(leftChild) {
+    let currentIop = leftChild,
+        ancestors = [];
+    while (currentIop.right) {
+      ancestors.push(['_right', currentIop]);
+      currentIop = currentIop.right;
+    }
+    return [ancestors, currentIop];
+  }
 
   /**
    *
