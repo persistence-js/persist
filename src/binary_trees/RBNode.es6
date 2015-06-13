@@ -70,4 +70,11 @@ export default class RBNode { //RBNode
   static switchColor(color) {
     return (color === RBNode.__Red) ? RBNode.__Red : RBNode.__Black;
   }
+
+  static increaseBlackness(node){
+    let color = node._color;
+    color = (color === RBNode.__RED) ? RBNode.__BLACK : RBNode.__DBLACK;
+    return new RBNode(node._store.set('_color', color));
+  }
+
 }

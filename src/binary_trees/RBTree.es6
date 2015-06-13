@@ -1,8 +1,9 @@
 const IM = require('immutable');
 const RBNode = require('./RBNode');
 const _NULL_SENTINEL = new RBNode(null, null, null, null, null, RBNode.__BLACK);
-export default class RBTree {//RBTree
-
+const _NULL_SENTINEL_DB = new RBNode(null, null, null, null, null, RBNode.__DBLACK);
+export default class RBTree {
+  //RBTree
   constructor(comparator, _root, size = null) {
     this._comparator = RBTree.setComparator(comparator);
     this._root = null;
@@ -110,7 +111,6 @@ export default class RBTree {//RBTree
 
   static checkAndModifyStack(newNode, ancestors, indexOfNodeToCheck) {
     //expect indexOfNodeToCheck to exceed current ancestor stack, unless in a recursive call
-    //
     if (ancestors[0][1].color !== RBNode.__BLACK){
       ancestors[0][1] = new RBNode(ancestors[0][1]._store.set('_color', RBNode.__BLACK));
       return [newNode, ancestors];
@@ -203,6 +203,7 @@ export default class RBTree {//RBTree
         let tempChild = nodeToCheck;
         //nodeToCheck takes parent's place in the stack
         nodeToCheck = ancestors[parentIdx][1];
+
         nodeToCheck = new RBNode(nodeToCheck._store.withMutations( (map) => {
           return map.set('_left',tempChild._store.get('_right'));
         }));
@@ -263,6 +264,7 @@ export default class RBTree {//RBTree
       ancestorStack.push(['_left', node])
       return RBTree.recursiveSearch(comparator, node.left, key, ancestorStack);
     } else {
+      //comparison returns 0, successful find
       //should only be inside here in a find operation: upon a successful find
       return [node, ancestorStack];
     }
@@ -513,8 +515,9 @@ export default class RBTree {//RBTree
    * @return {[RBNode]} [new root node with input node removed and children repositioned]
    */
   static removeFound(comparator, node, ancestors) {
+    //Returns NEW ROOT NODE: WILL CALL ANCESTORSTACK WHEN DOUBLE BLACK REPLACES CORRECTLY...
+    //Key Question: Will constructFromStack work...with a null node passed in.
     //See: 06-11-Delete-PseudoCode.md in scratchDB
-    let originalNodeToDelete = node;
     //if node is leaf, check color, handle double black
     //else if node has left subtree: find iOP
     //else if node has only right subtree: assign, raise, handle
@@ -524,38 +527,120 @@ export default class RBTree {//RBTree
     //  -color if now root
     //else : not leaf, left, or right: throw error
     if (node.isLeaf) {
-      //check color, handle double black
+      handleLeaf(node);
     } else if (node.left !== RBTree.nullPointer){
-      //find iOP
+      let [iOP, iOP_Ancestors] = RBTree.findInOrderPredecessor(node.left);
+      addiOPAncestorsToAncestorStack(iOP, iOP_Ancestors);
+      handleLeaf(iOP);
     } else if (node.right !== RBTree.nullPointer){
-      //assign/raise/handle
+      let rightNode = node.right;
+      ancestors.push(['right', rightNode]);
+      handleLeaf(rightNode);
     } else {
-      throw new Error("Case: Not a leaf, but no left or right subtree.")
+      throw new Error("Case: Not a leaf, but no left or right subtree.(!?)")
     }
-    //return things here...
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //working with iOP:
-    //if replacement has:
-    //  0 children: delete, handle double Black
-    //  1 child: 
-    //    -check subtree.
-    //    -if none, delete, assign parentSide to deleted node's right
-    //      -raise blackness
-    //      -handle double blacks
-    //  2 children: not possible: throw an error
-    let replacementNode;
-    let ancestors;
-    if (node.left !== RBTree.nullPointer) {
 
-    } else if {
+    handleDoubleBlack(node, ancestors, (node.color === RBNode.__DBLACK) ? ancestors.length : -1);
+    return constructFromLeaf(node, ancestors); //WiP;
 
-    } 
+    let handleLeaf = (leafNode) => {
+      if (leafNode.color === RBNode.__RED) {
+        node = RBTree.nullPointer;
+      } else if (leafNode.color === RBNode.__BLACK) {
+        node = RBTree.nullPointerDB;
+      } else {
+        throw new Error("Node color is not red or Black, in deletion case.");
+      }
+
+    }
+
+    let addiOPAncestorsToAncestorStack = (iOP, iOP_Ancestors) => {
+      ancestors.push(['left', iOP]);
+      ancestors = ancestors.concat(iOP_Ancestors);
+    }
+
+    let handleDoubleBlack = (finalNode, finalAncestors, doubleBlackIndex) => {
+      if (doubleBlackIndex <= -1){
+        return;
+      }
+      let parentIndex = finalAncestors.length-1;
+      let parent =      finalAncestors[parentIndex][1];
+      let doubleBlackSide  = finalAncestors[parentIndex][0];
+      let siblingSide = doubleBlackSide === 'left' ? 'right' : 'left';
+
+      let sibling = parent[siblingSide];
+      //black sibling, red child
+      //black sibling, black children (or null)
+      //red sibling
+      //
+      if (          sibling.color === RBNode.__BLACK &&
+                      (sibling.right.color === RBNode.__RED 
+                    || sibling.left.color === RBNode.__RED)){
+        handleCase1();
+      } else if (   sibling.color === RBNode.__BLACK 
+                &&  sibling.left.color === RBNode.__BLACK 
+                &&  sibling.right.color === RBNode.__BLACK){
+        handleCase2();
+      } else if (sibling.color === RBNode.__RED){
+        handleCase3();
+      } else {
+        throw new Error("sibling not Black, or Red in DB Case");
+      }
+
+
+
+
+      //if indexOfDoubleBlack === -1, do some stuff.
+      //returns a formatted ancestorStack(of final tree length-1), with the last node
+    }
+    
+    let handleCase1 = (indexOfDB, parentIndex, parent, doubleBlackSide, siblingSide, sibling) => {
+      if (doubleBlackSide === 'left'){
+        if (sibling.right && sibling.right.color === RBNode.__RED){
+          //left rotate the black sibling
+          //switch blackness --- write test cases
+        } else if (sibling.left && sibling.left.color === RBNode.__RED){
+          //right rotate, switch colors, enter above case
+        }
+      } else if (doubleBlackSide === 'right'){
+        if (sibling.left && sibling.left.color === RBNode.__RED){
+          //right rotate the black sibling
+          //switch blackness
+        } else if (sibling.right && sibling.right.color === RBNode.__RED){
+          //left rotate, switch colors, enter above case
+        }
+
+      } else {
+        throw new Error("doubleBlackSide not Left or Right");
+      }
+    }
+    let handleCase2 = (indexOfDB, parentIndex, parent, doubleBlackSide, siblingSide, sibling) => {
+      ancestors[parentIndex][1] = new RBNode(parent._store.withMutations((parentMap) => {
+        parentMap.set('_${siblingSide}', new RBNode(
+          parentMap.get('_${siblingSide}')._store.set('_color', RBNode.__RED)
+          ));
+        parentMap.set('_${doubleBlackSide}',RBNode.increaseBlackness(parentMap.get('_${doubleBlackSide}')));
+        // -recolor the sibling
+        // Node is Now single-black
+        // -increase the blackness of the parent
+        //   -recurse back if a new double black is created
+        parentMap.set('_color', (parentMap.get('_color') === RBNode.__RED ? RBNode.__BLACK : RBNode.__DBLACK))
+      }));
+      if (ancestors[parentIndex][1].color === RBNode.__DBLACK) {
+        //DB pushed up, recurse
+        handleDoubleBlack(node, ancestors, doubleBlackIndex-1);
+      }
+
+    }
+    let handleCase3 = (indexOfDB, parentIndex, parent, doubleBlackSide, siblingSide, sibling) => {
+      // adjust with a rotation and one of the previous cases applies....
+      //   -if right red sibling: rotate left
+      //   if left subling: rotate right
+      //     -recurse up, limits propagation since parent is now red
+
+    }
+    handleCase(node, ancestors);
+    return RBTree.constructFromLeaf(node, ancestors);
   }
 
   /**
@@ -586,5 +671,9 @@ export default class RBTree {//RBTree
 
   static get nullPointer() {
     return _NULL_SENTINEL;
+  }
+
+  static get nullPointerDB() {
+    return _NULL_SENTINEL_DB;
   }
 }
