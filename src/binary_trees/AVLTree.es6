@@ -92,13 +92,13 @@ export default class AVLTree {
         newStack = [newNode, ancestorStack];
       } else {
         newNode = new AVLNode(key, value, AVLTree.nullPointer, AVLTree.nullPointer);
-        newStack = AVLTree.checkAndModifyStack(newNode, ancestorStack, this.rebalanceCount);
+        newStack = AVLTree.updateAndBalance(newNode, ancestorStack, this.rebalanceCount);
       }
       return new AVLTree(this.comparator, AVLTree.constructFromLeaf(newStack[0], newStack[1]), this.size + 1, newStack[2]);
     }
   }
 
-  static checkAndModifyStack(newNode, ancestors, rebalanceCount) {
+  static updateAndBalance(newNode, ancestors, rebalanceCount) {
     // base-case: at root and all balanced
     if (!ancestors.length) return [newNode, [], rebalanceCount];
     // get last ancestor as parent and side of child
@@ -140,7 +140,7 @@ export default class AVLTree {
       rebalanceCount++;
     }
     // return recursive call with parent as newNode, updated ancestors, and rebalanceCount
-    return AVLTree.checkAndModifyStack(newNode, ancestors, rebalanceCount);
+    return AVLTree.updateAndBalance(newNode, ancestors, rebalanceCount);
   }
 
   static rotateRight(node) {
