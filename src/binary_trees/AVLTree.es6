@@ -195,7 +195,7 @@ export default class AVLTree {
   }
 
   static recursiveSearch(comparator, node, key, ancestorStack = []) {
-    if (node === AVLTree.nullPointer) return [null, ancestorStack];
+    if (node === AVLTree.nullPointer || node === null) return [null, ancestorStack];
     switch (comparator(node.key, key)) {
       case -1:
         return AVLTree.recursiveSearch(comparator, node.right, key, ancestorStack.concat([['_right', node]]));

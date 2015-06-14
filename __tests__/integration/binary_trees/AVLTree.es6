@@ -4,7 +4,7 @@ const AVLTree = require('../../../src/binary_trees/AVLTree');
 const AVLNode = require('../../../src/binary_trees/AVLNode');
 
 
-xdescribe('AVL Tests', () => {
+describe('AVL Tests', () => {
 
   describe('Node Tests', () => {
     let node1 = new AVLNode(1, 'hi', null, null);
@@ -73,132 +73,75 @@ xdescribe('AVL Tests', () => {
 
   });
 
-  xdescribe('Tree Functionality Tests', () => {
+  describe('Tree Functionality Tests', () => {
+    let _TREE = new AVLTree().insert(50, 'a');
 
-    describe('Basic Insertion: Simple Rotation Tests', () => {
-      let setLeftHeavy = new AVLTree();
-      setLeftHeavy = setLeftHeavy.insert(100, 'a')
-                                 .insert(80, 'b')
-                                 .insert(90, 'c');
+    describe('Base Tree for Rotation Tests', () => {
+      expect(_TREE.root.balance).toBe(0);
+      expect(_TREE.root.value).toBe('a');
+      expect(_TREE.root.key).toBe(50);
+      expect(_TREE.size).toBe(1);
+      expect(_TREE.rebalanceCount).toBe(0);
+    });
 
-      it('has a balanced root node and two balanced child nodes', () => {
-        expect(setLeftHeavy._root.balance).toBe(0);
-        expect(setLeftHeavy._root.value).toBe('c');
-        expect(setLeftHeavy.find(100).balance).toBe(0);
-        expect(setLeftHeavy.find(80).balance).toBe(0);
+    describe('Rotation: After Insertion', () => {
+
+      describe('LL Case Rotations', () => {
+
+        describe('without complex children', () => {
+          let testTree = _TREE.insert(100, 'b').insert(150, 'c');
+
+          it('pivots on right child', () => {
+            expect(testTree.root.key).toBe(100);
+            expect(testTree.root.value).toBe('b');
+            expect(testTree.root.left.key).toBe(50);
+            expect(testTree.root.right.key).toBe(150);
+          });
+
+          it('updates heights after rotation', () => {
+            expect(testTree.height).toBe(2);
+            expect(testTree.root.height).toBe(2);
+            expect(testTree.root.left.height).toBe(1);
+            expect(testTree.root.right.height).toBe(1);
+          });
+
+          it('rebalances the tree', () => {
+            expect(testTree.root.balance).toBe(0);
+            expect(testTree.root.left.balance).toBe(0);
+            expect(testTree.root.right.balance).toBe(0);
+          });
+
+          it('updates the rebalanceCount of returned tree', () => {
+            expect(testTree.rebalanceCount).toBe(1);
+          });
+
+          it('maintains the correct size of tree', () => {
+            expect(testTree.size).toBe(3);
+          });
+
+        });
+
+        describe('with complex children', () => {
+
+        });
+
       });
 
-      it('is a right child, with right parent', () => {
-        let after = setLeftHeavy.insert(105, 'd').insert(110, 'e');
-        expect(after.find(100).balance).toBe(0);
-        expect(after.find(105).left).toBe(after.find(100));
-        expect(after.find(105).right).toBe(after.find(110));
+      describe('LR Case Rotations', () => {
+
       });
 
-      it('is a left child, with a right parent', () => {
-        let after = setLeftHeavy.insert(105, 'd').insert(101, 'e');
-        expect(after.find(101).left).toBe(after.find(100));
-        expect(after.find(101).right).toBe(after.find(105));
-        expect(after.find(101).balance).toBe(0);
+      describe('RR Case Rotations', () => {
+
       });
 
-      it('is a right child, with left parent', () => {
-        let after = setLeftHeavy.insert(95, 'd').insert(96, 'e');
-        expect(after.find(96).left).toBe(after.find(95));
-        expect(after.find(96).right).toBe(after.find(100));
-        expect(after.find(96).balance).toBe(0);
-      });
+      describe('RL Case Rotations', () => {
 
-      it('is a left child, with a left parent', () => {
-        let after = setLeftHeavy.insert(95, 'd').insert(94, 'e');
-        expect(after.find(95).left).toBe(after.find(94));
-        expect(after.find(95).right).toBe(after.find(100));
-        expect(after.find(95).balance).toBe(0);
       });
 
     });
 
-    describe('Insertion & Deletion Tests', () => {
-      let persistentTree = new AVLTree();
-      let seq = [
-        [100, '1st'],
-        [80, '2nd'],
-        [90, '3rd'],
-        [160, '4th'],
-        [190, '5th'],
-        [140, '6th'],
-        [95, '7th'],
-        [40, '8th']
-      ];
-
-      let sequentialInsert = () => {
-        let counter = 0;
-        return () => {
-          return seq[counter++];
-        };
-      };
-
-      let addOne = sequentialInsert();
-
-      let addFromSeq = () => {
-        let tuple = addOne();
-        persistentTree = persistentTree.insert(tuple[0], tuple[1]);
-        return persistentTree;
-      };
-
-      describe('8-element Insertion Tests', () => {
-
-        it('inserts into empty', () => {
-          addFromSeq(); // 100
-          expect(persistentTree.root.value).toBe('1st');
-          expect(persistentTree.root.balance).toBe(0);
-        });
-
-        it('rotates left when required', () => {
-          addFromSeq(); // 80
-          addFromSeq(); // 90
-          expect(persistentTree.find(80).value).toEqual('2nd');
-        });
-
-        it('rebalances after right-heavy left rotation', () => {
-          addFromSeq(); // 160
-          addFromSeq(); // 190
-          expect(persistentTree.find(80).balance).toEqual(0);
-          expect(persistentTree.find(90).balance).toEqual(1);
-          expect(persistentTree.find(100).balance).toEqual(1);
-          expect(persistentTree.find(160).balance).toEqual(0);
-        });
-
-        it('rebalances after double rotation', () => {
-          addFromSeq(); // 140
-          expect(persistentTree.find(190).balance).toEqual(0);
-          expect(persistentTree.find(100).balance).toEqual(0);
-          expect(persistentTree.find(140).balance).toEqual(0);
-        });
-
-        it('simple inserts onto left subtree', () => {
-          addFromSeq(); // 95
-          addFromSeq(); // 40
-          expect(persistentTree.size).toBe(8);
-          expect(persistentTree.find(80).balance).toEqual(-1);
-          expect(persistentTree.find(40).balance).toEqual(0);
-          expect(persistentTree.find(190).value).toEqual('5th');
-        });
-
-        it('passes final state tests', () => {
-          expect(persistentTree._root.right.right.key).toEqual(190);
-          expect(persistentTree._root.right.right.balance).toEqual(0);
-          expect(persistentTree._root.left.left.left.key).toEqual(40);
-          expect(persistentTree._root.right.left.key).toEqual(140);
-          expect(persistentTree._root.left.right.key).toEqual(95);
-          expect(persistentTree._root.balance).toEqual(-1);
-        });
-
-      });
-
-      describe('Deletion Tests', () => {
-
-      });
+    describe('Rotation: After Removal', () => {
 
     });
 
