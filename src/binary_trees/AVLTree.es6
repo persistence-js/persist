@@ -1,30 +1,25 @@
 import 'core-js/shim';
 const IM = require('immutable');
 const AVLNode = require('./AVLNode');
-
+const _NULL_SENTINEL = new AVLNode(null, null, null, null, 0);
 
 export default class AVLTree {
 
   constructor(comparator, _root, _size = 0, _rebalanceCount = 0) {
-    this._comparator = this.setComparator(comparator);
-    this._size = _size;
+    this._comparator = AVLTree.setComparator(comparator);
+    this._root = null;
+    this._count = 0;
     this._rebalanceCount = _rebalanceCount;
-    if (Array.isArray(_root)) {
-      this._root = this.constructRoot(_root);
-    } else {
-      if (AVLNode.isAVLNode(_root)) {
-        this._root = AVLNode.cloneNode(_root);
-        this._size = _size || 1;
-        this._rebalanceCount = _rebalanceCount;
-      } else {
-        this._root = null;
-      }
+    if (AVLTree.isAVLNode(_root)) {
+      this._root = AVLNode.cloneNode(_root);
+      this._count = (_size > 0) ? _size : AVLTree.recount(_root);
+      this._rebalanceCount = _rebalanceCount;
     }
     Object.freeze(this);
   }
 
   get comparator() {
-    return this._comparator || AVLTree.defaultComp();
+    return this._comparator;
   }
 
   get root() {
@@ -32,11 +27,11 @@ export default class AVLTree {
   }
 
   get size() {
-    return this._size || 0;
+    return this._count;
   }
 
   get rebalanceCount() {
-    return this._rebalanceCount || 0;
+    return this._rebalanceCount;
   }
 
   get height() {
@@ -44,19 +39,23 @@ export default class AVLTree {
   }
 
   get min() {
-
+    return AVLTree.traverseSide('left', this);
   }
 
   get max() {
-
+    return AVLTree.traverseSide('right', this);
   }
 
   get keys() {
-
+    let keys = [];
+    this.forEach(node => keys.push(node.key));
+    return keys;
   }
 
   get values() {
-
+    let values = [];
+    this.forEach(node => values.push(node.value));
+    return values;
   }
 
   find(key) {
@@ -64,88 +63,125 @@ export default class AVLTree {
   }
 
   get(key) {
-
+    let [searchResult,] = AVLTree.recursiveSearch(this.comparator, this.root, key);
+    return !search ? null : search.value;
   }
 
   contains(value) {
-
+    return this.values.indexOf(value) > -1;
   }
 
-  forEach() {
-
+  forEach(callback) {
+    AVLTree.traverseInOrder(this.root, callback);
   }
 
   clone() {
     return new AVLTree(this.comparator, this.root, this.size, this.rebalanceCount);
   }
 
-  setComparator(comparator) {
-    let isComparator = !!comparator && typeof comparator === 'function';
-    return isComparator ? comparator : AVLTree.defaultComp;
-  }
-
-  // returns new root node after insertion of list items
-  // rebalances and freezes after all mutations
-  constructRoot(list) {
-
-  }
-
   insert(key, value) {
-    if (key === undefined) throw new Error('Cannot insert data into AVLTree without a key');
-    if (!this.root) return new AVLTree(this.comparator, new AVLNode(key, value), 1);
-    let [nodeMatch, ancestorStack] = AVLTree.recursiveSearch(this.comparator, this.root, key);
-    return !nodeMatch ? this.addChild(this.root, key, value, ancestorStack) : this.clone();
-  }
-
-  addChild(parentNode, key, value, ancestorStack = []) {
-    let newRoot,
-        balanceData = {},
-        comparisons = this.comparator(parentNode.key, key);
-
-    switch (comparisons) {
-      case 1:
-        if (!parentNode.left) {
-          [newRoot, balanceData] = AVLTree.constructFromLeaf(new AVLNode(key, value), ancestorStack);
-          if (balanceData.heavyNode) {
-            return AVLTree.rebalance(balanceData, this.comparator, this.size, this.rebalanceCount);
-          } else {
-            return new AVLTree(this.comparator, newRoot, this.size + 1);
-          }
-        } else {
-          return this.addChild(parentNode.left, key, value, ancestorStack);
-        }
-        break;
-      case -1:
-        if (!parentNode.right) {
-          [newRoot, balanceData] = AVLTree.constructFromLeaf(new AVLNode(key, value), ancestorStack);
-          if (balanceData.heavyNode) {
-            return AVLTree.rebalance(balanceData, this.comparator, this.size, this.rebalanceCount);
-          } else {
-            return new AVLTree(this.comparator, newRoot, this.size + 1);
-          }
-        } else {
-          return this.addChild(parentNode.right, key, value, ancestorStack);
-        }
-        break;
+    if (key === undefined) {
+      throw new Error('Cannot insert data into AVLTree without a key');
+    } else if (!this.size) {
+      return new AVLTree(this.comparator, new AVLNode(key, value, AVLTree.nullPointer, AVLTree.nullPointer, 1));
+    } else {
+      let newStack;
+      let [newNode, ancestorStack] = AVLTree.recursiveSearch(this.comparator, this.root, key);
+      if (newNode) {
+        newNode = new AVLNode(newNode._store.set('_value', value));
+        newStack = [newNode, ancestorStack];
+      } else {
+        newNode = new AVLNode(key, value, AVLTree.nullPointer, AVLTree.nullPointer);
+        newStack = AVLTree.checkAndModifyStack(newNode, ancestorStack, this.rebalanceCount);
+      }
+      return new AVLTree(this.comparator, AVLTree.constructFromLeaf(newStack[0], newStack[1]), this.size + 1, newStack[2]);
     }
   }
 
-  // inserts key-value pairs one-by-one, utilizes #withMutations
-  // for efficiency and overhead reduction
-  // returns new tree
-  insertAll(tuples) {
+  static checkAndModifyStack(newNode, ancestors, rebalanceCount) {
+    // base-case: at root and all balanced
+    if (!ancestors.length) return [newNode, [], rebalanceCount];
 
+    // get last ancestor as parent and side of child
+    let [childSide, parent] = ancestors.pop();
+
+    // set side of parent to the new node and increment height
+    let updatedParentStore = parent._store.withMutations(map => {
+      return map.set(childSide, newNode).set('_height', map.get('_height') + 1);
+    });
+
+    let updatedParentToCheck = new AVLNode(updatedParentStore);
+    newNode = updatedParentToCheck;
+
+    // check balance of updated parent
+    if (updatedParentToCheck.balance > 1) {
+      // addition of child node made parent too fat, R heavy
+      if (updatedParentToCheck.right.balance < 0) {
+        // perform right rotation on right, then left rotation on parent
+        console.log('LR Case');
+
+
+      } else {
+        // perform single left rotation
+        console.log('LL Case');
+        newNode = AVLTree.rotateLeft(updatedParentToCheck);
+        rebalanceCount++;
+      }
+    } else if (updatedParentToCheck.balance < -1) {
+      // addition of child node made parent too fat, L heavy
+      if (updatedParentToCheck.left.balance > 0) {
+        // perform left rotation on left, then right rotation on parent
+        console.log('RL Case');
+
+
+      } else {
+        // perform single right rotation
+        console.log('RR Case');
+        newNode = AVLTree.rotateRight(updatedParentToCheck);
+        rebalanceCount++;
+      }
+    }
+    // return recursive call with parent as newNode, updated ancestors, and rebalanceCount
+    return AVLTree.checkAndModifyStack(newNode, ancestors, rebalanceCount);
+  }
+
+  static rotateRight(node) {
+    let newLeft = node.left.right._store ? new AVLNode(node.left.right._store) : AVLTree.nullPointer;
+    let oldRoot = new AVLNode(node._store.withMutations(map => {
+      map.set('_left', newLeft)
+         .set('_height', Math.max(node.left.right.height + 1, node.right.height + 1, 1));
+      return map;
+    }));
+    return new AVLNode(node.left._store.withMutations(map => {
+      map.set('_right', new AVLNode(oldRoot._store))
+         .set('_height', Math.max(map.get('_left').height + 1, map.get('_right').height + 1, 1));
+      return map;
+    }));
+  }
+
+  static rotateLeft(node) {
+    let newRight = node.right.left._store ? new AVLNode(node.right.left._store) : AVLTree.nullPointer;
+    let oldRoot = new AVLNode(node._store.withMutations(map => {
+      map.set('_right', newRight)
+         .set('_height', Math.max(node.right.left.height + 1, node.left.height + 1, 1));
+      return map;
+    }));
+    return new AVLNode(node.right._store.withMutations(map => {
+      map.set('left', new AVLNode(oldRoot._store))
+         .set('_height', Math.max(map.get('_right').height + 1, map.get('left').height + 1, 1));
+      return map;
+    }));
+  }
+
+  insertAll(tuples = []) {
+    let resultTree = this;
+    tuples.forEach(tuple => {
+      resultTree = resultTree.insert(tuple[0], tuple[1]);
+    });
+    return resultTree;
   }
 
   remove(key) {
-
-  }
-
-  verify() {
-
-  }
-
-  resetHeights() {
 
   }
 
@@ -155,8 +191,13 @@ export default class AVLTree {
     else return 0;
   }
 
+  static setComparator(comparator) {
+    let isComparator = !!comparator && typeof comparator === 'function';
+    return isComparator ? comparator : AVLTree.defaultComp;
+  }
+
   static recursiveSearch(comparator, node, key, ancestorStack = []) {
-    if (!node) return [null, ancestorStack];
+    if (node === AVLTree.nullPointer) return [null, ancestorStack];
     switch (comparator(node.key, key)) {
       case -1:
         return AVLTree.recursiveSearch(comparator, node.right, key, ancestorStack.concat([['_right', node]]));
@@ -171,86 +212,44 @@ export default class AVLTree {
   }
 
   static constructFromLeaf(node, ancestors) {
-    let toRebalance = null,
-        counter = 0,
-        toBalanceStack;
     while (ancestors.length) {
       let [childSide, parentNode] = ancestors.pop();
-      parentNode.store.withMutations(pStore => {
-        pStore.set(childSide, node).set('_height', node.height + 1);
-        node = new AVLNode(pStore);
-        if ((node.balance < -1 || node.balance > 1) && counter++ === 0) {
-          toRebalance = node;
-          toBalanceStack = ancestors.slice();
-        }
-      });
+      node = new AVLNode(parentNode._store.set(childSide, node));
     }
-    return [node, { heavyNode: toRebalance, unbalancedParents: toBalanceStack }];
+    return node;
   }
 
-  static rebalance(balanceData, comparator, size, rebalanceCount) {
-    let rbCount = rebalanceCount + 1,
-        {heavyNode, unbalancedParents} = balanceData;
-
-    if (heavyNode.balance > 1) {
-      // right heavy node
-      if (heavyNode.right.balance < -1) {
-        // left heavy right child, perform double left rotation
-      } else {
-        // right heavy right child, perform single left rotation
-        let newRoot = AVLTree.rotateLeft(heavyNode);
-        let [side, parent] = unbalancedParents.pop();
-        while (parent) {
-          newRoot = new AVLNode(parent.store.set(side, newRoot));
-          let tuple = unbalancedParents.pop();
-          if (!tuple) break;
-          [side, parent] = tuple;
-        }
-        return new AVLTree(comparator, newRoot, size + 1, rbCount);
-      }
-    } else if (heavyNode.balance < -1) {
-      // left heavy node
-      if (heavyNode.left.balance > 1) {
-        // right heavy left child, perform double right rotation
-      } else {
-        // left heavy left child, perform single right rotation
-        let newRoot = AVLTree.rotateRight(heavyNode);
-        // let [side, parent] = unbalancedParents.pop();
-        // while (parent) {
-          // newRoot = new AVLNode(parent.store.set(side, newRoot));
-          // let tuple = unbalancedParents.pop();
-          // if (!tuple) break;
-          // [side, parent] = tuple;
-        // }
-        // return new AVLTree(comparator, newRoot, size + 1, rbCount);
-      }
+  static traverseSide(side, tree) {
+    let currentRoot = tree.root;
+    if (!currentRoot) return null;
+    let nextNode = currentRoot[side];
+    while (nextNode) {
+      currentRoot = nextNode;
+      nextNode = nextNode[side];
     }
+    return currentRoot;
   }
 
-  static rotateLeft(heavyNode) {
-    let rightChild = heavyNode.right;
-    let rightChildLeft = rightChild.left || null;
-    let newLeftChild = new AVLNode(heavyNode.store.withMutations(store => {
-      let temp = store.set('_right', rightChildLeft);
-      let leftHeight = temp.get('_left') ? temp.get('_left').height : 0;
-      let rightHeight = temp.get('_right') ? temp.get('_right').height : 0;
-      let maxHeight = Math.max(leftHeight, rightHeight, 1);
-      return temp.set('_height', maxHeight);
-    }));
-    return new AVLNode(rightChild.store.set('_left', newLeftChild));
+  static recount(_root) {
+    let count = 0;
+    AVLTree.traverseInOrder(_root, () => count++);
+    return count;
   }
 
-  static rotateRight(heavyNode) {
-    let leftChild = heavyNode.left;
-    let leftChildRight = leftChild.right || null;
-    let newRightChild = new AVLNode(heavyNode.store.withMutations(store => {
-      let temp = store.set('_left', leftChildRight);
-      let leftHeight = temp.get('_left') ? temp.get('_left').height : 0;
-      let rightHeight = temp.get('_right') ? temp.get('_right').height : 0;
-      let maxHeight = Math.max(leftHeight, rightHeight, 1);
-      return temp.set('_height', maxHeight);
-    }));
-    return new AVLNode(leftChild.store.set('_right', newRightChild));
+  static traverseInOrder(node, cb) {
+    if (node === AVLTree.nullPointer || node === null) return;
+    let left = node.left, right = node.right;
+    if (left !== AVLTree.nullPointer) AVLTree.traverseInOrder(left, cb);
+    cb(node);
+    if (right !== AVLTree.nullPointer) AVLTree.traverseInOrder(right, cb);
+  }
+
+  static get nullPointer() {
+    return _NULL_SENTINEL;
+  }
+
+  static isAVLNode(maybe) {
+    return !!maybe && maybe.constructor === AVLNode;
   }
 
 }
