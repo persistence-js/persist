@@ -101,45 +101,43 @@ export default class AVLTree {
   static checkAndModifyStack(newNode, ancestors, rebalanceCount) {
     // base-case: at root and all balanced
     if (!ancestors.length) return [newNode, [], rebalanceCount];
-
     // get last ancestor as parent and side of child
     let [childSide, parent] = ancestors.pop();
-
     // set side of parent to the new node and increment height
     let updatedParentStore = parent._store.withMutations(map => {
       return map.set(childSide, newNode).set('_height', map.get('_height') + 1);
     });
-
     let updatedParentToCheck = new AVLNode(updatedParentStore);
     newNode = updatedParentToCheck;
-
     // check balance of updated parent
     if (updatedParentToCheck.balance > 1) {
       // addition of child node made parent too fat, R heavy
       if (updatedParentToCheck.right.balance < 0) {
+        // LR Case //
         // perform right rotation on right, then left rotation on parent
-        console.log('LR Case');
-
-
+        let newRightNode = AVLTree.rotateRight(updatedParentToCheck.right);
+        let newParent = new AVLNode(updatedParentToCheck._store.set('_right', newRightNode));
+        newNode = AVLTree.rotateLeft(newParent);
       } else {
+        // LL Case //
         // perform single left rotation
-        console.log('LL Case');
         newNode = AVLTree.rotateLeft(updatedParentToCheck);
-        rebalanceCount++;
       }
+      rebalanceCount++;
     } else if (updatedParentToCheck.balance < -1) {
       // addition of child node made parent too fat, L heavy
       if (updatedParentToCheck.left.balance > 0) {
+        // RL Case //
         // perform left rotation on left, then right rotation on parent
-        console.log('RL Case');
-
-
+        let newLeftNode = AVLTree.rotateLeft(updatedParentToCheck.left);
+        let newParent = new AVLNode(updatedParentToCheck._store.set('_left', newLeftNode));
+        newNode = AVLTree.rotateRight(newParent);
       } else {
+        // RR Case //
         // perform single right rotation
-        console.log('RR Case');
         newNode = AVLTree.rotateRight(updatedParentToCheck);
-        rebalanceCount++;
       }
+      rebalanceCount++;
     }
     // return recursive call with parent as newNode, updated ancestors, and rebalanceCount
     return AVLTree.checkAndModifyStack(newNode, ancestors, rebalanceCount);
@@ -167,8 +165,8 @@ export default class AVLTree {
       return map;
     }));
     return new AVLNode(node.right._store.withMutations(map => {
-      map.set('left', new AVLNode(oldRoot._store))
-         .set('_height', Math.max(map.get('_right').height + 1, map.get('left').height + 1, 1));
+      map.set('_left', new AVLNode(oldRoot._store))
+         .set('_height', Math.max(map.get('_right').height + 1, map.get('_left').height + 1, 1));
       return map;
     }));
   }
