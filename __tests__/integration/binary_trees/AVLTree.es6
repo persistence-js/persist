@@ -133,6 +133,43 @@ describe('AVL Tests', () => {
 
       describe('RR Case Rotations', () => {
 
+        describe('without complex children', () => {
+          let testTree = _TREE.insert(25, 'b').insert(0, 'c');
+
+          it('pivots on left child', () => {
+            expect(testTree.root.key).toBe(25);
+            expect(testTree.root.value).toBe('b');
+            expect(testTree.root.left.key).toBe(0);
+            expect(testTree.root.right.key).toBe(50);
+          });
+
+          it('updates heights after rotation', () => {
+            expect(testTree.height).toBe(2);
+            expect(testTree.root.height).toBe(2);
+            expect(testTree.root.left.height).toBe(1);
+            expect(testTree.root.right.height).toBe(1);
+          });
+
+          it('rebalances the tree', () => {
+            expect(testTree.root.balance).toBe(0);
+            expect(testTree.root.left.balance).toBe(0);
+            expect(testTree.root.right.balance).toBe(0);
+          });
+
+          it('updates the rebalanceCount of returned tree', () => {
+            expect(testTree.rebalanceCount).toBe(1);
+          });
+
+          it('maintains the correct size of tree', () => {
+            expect(testTree.size).toBe(3);
+          });
+
+        });
+
+        describe('with complex children', () => {
+
+        });
+
       });
 
       describe('RL Case Rotations', () => {
