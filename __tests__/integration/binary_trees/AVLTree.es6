@@ -88,7 +88,7 @@ describe('AVL Tests', () => {
 
       describe('LL Case Rotations', () => {
 
-        describe('without complex children', () => {
+        describe('R Heavy Root, Rotate Left', () => {
           let testTree = _TREE.insert(100, 'b').insert(150, 'c');
 
           it('pivots on right child', () => {
@@ -121,10 +121,6 @@ describe('AVL Tests', () => {
 
         });
 
-        describe('with complex children', () => {
-
-        });
-
       });
 
       describe('LR Case Rotations', () => {
@@ -133,7 +129,7 @@ describe('AVL Tests', () => {
 
       describe('RR Case Rotations', () => {
 
-        describe('without complex children', () => {
+        describe('L Heavy Root, Rotate Right', () => {
           let testTree = _TREE.insert(25, 'b').insert(0, 'c');
 
           it('pivots on left child', () => {
@@ -163,10 +159,6 @@ describe('AVL Tests', () => {
           it('maintains the correct size of tree', () => {
             expect(testTree.size).toBe(3);
           });
-
-        });
-
-        describe('with complex children', () => {
 
         });
 
