@@ -308,13 +308,73 @@ describe('AVL Tests', () => {
 
     });
 
-    describe('Rotation: After Removal', () => {
+    describe('Basic Removal: No Rotation', () => {
 
+      xdescribe('#remove from empty tree', () => {
 
+        it('returns a clone of the original tree', () => {
+          let oTree = new AVLTree();
+          let nTree = oTree.remove(1);
+          expect(nTree).not.toBe(oTree);
+          expect(nTree).toEqual(oTree);
+        });
 
+      });
 
+      xdescribe('#remove from single node tree', () => {
+        let oneTree = new AVLTree().insert(1, 'a');
+        let exTree = new AVLTree().insert(1, 'a');
 
+        it('returns an empty tree', () => {
+          expect(oneTree.remove(1)).toEqual(new AVLTree());
+        });
 
+        it('does not mutate original tree', () => {
+          oneTree.remove(1);
+          expect(oneTree).toEqual(exTree);
+        });
+
+      });
+
+      xdescribe('#remove leaf from left heavy simple tree', () => {
+        let oneTree = new AVLTree().insert(1, 'a').insert(0, 'b');
+        let testTree = oneTree.remove(0);
+
+      });
+
+      xdescribe('#remove leaf from right heavy simple tree', () => {
+        let oneTree = new AVLTree().insert(1, 'a').insert(2, 'b');
+        let testTree = oneTree.remove(2);
+
+      });
+
+      xdescribe('#remove root from left heavy simple tree', () => {
+        let oneTree = new AVLTree().insert(1, 'a').insert(0, 'b');
+        let testTree = oneTree.remove(1);
+
+      });
+
+      xdescribe('#remove root from right heavy simple tree', () => {
+        let oneTree = new AVLTree().insert(1, 'a').insert(2, 'b');
+        let testTree = oneTree.remove(1);
+
+      });
+
+      xdescribe('#remove left leaf from balanced simple tree', () => {
+
+      });
+
+      xdescribe('#remove right leaf from balanced simple tree', () => {
+
+      });
+
+      xdescribe('#remove root from balanced simple tree', () => {
+
+      });
+
+    });
+
+    xdescribe('Rotation: After Removal', () => {
 
     });
 

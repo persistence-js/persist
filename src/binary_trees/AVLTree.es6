@@ -107,7 +107,12 @@ export default class AVLTree {
   }
 
   remove(key) {
-
+    let [node, ancestors] = AVLTree.recursiveSearch(this.comparator, this.root, key);
+    if (!this.size || key === undefined || !node) {
+      return this.clone();
+    } else if (node) {
+      return AVLTree.removeFound(this.comparator, node, ancestors);
+    }
   }
 
   static defaultComp(keyA, keyB) {
