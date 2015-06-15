@@ -105,7 +105,15 @@ export default class AVLTree {
     let [childSide, parent] = ancestors.pop();
     // set side of parent to the new node and increment height
     let updatedParentStore = parent._store.withMutations(map => {
-      return map.set(childSide, newNode).set('_height', map.get('_height') + 1);
+      let childDir;
+      if (childSide === '_left') {
+        childDir = '_right';
+      } else if (childSide === '_right') {
+        childDir = '_left';
+      }
+      let newHeight = Math.max(newNode._store.get('_height') + 1, map.get(childDir)._store.get('_height') + 1, 1);
+      map.set(childSide, newNode).set('_height', newHeight);
+      return map;
     });
     let updatedParentToCheck = new AVLNode(updatedParentStore);
     newNode = updatedParentToCheck;
@@ -221,7 +229,7 @@ export default class AVLTree {
     let currentRoot = tree.root;
     if (!currentRoot) return null;
     let nextNode = currentRoot[side];
-    while (nextNode) {
+    while (nextNode && nextNode !== AVLTree.nullPointer) {
       currentRoot = nextNode;
       nextNode = nextNode[side];
     }
