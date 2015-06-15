@@ -115,6 +115,10 @@ export default class AVLTree {
     }
   }
 
+  static removeFound(comparator, nodeToRemove, ancestors) {
+
+  }
+
   static defaultComp(keyA, keyB) {
     if (keyA < keyB) return -1;
     else if (keyA > keyB) return 1;
