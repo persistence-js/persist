@@ -125,6 +125,46 @@ describe('AVL Tests', () => {
 
       describe('LR Case Rotations', () => {
 
+        describe('R Heavy Root, L Child, Rotate L Child Right, Rotate Left', () => {
+          let testTree = _TREE.insert(100, 'b').insert(75, 'c');
+
+          it('pivots on left child of right child', () => {
+            expect(testTree.root.key).toBe(75);
+            expect(testTree.root.value).toBe('c');
+            expect(testTree.root.left.key).toBe(50);
+            expect(testTree.root.right.key).toBe(100);
+          });
+
+          it('updates heights after rotation', () => {
+            expect(testTree.height).toBe(2);
+            expect(testTree.root.height).toBe(2);
+            expect(testTree.root.left.height).toBe(1);
+            expect(testTree.root.right.height).toBe(1);
+          });
+
+          it('updates children of children to _nil', () => {
+            expect(testTree.root.left.left).toEqual(AVLTree.nullPointer);
+            expect(testTree.root.right.left).toEqual(AVLTree.nullPointer);
+            expect(testTree.root.left.right).toEqual(AVLTree.nullPointer);
+            expect(testTree.root.right.right).toEqual(AVLTree.nullPointer);
+          });
+
+          it('rebalances the tree', () => {
+            expect(testTree.root.balance).toBe(0);
+            expect(testTree.root.left.balance).toBe(0);
+            expect(testTree.root.right.balance).toBe(0);
+          });
+
+          it('updates the rebalanceCount of returned tree', () => {
+            expect(testTree.rebalanceCount).toBe(1);
+          });
+
+          it('maintains the correct size of tree', () => {
+            expect(testTree.size).toBe(3);
+          });
+
+        });
+
       });
 
       describe('RR Case Rotations', () => {
@@ -166,6 +206,104 @@ describe('AVL Tests', () => {
 
       describe('RL Case Rotations', () => {
 
+        describe('L Heavy Root, R Child, Rotate R Child Left, Rotate Right', () => {
+          let testTree = _TREE.insert(100, 'b').insert(75, 'c');
+
+          it('pivots on right child of left child', () => {
+            expect(testTree.root.key).toBe(75);
+            expect(testTree.root.value).toBe('c');
+            expect(testTree.root.left.key).toBe(50);
+            expect(testTree.root.right.key).toBe(100);
+          });
+
+          it('updates heights after rotation', () => {
+            expect(testTree.height).toBe(2);
+            expect(testTree.root.height).toBe(2);
+            expect(testTree.root.left.height).toBe(1);
+            expect(testTree.root.right.height).toBe(1);
+          });
+
+          it('updates children of children to _nil', () => {
+            expect(testTree.root.left.left).toEqual(AVLTree.nullPointer);
+            expect(testTree.root.right.left).toEqual(AVLTree.nullPointer);
+            expect(testTree.root.left.right).toEqual(AVLTree.nullPointer);
+            expect(testTree.root.right.right).toEqual(AVLTree.nullPointer);
+          });
+
+          it('rebalances the tree', () => {
+            expect(testTree.root.balance).toBe(0);
+            expect(testTree.root.left.balance).toBe(0);
+            expect(testTree.root.right.balance).toBe(0);
+          });
+
+          it('updates the rebalanceCount of returned tree', () => {
+            expect(testTree.rebalanceCount).toBe(1);
+          });
+
+          it('maintains the correct size of tree', () => {
+            expect(testTree.size).toBe(3);
+          });
+
+        });
+
+      });
+
+    });
+
+    describe('Batch Insertion and Rotation Tests', () => {
+
+      let testTree = _TREE.insert(0, 'b')
+                          .insert(100, 'c')
+                          .insert(25, 'd')
+                          .insert(51, 'e')
+                          .insert(1000, 'f')
+                          .insert(500, 'g')
+                          .insert(2000, 'h')
+                          .insert(750, 'i');
+
+      describe('Final Balanced State', () => {
+
+        it('pivoted on correct root', () => {
+          expect(testTree.root.key).toBe(50);
+          expect(testTree.root.value).toBe('a');
+          expect(testTree.root.left.key).toBe(0);
+          expect(testTree.root.right.key).toBe(500);
+        });
+
+        it('rebalanced the tree after rotation', () => {
+          expect(testTree.root.balance).toBe(1);
+          expect(testTree.root.right.balance).toBe(0);
+        });
+
+        it('rearranged children correctly', () => {
+          expect(testTree.root.left.key).toBe(0);
+          expect(testTree.root.left.left.key).toBeNull();
+          expect(testTree.root.left.right.key).toBe(25);
+          expect(testTree.root.right.left.key).toBe(100);
+          expect(testTree.root.right.left.left.key).toBe(51);
+          expect(testTree.root.right.left.right.key).toBeNull();
+          expect(testTree.root.right.right.key).toBe(1000);
+          expect(testTree.root.right.right.left.key).toBe(750);
+          expect(testTree.root.right.right.right.key).toBe(2000);
+        });
+
+        it('reset heights after rotations', () => {
+          expect(testTree.height).toBe(4);
+          expect(testTree.root.height).toBe(4);
+          expect(testTree.root.left.height).toBe(2);
+          expect(testTree.root.left.right.height).toBe(1);
+          expect(testTree.root.right.height).toBe(3);
+          expect(testTree.root.right.left.height).toBe(2);
+          expect(testTree.root.right.left.left.height).toBe(1);
+          expect(testTree.root.right.left.left.left.height).toBe(0);
+          expect(testTree.root.right.left.left.right.height).toBe(0);
+          expect(testTree.root.right.right.height).toBe(2);
+          expect(testTree.root.right.right.left.height).toBe(1);
+          expect(testTree.root.right.right.right.height).toBe(1);
+          expect(testTree.root.right.right.left.left.height).toBe(0);
+          expect(testTree.root.right.right.right.right.height).toBe(0);
+        });
+
       });
 
     });
@@ -176,7 +314,7 @@ describe('AVL Tests', () => {
 
   });
 
-  xdescribe('Tree Built-in Getter Tests', () => {
+  describe('Tree Built-in Getter Tests', () => {
 
     describe('get size', () => {
 
@@ -228,7 +366,7 @@ describe('AVL Tests', () => {
           expect(avl.height).toBe(2);
         });
 
-        it('returns height of temporarily unbalanced tree', () => {
+        it('returns height of temporarily unbalanced tree, after balance', () => {
           let avl = new AVLTree().insert(1, 'a').insert(2, 'b').insert(3, 'c');
           expect(avl.height).toBe(2);
         });
