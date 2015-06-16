@@ -3,9 +3,7 @@ const IM = require('immutable');
 const BSTree = require('../../../src/binary_trees/BSTree');
 const BSTNode = require('../../../src/binary_trees/BSTNode');
 
-
 describe('BSTree', () => {
-
   describe('Instantiation', () => {
     let bst = new BSTree(),
         _node = new BSTNode(0, 'first node value', null, null, 1),
@@ -33,9 +31,7 @@ describe('BSTree', () => {
   });
 
   describe('Instance Methods', () => {
-
     describe('#insert', () => {
-
       describe('empty trees', () => {
         let bst = new BSTree();
 
@@ -96,7 +92,6 @@ describe('BSTree', () => {
             chainedResult = bst.insert(25, 'a').insert(75, 'b').insert(95, 'c');
 
         describe('resulting tree', () => {
-
           it('returns a new tree', () => {
             expect(chainedResult).toEqual(jasmine.any(BSTree));
           });
@@ -112,7 +107,6 @@ describe('BSTree', () => {
         });
 
         describe('root node of chained tree', () => {
-
           it('has the correct id', () => {
             expect(chainedResult.root.id).toBe(1);
           });
@@ -135,7 +129,6 @@ describe('BSTree', () => {
       });
 
       describe('insertion operation immutability', () => {
-
         it('does not mutate tree', () => {
           let bst = new BSTree();
           bst.insert(1, 'a');
@@ -154,7 +147,6 @@ describe('BSTree', () => {
     });
 
     describe('#remove', () => {
-
       describe('empty trees', () => {
         let bst = new BSTree();
 
