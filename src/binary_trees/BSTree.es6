@@ -2,7 +2,6 @@ import 'core-js/shim';
 const IM = require('immutable');
 const BSTNode = require('./BSTNode');
 
-
 export default class BSTree {
   /**
    * Accepts optional custom comparator function for sorting keys,

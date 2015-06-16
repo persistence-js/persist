@@ -2,9 +2,7 @@ import 'core-js/shim';
 const IM = require('immutable');
 const LList = require('./LList.es6');
 
-
 export default class CLList extends LList {
-
   constructor(itemOrList = [], options = {}) {
     options.circular = true;
     super(itemOrList, options)

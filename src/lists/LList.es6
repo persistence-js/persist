@@ -1,7 +1,6 @@
 import 'core-js/shim';
 const IM = require('immutable');
 
-
 export default class LList {
   /**
    * Accepts items and list-like objects.
@@ -24,12 +23,10 @@ export default class LList {
       }
       this.size = this.size + options.oldSize;
     }
-
     if (options.circular){
       this.tail.next = this.head;
       this.circular = options.circular;
     }
-
     this.forEach(Object.freeze);
     Object.freeze(this);
   }
@@ -60,21 +57,18 @@ export default class LList {
       prependTo : this.head,
       oldSize   : this.size,
     };
-
     //If circular, can't use tail-sharing.
     if (this.circular){
       toPre = LList.convertToSeq(toPre);
       return new LList(toPre.concat(this.map(LList.getData)).toArray(),
         { circular: this.circular });
     }
-
     //Else, prepend in O(1);
     return (
       LList.isNode(toPre) ? new LList(LList.getData(toPre), opts) :
       LList.isLList(toPre) ? new LList(toPre.map(LList.getData), opts) :
       new LList(toPre, opts)
     );
-
   }
 
   /**
@@ -133,7 +127,7 @@ export default class LList {
      { circular: this.circular });
   }
 
-  //Functional helper methods
+  //Functional Helpers:
   forEach(cb) {
     let current = this.head;
     while (current !== null){
