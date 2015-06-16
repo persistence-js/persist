@@ -2,7 +2,6 @@ jest.autoMockOff();
 var IM = require('immutable'),
     CLList = require('../../../src/lists/CLList');
 
-
 describe('Circular Linked Lists', function() {
   let oneToFive = [1,2,3,4,5];
   let cLL = new CLList(oneToFive);
@@ -34,7 +33,6 @@ describe('Circular Linked Lists', function() {
   });
 
   describe('Add before', function() {
-
     it('when called with head, behaves exactly as prepend should, ', function() {
       expect(cLL.addBefore(cLL.head, 0).head.data).toBe(cLL.prepend(0).head.data);
     });
@@ -71,7 +69,6 @@ describe('Circular Linked Lists', function() {
   });
 
   describe('Add after', function() {
-
     it('when called with tail, behaves exactly as append should', function() {
       expect(cLL.addAfter(cLL.tail, 0).head.data).toBe(cLL.append(0).head.data);
 
@@ -107,7 +104,5 @@ describe('Circular Linked Lists', function() {
       }
       expect(removeAfterResult.filter(isHead).length).toBeFalsy();
     });
-
   });
-
 });

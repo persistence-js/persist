@@ -2,9 +2,7 @@ jest.autoMockOff();
 const IM = require('immutable');
 const Heap = require('../../../src/heaps/Heap');
 
-
 describe("Heap Operations", () => {
-
   describe("Instantiation", () => {
     let newHeap = new Heap();
 
@@ -30,7 +28,6 @@ describe("Heap Operations", () => {
   });
 
   describe("Internal Methods", () => {
-
     describe("Directional Sifting", () => {
       let newMinHeap = new Heap();
       newMinHeap = newMinHeap.push(99).push(8).push(9).push(4).push(5);
@@ -94,7 +91,6 @@ describe("Heap Operations", () => {
     }
 
     describe("BuildHeap", () => {
-
       it("builds max heaps from an array", () => {
         let heap = new Heap(numbers25, true);
         expect(heap.size).toBe(25);
@@ -120,7 +116,6 @@ describe("Heap Operations", () => {
     });
 
     describe("Merge", () => {
-
       it("merges with other heaps", () => {
         let heap1 = new Heap(numbers25);
         let heap2 = new Heap(numbers50);
@@ -132,7 +127,6 @@ describe("Heap Operations", () => {
     });
 
     describe("HeapSort", () => {
-
       it('sorts an array of numbers', () => {
         let tenNumbers = [1,2,3,4,5,6,7,8,9,10].sort(() => {
           return .5 - Math.random();
@@ -143,9 +137,6 @@ describe("Heap Operations", () => {
           expect(sortedArray.get(i)).toEqual(i+1);
         }
       });
-
     });
-
   });
-
 });

@@ -2,11 +2,9 @@ jest.autoMockOff();
 var IM = require('immutable'),
     LList = require('../../../src/lists/LList');
 
-
 describe('LList', () => {
   describe('new instance initialization', () => {
     let sLLEmpty = new LList();
-
     it('starts with a null head', () => {
       expect(sLLEmpty.head).toBeNull();
     });
@@ -86,7 +84,6 @@ describe('LList', () => {
         { name: 'anna' },
       ]);
 
-
     describe('prepends', () => {
 
       it('returns a new list when prepending undefined', () => {
@@ -136,7 +133,6 @@ describe('LList', () => {
           currentNode = currentNode.next;
         }
       });
-
     });
 
     describe('appends', () => {
