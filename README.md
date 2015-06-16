@@ -1,6 +1,6 @@
 # PersistenceJS
 
-**PersistenceJS** provides specialized, immutable, persistent data structures built on-top of Immutable.js. PersistenceJS offers highly efficient immutable _linked-lists_, _heaps_, and _search trees_, with more data structures coming soon.
+**PersistenceJS** provides specialized, immutable, persistent data structures built on-top of ImmutableJS. PersistenceJS offers highly efficient immutable _linked-lists_, _heaps_, and _search trees_, with more data structures coming soon.
 
 [ ![Current Stable Release Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/persistence-js/persist/releases)
 [ ![Codeship Status for PersistenceJS](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://codeship.com/projects/86120/)
@@ -14,7 +14,8 @@ To learn more about immutable data, persistent data structures, or any of the in
 
 ---
 
-> **Created by [Clark Feusier](http://clarkfeusier.com/pages/about) and [Daniel Tsui](http://sdtsui.com)** during tenure as hackers in residence at [Hack Reactor](http://hackreactor.com)
+> **Created by [Clark Feusier](http://clarkfeusier.com/pages/about) and [Daniel Tsui](http://sdtsui.com)**  
+
 
 ---
 
