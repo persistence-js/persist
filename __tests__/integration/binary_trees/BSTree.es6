@@ -556,7 +556,6 @@ describe('BSTree', () => {
             bst = new BSTree(null, rootNode);
         expect(bst.max).toEqual(maxNode);
       });
-
     });
 
     describe('get keys', () => {
@@ -572,7 +571,6 @@ describe('BSTree', () => {
             bst = new BSTree(null, rootNode);
         expect(bst.keys).toEqual([25, 50, 75, 100]);
       });
-
     });
 
     describe('get values', () => {
