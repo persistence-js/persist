@@ -116,7 +116,7 @@ describe('Red-Black Tests', function() {
       //rotate left on 100, paint 90 red, 100 black...
     });
 
-    describe('Insertion & Deletion Tests', function() {
+    describe('Insertion & Removal Tests', function() {
       let persistentTree = new RBTree();
       let seq = [ 
         [100, "1st"],
@@ -191,12 +191,11 @@ describe('Red-Black Tests', function() {
       });
 
 
-      describe('Deletion Tests', function() {
-        
+      describe('Removal Tests', function() {
         it('deletes a red leaf with no further changes', function() {
-          persistentTree.remove(40);
-          expect(persistentTree._root.left.left).toEqual(RBTree.nullPointer);
-          let rightSide = persistentTree._root.right;
+          leafDelete = persistentTree.remove(40);
+          expect(leafDelete._root.left.left).toEqual(RBTree.nullPointer);
+          let rightSide = leafDelete._root.right;
           expect(rightSide.key).toEqual(160);
           expect(rightSide.color).toEqual(RBNode.__RED);
           expect(rightSide.left.right.key).toBe(140);
@@ -204,70 +203,263 @@ describe('Red-Black Tests', function() {
         });
 
         it('deletes a red non-leaf, with no further changes, replacing with predecessor', function() {
-          persistentTree.remove(160);
-          let rootN = persistentTree._root;
+          redNonLeaf = persistentTree.remove(160);
+          let rootN = redNonLeaf._root;
           let rSide = rootN.right;
-          expect(persistentTree.size).toEqual(6);
+          expect(redNonLeaf.size).toEqual(7);
           expect(rootN.color).toEqual(RBNode.__BLACK);
           expect(rootN.key).toEqual(90);
           expect(rSide.color).toEqual(RBNode.__RED);
           expect(rSide.key).toEqual(140);
           expect(rSide.left.left.key).toEqual(95);
           expect(rSide.right.key).toEqual(190);
+          expect(rSide.left.left.left).toEqual(rSide.left.left.right);
+          expect(rSide.left.right.key).not.toEqual(140);
         });
 
         it('deletes a black node with red child, makes red child black', function() {
-          //delete 100
+          let tempTree = persistentTree.remove(160);
+          let blackNonLeaf = tempTree.remove(100);
+
+          let rootN = blackNonLeaf._root;
+          let rSide = rootN.right;
+          expect(blackNonLeaf.size).toEqual(6);
+          expect(rootN.color).toEqual(RBNode.__BLACK);
+          expect(rootN.key).toEqual(90);
+          expect(rSide.color).toEqual(RBNode.__RED);
+          expect(rSide.key).toEqual(140);
+          expect(rSide.left.key).toEqual(95);
+          expect(rSide.left.color).toEqual(RBNode.__BLACK);
+          expect(rSide.right.key).toEqual(190);
+          expect(rSide.left.left).toEqual(rSide.left.right);//both pointing at sentinel
+          expect(rSide.left.isLeaf).toBeTruthy();
         });
 
-        describe('Double Black Cases', function() {
-          describe('Case 1: Sibling Black, one child red:', function() {
-            //set up case...add nephews to 190, delete and RE-ADD 100.
-            it('Handles a "LEFT double-black, right red nephew" Case.', function() {
-                  
-            });
+        it('Deletes root in an 8-element Tree', function() {
+          expect(persistentTree.size).toEqual(8);
+          rootDeleted = persistentTree.remove(90)._root;
+          expect(rootDeleted.color).toEqual(RBNode.__BLACK);
+          expect(rootDeleted.key).toEqual(80);
+          expect(rootDeleted.right.color).toEqual(RBNode.__RED);
+          expect(rootDeleted.right.key).toEqual(160);
+          expect(rootDeleted.left.color).toEqual(RBNode.__BLACK);
+          expect(rootDeleted.left.key).toEqual(40);
+          expect(rootDeleted.left.left).toBe(RBTree.nullPointer);
+          expect(rootDeleted.left.right).toBe(RBTree.nullPointer);
+        });
+      });
+    });
+      describe('Double Black Cases', function() {
+        //Double Black Cases Should Not Depend on State from Previous Tests:
+        //
+        //insert 100-1000
+        let DBCases = new RBTree();
+        let key = 0;
+        for (let i = 0; i < 10; i++){
+          key += 100;
+          DBCases = DBCases.insert(key, 'testValue');
+        }//then:
+        //balance out
+        DBCases = DBCases.insert(50, 'testValue').insert(125, 'testValue');
 
-            it('Handles a "LEFT double-black, left red nephew" Case.', function() {
-                          
-            });
-            it('Handles a "RIGHT double-black, right red nephew" Case.', function() {
-                          
-            });
-            it('Handles a "RIGHT double-black, left red nephew" Case.', function() {
-                          
-            });
-          });
-          describe('Case 2: Sibling Black, black children', function() {
-            it('deletes a black leaf (with black child): Red Parent', function() {
-              
-            });
-
-            it('deletes a black leaf (with black child): black parent, recursing up', function() {
-              
-            });
-
-            it('handles a recursion of double black to the root', function() {
-              
-            });
-          });
-
-          describe('Case 3: Red Sibling', function() {
-            it('Handles a LEFT double-black, right red sibling', function() {
-              
-            });
-
-            it('Handles a RIGHT double-black, left red sibling', function() {
-              
-            });
-
-          });
-          
+        xit('Begins Test Cases correctly, inserting 100-1000', () => {
+          expect(DBCases.find(1000).value).toEqual('testValue');
+          expect(DBCases.size).toEqual(12);
+          expect(DBCases._root.key).toEqual(400);
+          expect(DBCases._root.left.right.key).toEqual(300);
+          expect(DBCases._root.left.right.color).toEqual(RBNode.__BLACK);
+          expect(DBCases._root.right.left.key).toEqual(500);
+          expect(DBCases._root.right.left.color).toEqual(RBNode.__BLACK);
+          // IMAGE OF INITIAL STATE OF DBCases
+          // http://i.imgur.com/OLzMtUU.png
         });
 
+        xdescribe('Case 1: Sibling Black, one child red:', function() {
+          //set up case...add nephews to 190, delete and RE-ADD 100.
+          it('Handles a "LEFT double-black, right red nephew" Case (base case).', function() {
+            let case1LR = DBCases.remove(700);
+            expect(case1LR._root.right.key).toEqual(600);
+            expect(case1LR._root.right.right.key).toEqual(900);
+            let onlyRed = case1LR.find(900);
+            expect(onlyRed.color).toEqual(RBNode.__RED);
+            expect(onlyRed.right.color).toEqual(RBNode.__BLACK);
+            expect(onlyRed.right.key).toEqual(1000);
+            expect(onlyRed.left.color).toEqual(RBNode.__BLACK);
+            expect(onlyRed.left.key).toEqual(800);
+          });
+
+          it('Handles a "RIGHT double-black, left red nephew" Case. (base case)', function() {
+            let case1RL = DBCases
+                            .insert(25, 'newValue')
+                            .remove(125);
+            expect(case1RL._root.left.key).toEqual(200);
+            expect(case1RL._root.left.right.key).toEqual(300);
+            let leftRed = case1RL.find(50);
+            expect(leftRed.color).toEqual(RBNode.__RED);
+            expect(leftRed.right.color).toEqual(RBNode.__BLACK);
+            expect(leftRed.right.key).toEqual(100);
+            expect(leftRed.left.color).toEqual(RBNode.__BLACK);
+            expect(leftRed.left.key).toEqual(25);
+            expect(leftRed.right.right).toBe(RBTree.nullPointer);
+            expect(leftRed.left.right).toBe(RBTree.nullPointer);
+          });
+
+          it('Handles a "LEFT double-black, left red nephew" Case. (sub case)', function() {
+            let case1LL = DBCases.insert(850, 'newValue').remove(1000) //setup
+            case1LL = case1LL.remove(700); // Removal to test
+            expect(case1LL._root.left.key).toEqual(200);
+            expect(case1LL._root.left.right.key).toEqual(300);
+            let onlyRed = case1LL.find(850);
+            expect(onlyRed.color).toEqual(RBNode.__RED);
+            expect(onlyRed.right.color).toEqual(RBNode.__BLACK);
+            expect(onlyRed.right.key).toEqual(900);
+            expect(onlyRed.left.color).toEqual(RBNode.__BLACK);
+            expect(onlyRed.left.key).toEqual(800);
+            expect(onlyRed.right.right).toBe(RBTree.nullPointer);
+            expect(onlyRed.left.right).toBe(RBTree.nullPointer);
+          });
+
+          it('Handles a "RIGHT double-black, right red nephew" Case. (sub-case)', function() {
+            let case1RR = DBCases.insert(75, 'newValue')
+                            .remove(125);
+            let parentRed = case1RR.find(75);
+            expect(parentRed.color).toEqual(RBNode.__RED);
+            expect(parentRed.right.color).toEqual(RBNode.__BLACK);
+            expect(parentRed.right.key).toEqual(100);
+            expect(parentRed.left.color).toEqual(RBNode.__BLACK);
+            expect(parentRed.left.key).toEqual(50);
+            expect(parentRed.right.right).toBe(RBTree.nullPointer);
+            expect(parentRed.left.right).toBe(RBTree.nullPointer);
+          });
+
+          it('Handles a subcase (Right DB) with two nephews', function() {
+            let caseTC = DBCases.remove(300);
+            let parentBlack = caseTC._root.left;
+            expect(parentBlack).toEqual(caseTC.find(100));
+            expect(parentBlack.color).toEqual(RBNode.__BLACK);
+            expect(parentBlack.right.color).toEqual(RBNode.__BLACK);
+            expect(parentBlack.right.key).toEqual(200);
+            expect(parentBlack.left.color).toEqual(RBNode.__BLACK);
+            expect(parentBlack.left.key).toEqual(50);
+            expect(parentBlack.right.right).toBe(RBTree.nullPointer);
+            expect(parentBlack.left.right).toBe(RBTree.nullPointer);
+
+            expect(parentBlack.right.left).toNotBe(RBTree.nullPointer);
+            expect(parentBlack.right.left).not.toBeNull();
+            expect(parentBlack.right.left.color).toBe(RBNode.__RED);
+          });
+
+          it('Handles a subcase (Left DB) with two nephews', function() {
+            let caseSLL = DBCases.insert(850, 'newValue').remove(700);
+            let parentRed = caseTC._root.right.right;
+            expect(parentRed).toEqual(caseTC.find(900));
+            expect(parentRed.color).toEqual(RBNode.__RED);
+            expect(parentRed.right.color).toEqual(RBNode.__BLACK);
+            expect(parentRed.right.key).toEqual(1000);
+            expect(parentRed.left.color).toEqual(RBNode.__BLACK);
+            expect(parentRed.left.key).toEqual(800);
+            expect(parentRed.right.right).toBe(RBTree.nullPointer);
+            expect(parentRed.left.right).toBe(RBTree.nullPointer);
+
+            //examine null pointers
+            expect(parentRed.right.left).toBe(RBTree.nullPointer);
+            expect(parentRed.right.left).not.toBeNull();
+            expect(parentRed.left.left).toBe(RBTree.nullPointer);
+
+          });
+
+        });
+        describe('Case 2: Sibling Black, black children', function() {
+          it('Left DB : Red Parent', function() {
+            let LDB_RP = DBCases.remove(1000);
+            LDB_RP = LDB_RP.remove(700);
+            let blackKey800 = LDB_RP._root.right.right;
+            expect(blackKey800).toEqual(LDB_RP.find(800));
+            expect(blackKey800.color).toEqual(RBNode.__BLACK);
+            expect(blackKey800.right.color).toEqual(RBNode.__RED);
+            expect(blackKey800.right.key).toEqual(900);
+
+            //examine leaves
+            expect(blackKey800.right.left).toEqual(RBTree.nullPointer);
+            expect(blackKey800.right.right).toEqual(RBTree.nullPointer);
+            expect(blackKey800.left).toEqual(RBTree.nullPointer);
+          });
+
+          it('Right DB : black parent, causing a rotation (And non-leaf Double-Black)', function() {
+            // http://i.imgur.com/DP9u4Me.png
+
+            let LDB_RP = DBCases.remove(50).remove(125);
+            let LDB_RP = LDB_RP.remove(300);
+            expect(LDB_RP.size).toBe(9);
+            let blackRoot = LDB_RP._root;
+            expect(blackRoot).toEqual(LDB_RP.find(600));
+            expect(blackRoot.left.left).toBe(LDB_RP.find(200));
+            expect(blackRoot.left.left.left).toBe(LDB_RP.find(100));
+            expect(blackRoot.left.left.left.color).toBe(RBNode.__RED);
+            expect(blackRoot.right.right.right).toBe(LDB_RP.find(1000));
+            expect(blackRoot.right.right.right.color).toBe(RBNode.__RED);
+            expect(blackRoot.right.left).toBe(LDB_RP.find(700));
+            expect(blackRoot.right.right).toBe(LDB_RP.find(900));
+            expect(blackRoot.left).toBe(LDB_RP.find(400));
+          });
+
+          xit('Right DB : recursing up to root', function() {
+            //case of a tree with three black nodes: delete one, and make sure the check for parent blackness exists.
+
+            // let threeNodes = new RBTree();
+            // let threeNodes = threeNodes.insert(1, '3')
+            // let threeNodes = threeNodes.insert(2, '3')
+            // let threeNodes = threeNodes.insert(3, '3')
+            
+          });
+
+        });
+
+        xdescribe('Case 3: Red Sibling', function() {
+          it('Handles a LEFT double-black, right red sibling', function() {
+            //remove 500
+            let Case3LR = DBCases.remove(500);
+            let blackKey800 = Case3LR._root.right;
+            expect(blackKey800).toEqual(Case3LR.find(800));
+            expect(blackKey800.color).toEqual(RBNode.__BLACK);
+            expect(blackKey800.right.color).toEqual(RBNode.__BLACK);
+            expect(blackKey800.right.key).toEqual(900);
+            expect(blackKey800.left.color).toEqual(RBNode.__BLACK);
+            expect(blackKey800.left.key).toEqual(600);
+            expect(blackKey800.left.right).toBe(Case3LR.find(700));
+
+            //examine null pointers
+            expect(blackKey800.right.right).toBe(Case3LR.find(1000));
+            expect(blackKey800.left.right).toBe(Case3LR.find(700));
+            expect(blackKey800.right.left).toBe(RBTree.nullPointer);
+            expect(blackKey800.right.left).not.toBeNull();
+            expect(blackKey800.left.left).toBe(RBTree.nullPointer);
+          });
+
+          it('Handles a RIGHT double-black, left red sibling', function() {
+            let temp = DBCases.insert(25, 'newValue');
+            let Case3RL = temp.remove(300);
+            let redKey100 = Case3RL._root.left.left;
+            expect(redKey100).toEqual(Case3RL.find(100));
+            expect(redKey100.color).toEqual(RBNode.__RED);
+            expect(redKey100.right.color).toEqual(RBNode.__BLACK);
+            expect(redKey100.right.key).toEqual(125);
+            expect(redKey100.left.color).toEqual(RBNode.__BLACK);
+            expect(redKey100.left.key).toEqual(50);
+            expect(redKey100.left.left).toBe(Case3RL.find(25));
+
+            //examine null pointers
+            expect(redKey100.right.right).toBe(RBTree.nullPointer);
+            expect(redKey100.left.right).toBe(RBTree.nullPointer);
+            expect(redKey100.right.left).toBe(RBTree.nullPointer);
+            expect(redKey100.right.left).not.toBeNull();
+            expect(redKey100.left.left.left).toBe(RBTree.nullPointer);
+          });
+
+        });
+        
       });
 
-
-    });
   describe('Batch Insert with traversal', function() {
     let ten = new RBTree();
     let twentyThings = Array(20);
@@ -282,7 +474,7 @@ describe('Red-Black Tests', function() {
     });
   });
 
-  describe('Large Batch Insert, with traversal and deletion', function() {
+  xdescribe('Large Batch Insert, with traversal and Removal', function() {
     //WARN: This test takes 2-5 minutes in Jest + Babel.
     let ten = new RBTree();
     let manyThings = Array(10000);
@@ -290,11 +482,34 @@ describe('Red-Black Tests', function() {
       //tested manually up to 9
       manyThings[i] = [i, "valueForKey :" + i];
     }
-    let completed = ten.insertAll(manyThings);
-    let counter = 0;
-    RBTree.traverseInOrder(completed._root, (node) => {
-      expect(node.key).toEqual(counter++);
+    let completed;
+
+    it('Performs a large batch insert, in-order', function() {
+      completed = ten.insertAll(manyThings);
+      let counter = 0;
+      expect(completed.size).toEqual(10000);
+
+      RBTree.traverseInOrder(completed._root, (node) => {
+        expect(node.key).toEqual(counter++);
+      });
     });
+    it('Should remove from root repeatedly without throwing erros', function() {
+      let sizeCount = 1000;
+      let removeRoot = () => {
+        let expectedKey = completed._root.key;
+        completed = completed.remove(expectedKey);
+        expect(completed.size).toEqual(--sizeCount);
+        if(completed.size > 4){
+          expect(completed._root.left).not.toEqual(RBTree.nullPointer);
+          expect(completed._root.right).not.toEqual(RBTree.nullPointer);
+        }
+      }
+    });
+    //remove Root 10000 times without throwing errors:
+    //check size
+    //check colors
+
+    //remove X random numbers, checking the in-order traversal 
 
     //insert only keys, with the same value
     //insert numbers from 0 to 10000
