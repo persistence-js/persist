@@ -1,10 +1,10 @@
 {
-  "name": "immutable-harmony",
+  "name": "persistence-js",
   "version": "0.0.1",
-  "description": "specialized immutable collections in javascript -- immutable-js addons",
-  "homepage": "https://github.com/immutable-harmony/ih",
+  "description": "specialized persistent collections in javascript -- immutable-js addons",
+  "homepage": "https://github.com/persistence-js/persist",
   "author": {
-    "name": "Immutable-Harmony"
+    "name": "PersistenceJS"
   },
   "contributors": [
     {
@@ -12,18 +12,18 @@
       "email": "cfeusier@gmail.com"
     },
     {
-      "name": "Sze-Hung Daniel Tsui",
-      "email": "daniel.tsui@hackreactor.com"
+      "name": "Daniel Tsui",
+      "email": "danielt213@gmail.com"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/immutable-harmony/ih.git"
+    "url": "https://github.com/persistence-js/persist.git"
   },
   "bugs": {
-    "url": "https://github.com/immutable-harmony/ih/issues"
+    "url": "https://github.com/persistence-js/persist/issues"
   },
-  "main": "",
+  "main": "./dist/Persist.js",
   "scripts": {
     "test": "jest",
     "test-debug": "node-debug --nodejs --harmony ./node_modules/jest-cli/bin/jest.js --runInBand"
@@ -35,7 +35,11 @@
   "devDependencies": {
     "babel": "^4.6.0",
     "babel-jest": "*",
-    "jest-cli": "^0.4.0"
+    "grunt": "^0.4.5",
+    "grunt-babel": "^5.0.1",
+    "grunt-cli": "^0.1.13",
+    "jest-cli": "^0.4.0",
+    "load-grunt-tasks": "^3.2.0"
   },
   "engines": {
     "node": ">=0.8.0"
@@ -43,14 +47,17 @@
   "keywords": [
     "immutable",
     "persistent",
-    "lazy",
     "data",
     "datastructure",
     "functional",
     "collection",
-    "stateless",
     "sequence",
-    "iteration"
+    "iteration",
+    "heap",
+    "bst",
+    "binary search tree",
+    "linked list",
+    "circular linked list"
   ],
   "license": "Apache 2.0",
   "jest": {

@@ -1,6 +1,6 @@
 import 'core-js/shim';
 const IM = require('immutable');
-const LList = require('./LList.es6');
+const LList = require('./LList');
 
 export default class CLList extends LList {
   constructor(itemOrList = [], options = {}) {
