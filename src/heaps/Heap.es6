@@ -125,7 +125,7 @@ export default class Heap {
   siftDown(list, indexToSift) {
     return list.withMutations((list) => {
       let finalList = list;
-      let switchDown = (p, c, list) => {
+      let switchDown = (p, c, list) => {//Parent and Child
         finalList = Heap.switchNodes(p, c, list);
         parentIndex = c;
         children = Heap.findChildrenWithParent(parentIndex, list);
@@ -190,6 +190,7 @@ export default class Heap {
     return (this.__proto__ === object.__proto__) ? true : false;
   }
 
+  //Standard comparator function. returns 1, -1, or 0 (for a match).
   static defaultComparator() {
     return function(a, b) {
       if (a > b) {
@@ -202,6 +203,13 @@ export default class Heap {
     }
   }
 
+  /**
+   * Returns a boolean for whether Heap Integrity is maintained.
+   * @param  {[type]} parentIndex [description]
+   * @param  {[type]} childIndex  [description]
+   * @param  {[type]} list        [description]
+   * @return {[type]}             [description]
+   */
   integrityCheck(parentIndex, childIndex, list) {
     if (parentIndex === null || childIndex === null) {return true;}
     let parentNode = list.get(parentIndex);
@@ -216,6 +224,13 @@ export default class Heap {
     }
   }
 
+  /**
+   * Switched the locations of two nodes.
+   * @param  {[type]} parentIndex [description]
+   * @param  {[type]} childIndex  [description]
+   * @param  {[type]} list        [description]
+   * @return {[type]}             [description]
+   */
   static switchNodes(parentIndex, childIndex, list) {
     return list.withMutations((list) => {
       let temp = list.get(parentIndex);
@@ -233,6 +248,7 @@ export default class Heap {
     }
   }
 
+  //Find the parent of a child, with the Child's index
   static findParentWithChild(childIndex) {
     return (childIndex === 0) ? null :
     (childIndex % 2 === 0 ? childIndex / 2 - 1 : Math.floor(childIndex / 2));
