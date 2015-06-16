@@ -41,7 +41,8 @@ export default class RBNode { //RBNode
   }
 
   get isLeaf() {
-    return !!(this.children.length === 0);
+    let children = this.children;
+    return !!((children[0][1] === children[1][1]) && (children[0][1].color === RBNode.__BLACK));
   }
 
   get children() {
