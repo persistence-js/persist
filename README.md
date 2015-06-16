@@ -165,7 +165,9 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 [Immutability](https://en.wikipedia.org/wiki/Immutable_object)
 
-An immutable object is an object whose state cannot be modified after it is created. Note, persistent data structures are generally immutable, since the API returns a new structure, despite appearing mutable.
+> An immutable object is an object whose state cannot be modified after it is created. 
+
+Note, persistent data structures are generally immutable, since the API returns a new structure, despite appearing mutable.
 
 #### [Back to Top](#)
 
