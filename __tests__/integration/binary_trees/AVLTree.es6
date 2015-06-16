@@ -376,6 +376,20 @@ describe('AVL Tests', () => {
 
     xdescribe('Rotation: After Removal', () => {
 
+      // right weighted, not-heavy
+      // 50
+      // 0
+      // 100
+      // 200
+      // remove 0
+
+      // left weighted, not-heavy
+      // 50
+      // 25
+      // 100
+      // 0
+      // remove 100
+
     });
 
   });
