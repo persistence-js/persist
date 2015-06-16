@@ -3,9 +3,7 @@ const IM = require('immutable');
 const BSTree = require('../../../src/binary_trees/BSTree');
 const BSTNode = require('../../../src/binary_trees/BSTNode');
 
-
 describe('BSTree', () => {
-
   describe('Instantiation', () => {
     let bst = new BSTree(),
         _node = new BSTNode(0, 'first node value', null, null, 1),
@@ -33,9 +31,7 @@ describe('BSTree', () => {
   });
 
   describe('Instance Methods', () => {
-
     describe('#insert', () => {
-
       describe('empty trees', () => {
         let bst = new BSTree();
 
@@ -65,7 +61,6 @@ describe('BSTree', () => {
 
         describe('root node', () => {
           let newTree1 = bst.insert(8, 'string');
-
           it('has correct id', () => {
             expect(newTree1.root.id).toBe(1);
           });
@@ -96,7 +91,6 @@ describe('BSTree', () => {
             chainedResult = bst.insert(25, 'a').insert(75, 'b').insert(95, 'c');
 
         describe('resulting tree', () => {
-
           it('returns a new tree', () => {
             expect(chainedResult).toEqual(jasmine.any(BSTree));
           });
@@ -112,7 +106,6 @@ describe('BSTree', () => {
         });
 
         describe('root node of chained tree', () => {
-
           it('has the correct id', () => {
             expect(chainedResult.root.id).toBe(1);
           });
@@ -135,7 +128,6 @@ describe('BSTree', () => {
       });
 
       describe('insertion operation immutability', () => {
-
         it('does not mutate tree', () => {
           let bst = new BSTree();
           bst.insert(1, 'a');
@@ -154,7 +146,6 @@ describe('BSTree', () => {
     });
 
     describe('#remove', () => {
-
       describe('empty trees', () => {
         let bst = new BSTree();
 
@@ -169,7 +160,6 @@ describe('BSTree', () => {
       })
 
       describe('nonempty trees', () => {
-
         it('returns a new tree', () => {
           let rootNode = new BSTNode(1, 'hi', null, null, 1),
               bst = new BSTree(null, rootNode);
@@ -209,7 +199,6 @@ describe('BSTree', () => {
       });
 
       describe('target node with one child', () => {
-
         describe('no ancestor', () => {
           let childL = new BSTNode(0, 'reset my position to root', null, null, 1),
               childR = new BSTNode(99, 'reset my position to root', null, null, 1),
@@ -302,7 +291,6 @@ describe('BSTree', () => {
             chainedResult = bst.remove(50).remove(75).remove(35);
 
         describe('resulting tree', () => {
-
           it('returns a new tree', () => {
             expect(chainedResult).toEqual(jasmine.any(BSTree));
           });
@@ -318,7 +306,6 @@ describe('BSTree', () => {
         });
 
         describe('root node of chained tree', () => {
-
           it('has the correct id', () => {
             expect(chainedResult.root.id).toBe(2);
           });
@@ -343,7 +330,6 @@ describe('BSTree', () => {
       });
 
       describe('removal operation immutability', () => {
-
         it('does not mutate tree', () => {
           let rootNode = new BSTNode(50, 'root', null, null, 1),
               bst = new BSTree(null, rootNode);
@@ -364,9 +350,7 @@ describe('BSTree', () => {
     });
 
     describe('#find', () => {
-
       describe('key not present in tree', () => {
-
         it('returns null for empty tree', () => {
           expect((new BSTree()).find(1)).toBeNull();
         });
@@ -379,7 +363,6 @@ describe('BSTree', () => {
       });
 
       describe('key present in tree', () => {
-
         it('returns associated node, shallow tree', () => {
           let node = new BSTNode(1, 'a', null, null, 1),
               bst = new BSTree(null, node);
@@ -400,9 +383,7 @@ describe('BSTree', () => {
     });
 
     describe('#get', () => {
-
       describe('key not present in tree', () => {
-
         it('returns null for empty tree', () => {
           expect((new BSTree()).get(1)).toBeNull();
         });
@@ -415,7 +396,6 @@ describe('BSTree', () => {
       });
 
       describe('key present in tree', () => {
-
         it('returns associated node value, shallow tree', () => {
           let node = new BSTNode(1, 'a', null, null, 1),
               bst = new BSTree(null, node);
@@ -430,15 +410,11 @@ describe('BSTree', () => {
               bst = new BSTree(null, rootNode);
           expect(bst.get(100)).toBe('max');
         });
-
       });
-
     });
 
     describe('#contains', () => {
-
       describe('value not present in tree', () => {
-
         it('returns false for empty tree', () => {
           expect((new BSTree()).contains(1)).toBe(false);
         });
@@ -451,7 +427,6 @@ describe('BSTree', () => {
       });
 
       describe('value present in tree', () => {
-
         it('returns true, shallow tree', () => {
           let node = new BSTNode(1, 'a', null, null, 1),
               bst = new BSTree(null, node);
@@ -472,7 +447,6 @@ describe('BSTree', () => {
     });
 
     describe('#forEach', () => {
-
       it('does not execute callback for empty tree', () => {
         let bstEmpty = new BSTree(),
             result = [];
@@ -510,9 +484,7 @@ describe('BSTree', () => {
   });
 
   describe('Basic Getters', () => {
-
     describe('get size', () => {
-
       it('returns current number of nodes in tree', () => {
         let bst1 = new BSTree(),
             bst2 = bst1.insert(5, 'first value'),
@@ -527,7 +499,6 @@ describe('BSTree', () => {
     });
 
     describe('get comparator', () => {
-
       it('returns default comparator, duck-check', () => {
         let bstDefault = (new BSTree()).comparator;
         expect(bstDefault(2, 1)).toBe(1);
@@ -545,7 +516,6 @@ describe('BSTree', () => {
     });
 
     describe('get root', () => {
-
       it('returns null for empty tree', () => {
         expect((new BSTree()).root).toBeNull();
       });
@@ -558,7 +528,6 @@ describe('BSTree', () => {
     });
 
     describe('get min', () => {
-
       it('returns null for empty tree', () => {
         expect((new BSTree()).min).toBeNull();
       });
@@ -575,7 +544,6 @@ describe('BSTree', () => {
     });
 
     describe('get max', () => {
-
       it('returns null for empty tree', () => {
         expect((new BSTree()).max).toBeNull();
       });
@@ -588,11 +556,9 @@ describe('BSTree', () => {
             bst = new BSTree(null, rootNode);
         expect(bst.max).toEqual(maxNode);
       });
-
     });
 
     describe('get keys', () => {
-
       it('returns empty array for empty tree', () => {
         expect((new BSTree()).keys).toEqual([]);
       });
@@ -605,11 +571,9 @@ describe('BSTree', () => {
             bst = new BSTree(null, rootNode);
         expect(bst.keys).toEqual([25, 50, 75, 100]);
       });
-
     });
 
     describe('get values', () => {
-
       it('returns empty array for empty tree', () => {
         expect((new BSTree()).values).toEqual([]);
       });
@@ -622,9 +586,6 @@ describe('BSTree', () => {
             bst = new BSTree(null, rootNode);
         expect(bst.values).toEqual(['c', 'a', 'b', 'max']);
       });
-
     });
-
   });
-
 });

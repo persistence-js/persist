@@ -1,7 +1,6 @@
 import 'core-js/shim';
 const IM = require('immutable');
 
-
 export default class LList {
   /**
    * Accepts items and list-like objects.
@@ -24,12 +23,10 @@ export default class LList {
       }
       this.size = this.size + options.oldSize;
     }
-
     if (options.circular){
       this.tail.next = this.head;
       this.circular = options.circular;
     }
-
     this.forEach(Object.freeze);
     Object.freeze(this);
   }
@@ -54,27 +51,24 @@ export default class LList {
    * @param  {Item, Array, List, Node, or LList}  toPrepend []
    * @return {[type]}           [description]
    */
-  prepend(toPre = []) {
+  prepend(toPrepend = []) {
     let opts = {
       circular  : this.circular,
       prependTo : this.head,
       oldSize   : this.size,
     };
-
     //If circular, can't use tail-sharing.
     if (this.circular){
-      toPre = LList.convertToSeq(toPre);
-      return new LList(toPre.concat(this.map(LList.getData)).toArray(),
+      toPrepend = LList.convertToSeq(toPrepend);
+      return new LList(toPrepend.concat(this.map(LList.getData)).toArray(),
         { circular: this.circular });
     }
-
     //Else, prepend in O(1);
     return (
-      LList.isNode(toPre) ? new LList(LList.getData(toPre), opts) :
-      LList.isLList(toPre) ? new LList(toPre.map(LList.getData), opts) :
-      new LList(toPre, opts)
+      LList.isNode(toPrepend) ? new LList(LList.getData(toPrepend), opts) :
+      LList.isLList(toPrepend) ? new LList(toPrepend.map(LList.getData), opts) :
+      new LList(toPrepend, opts)
     );
-
   }
 
   /**
@@ -83,14 +77,14 @@ export default class LList {
    * @param  {[Item, Array, List, Node, or LList]} toAppend [description]
    * @return {[type]}       [description]
    */
-  append(toApp) {
+  append(toAppend) {
     let opts = { circular : this.circular,}
     return (
       new LList(
         this.map(LList.getData).concat(
-          LList.isNode(toApp) ? LList.getData(toApp) :
-          LList.isLList(toApp) ? toApp.map(LList.getData) :
-          LList.convertToSeq(toApp).toArray()
+          LList.isNode(toAppend) ? LList.getData(toAppend) :
+          LList.isLList(toAppend) ? toAppend.map(LList.getData) :
+          LList.convertToSeq(toAppend).toArray()
         ), opts
       )
     );
@@ -133,7 +127,7 @@ export default class LList {
      { circular: this.circular });
   }
 
-  //Functional helper methods
+  //Functional Helpers:
   forEach(cb) {
     let current = this.head;
     while (current !== null){

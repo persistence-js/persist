@@ -1,7 +1,6 @@
 import 'core-js/shim';
 const IM = require('immutable');
 
-
 export default class Heap {
   /**
    * Heap constructor
@@ -10,8 +9,11 @@ export default class Heap {
    * @param  {[function]}  comparator [Must return {0, 1, -1} to sort nodes]
    * @return {[type]}             [Heap]
    */
-  constructor(value = null , isMax = false, comparator = Heap.defaultComparator()) {
-    //Construct from existing heap:
+  constructor(
+    value = null , 
+    isMax = false, 
+    comparator = Heap.defaultComparator()
+    ) {
     if (!!value && this.isHeap(value)) {
       this._heapStorage = value._heapStorage;
       this.maxHeap = isMax;
@@ -29,6 +31,7 @@ export default class Heap {
     this._heapStorage = this.buildHeap(this._heapStorage);
     Object.freeze(this);
   }
+
   //Returns a new Heap, with the new value inserted.
   push(value) {
     let childIndex = this.storage.size;
@@ -38,6 +41,7 @@ export default class Heap {
 
     return new Heap(finalStorageList, this.isMaxHeap, this.comparator);
   }
+
   /**
    * Returns a new Heap with the extracted value (max or min)
    * Use Peek() for the top of the Heap.
@@ -47,7 +51,6 @@ export default class Heap {
    */
   pop(value) {
     if (this.storage.size <= 0) { return this; }
-
     let siftingList;
     if (value === undefined) {
       siftingList = this.storage.withMutations((list) => {
@@ -60,10 +63,12 @@ export default class Heap {
 
     return new Heap(finalStorageList, this.isMaxHeap, this.comparator);
   }
+
   //Alias method for pop, but with a value.
   replace(value) {
     return this.pop(value);
   }
+
   /**
    * Builds the array repesenting Heap Storage.
    * Should only be called from constructor.
@@ -89,6 +94,7 @@ export default class Heap {
       return heapifiedList;
     }
   }
+
   /**
    * Merges heaps, returning a new Heap.
    * @param  {[Heap]} hp [description]
@@ -98,6 +104,7 @@ export default class Heap {
     let newStorage = this.buildHeap(hp._heapStorage.concat(this._heapStorage));
     return new Heap(newStorage, hp.isMaxHeap, hp.comparator);
   }
+
   //Returns a sorted Immuatble List of the Heap's elements.
   heapSort() {
     let sortedList = new IM.List([]);
@@ -113,11 +120,12 @@ export default class Heap {
 
     return sortedList;
   }
+
   //Takes a list, and sifts down depending on the index.
   siftDown(list, indexToSift) {
     return list.withMutations((list) => {
       let finalList = list;
-      let switchDown = (p, c, list) => {
+      let switchDown = (p, c, list) => {//Parent and Child
         finalList = Heap.switchNodes(p, c, list);
         parentIndex = c;
         children = Heap.findChildrenWithParent(parentIndex, list);
@@ -141,10 +149,10 @@ export default class Heap {
           switchDown(parentIndex, children.right, finalList);
         }
       }
-
       return finalList;
     }.bind(this));
   }
+
   //Child checks parent, switches if they violate the Heap property.
   siftUp(parentIndex, childIndex, list) {
     return list.withMutations((siftingList) => {
@@ -154,28 +162,35 @@ export default class Heap {
         childIndex = parentIndex;
         parentIndex = Heap.findParentWithChild(childIndex);
       }
-
       return siftingList;
     }.bind(this))
   }
+
   peek() {
     return this.storage.first();
   }
+
   get comparator() {
     return this.comparatorFunction;
   }
+
   get isMaxHeap() {
     return this.maxHeap;
   }
+
   get storage() {
     return this._heapStorage;
   }
+
   get size() {
     return this._heapStorage.size;
   }
+
   isHeap(object) {
     return (this.__proto__ === object.__proto__) ? true : false;
   }
+
+  //Standard comparator function. returns 1, -1, or 0 (for a match).
   static defaultComparator() {
     return function(a, b) {
       if (a > b) {
@@ -187,6 +202,14 @@ export default class Heap {
       return 0;
     }
   }
+
+  /**
+   * Returns a boolean for whether Heap Integrity is maintained.
+   * @param  {[type]} parentIndex [description]
+   * @param  {[type]} childIndex  [description]
+   * @param  {[type]} list        [description]
+   * @return {[type]}             [description]
+   */
   integrityCheck(parentIndex, childIndex, list) {
     if (parentIndex === null || childIndex === null) {return true;}
     let parentNode = list.get(parentIndex);
@@ -200,12 +223,21 @@ export default class Heap {
       return (comparison === -1 || comparison === 0) ? true: false;
     }
   }
+
+  /**
+   * Switched the locations of two nodes.
+   * @param  {[type]} parentIndex [description]
+   * @param  {[type]} childIndex  [description]
+   * @param  {[type]} list        [description]
+   * @return {[type]}             [description]
+   */
   static switchNodes(parentIndex, childIndex, list) {
     return list.withMutations((list) => {
       let temp = list.get(parentIndex);
       return list.set(parentIndex, list.get(childIndex)).set(childIndex, temp)
     });
   }
+
   //assigns child indexes for a given parent index
   static findChildrenWithParent(parentIndex, list) {
     let leftIdx = (parentIndex * 2) + 1;
@@ -215,8 +247,11 @@ export default class Heap {
       right: (rightIdx >= list.size) ? null : rightIdx,
     }
   }
+
+  //Find the parent of a child, with the Child's index
   static findParentWithChild(childIndex) {
     return (childIndex === 0) ? null :
     (childIndex % 2 === 0 ? childIndex / 2 - 1 : Math.floor(childIndex / 2));
   }
+
 }

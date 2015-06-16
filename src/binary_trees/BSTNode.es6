@@ -1,14 +1,17 @@
 import 'core-js/shim';
 const IM = require('immutable');
 
-
 export default class BSTNode {
-
   constructor(key, value, left, right, id) {
     if (IM.Map.isMap(key)) {
       this._store = key;
     } else {
-      this._store = IM.Map({ '_key': key, '_value': value, '_left': left, '_right': right, '_id': id });
+      this._store = IM.Map({ 
+        '_key': key, 
+        '_value': value, 
+        '_left': left, 
+        '_right': right, 
+        '_id': id });
     }
     Object.freeze(this);
   }
@@ -37,6 +40,7 @@ export default class BSTNode {
     return this.store.get('_id');
   }
 
+  //Returns an array with the node's children
   get children() {
     let children = [];
     if (this.left) children.push(['_left', this.left]);
